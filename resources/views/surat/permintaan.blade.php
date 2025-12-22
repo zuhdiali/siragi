@@ -98,33 +98,90 @@
                     <tr>
                       <td>
                         @if((Auth::user()->role == 'Admin')||($surat->id_pembuat_surat == Auth::user()->id)||(Auth::user()->role == 'Ketua Tim' && $surat->tim == Auth::user()->tim))
-                        <div class="form-button-action">
-                          <form action="{{url('surat/edit/'.$surat->jenis_surat."/".$surat->id)}}">
-                            <button
-                              type="submit"
-                              data-bs-toggle="tooltip"
-                              title="Edit"
-                              class="btn btn-link btn-primary px-2"
-                              data-original-title="Edit Surat"
-                            >
-                            <i class="fa fa-edit"></i>
-                          </button>
-                        </form>
+                        <div class="row">
+                          <div class="form-button-action">
+                            <form action="{{url('surat/edit/'.$surat->jenis_surat."/".$surat->id)}}">
+                              <button
+                                type="submit"
+                                data-bs-toggle="tooltip"
+                                title="Edit"
+                                class="btn btn-link btn-primary px-2"
+                                data-original-title="Edit Surat"
+                              >
+                              <i class="fa fa-edit"></i>
+                              </button>
+                            </form>
 
-                          <button
-                            type="button"
-                            title="Hapus"
-                            class="btn btn-link btn-danger px-2"
-                            data-bs-toggle="modal" 
-                            data-bs-target="{{'#exampleModal'.$surat->id}}"
-                            data-original-title="Hapus"
-                          >
-                            <i class="fa fa-times"></i>
-                          </button>
+                            <button
+                              type="button"
+                              title="Hapus"
+                              class="btn btn-link btn-danger px-2"
+                              data-bs-toggle="modal" 
+                              data-bs-target="{{'#exampleModal'.$surat->id}}"
+                              data-original-title="Hapus"
+                            >
+                              <i class="fa fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="form-button-action">
+                            <form action="#">
+                              <button
+                                type="submit"
+                                data-bs-toggle="tooltip"
+                                title="Surat Tugas"
+                                class="btn btn-link btn-primary px-2"
+                                data-original-title="Surat Tugas"
+                              >
+                              <i class="fa fa-envelope"></i>
+                              </button>
+                            </form>
+                            <button
+                              type="button"
+                              data-bs-toggle="tooltip"
+                              title="SPD"
+                              class="btn btn-link btn-primary px-2"
+                              data-original-title="SPD"
+                              onclick="navigator.clipboard.writeText('SPD')"
+                            >
+                              <i class="fa fa-envelope"></i>
+                            </button>
+                            <button
+                              type="button"
+                              data-bs-toggle="tooltip"
+                              title="Laporan"
+                              class="btn btn-link btn-primary px-2"
+                              data-original-title="Laporan"
+                            >
+                              <i class="fa fa-file"></i>
+                            </button>
+                            
+                            <button
+                              type="button"
+                              data-bs-toggle="tooltip"
+                              title="Pembayaran"
+                              class="btn btn-link btn-primary px-2"
+                              data-original-title="Pembayaran"
+                            >
+                              <i class="fa fa-money-bill"></i>
+                            </button>
+                          </div>
                         </div>
                         @endif
                       </td>
-                      <th scope="row">{{$surat->nomor_surat}}</th>
+                        <th scope="row">
+                        {{$surat->nomor_surat}}
+                        <button
+                          type="button"
+                          data-bs-toggle="tooltip"
+                          title="Copy Nomor Surat"
+                          class="btn btn-link btn-primary px-2"
+                          onclick="copyText('{{$surat->nomor_surat}}')"
+                        >
+                          <i class="fa fa-copy"></i>
+                        </button>
+                        </th>
                       <td>{{\Carbon\Carbon::parse($surat->created_at)->translatedFormat('d F Y')}}</td>
                       <td>{{$surat->pembuat_surat->nama}}</td>
                       <td>{{$surat->kegiatan->nama}}</td>

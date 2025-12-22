@@ -117,7 +117,7 @@
                             data-bs-target="{{'#exampleModal'.$mitra->id}}"
                             data-original-title="Hapus"
                           >
-                            <i class="fa fa-times"></i>
+                            <i class="fa fa-trash-alt"></i>
                           </button>
                         </div>
                       </td>

@@ -108,7 +108,7 @@
                             data-bs-target="{{'#exampleModal'.$ruangan->id}}"
                             data-original-title="Hapus"
                           >
-                            <i class="fa fa-times"></i>
+                            <i class="fa fa-trash-alt"></i>
                           </button>
                         </div>
                       </td>
@@ -142,7 +142,7 @@
                 <button
                   class="btn btn-icon btn-link btn-primary btn-xs"
                 >
-                  <span class="fa fa-times"></span>
+                  <span class="fa fa-trash-alt"></span>
                 </button>
               </div>
             </div>

@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class KegiatanMitra extends Model
+class SuratMitra extends Model
 {
     use HasFactory;
 
-    protected $table = 'kegiatan_mitras';
+    protected $table = 'surat_mitras';
 
     protected $fillable = [
-        'kegiatan_id',
+        'surat_id',
         'mitra_id',
         'is_pml',
         'jumlah',
@@ -26,8 +26,8 @@ class KegiatanMitra extends Model
         return $this->belongsTo(Mitra::class, 'mitra_id');
     }
 
-    public function kegiatan()
+    public function surat()
     {
-        return $this->belongsTo(Kegiatan::class, 'kegiatan_id');
+        return $this->belongsTo(Surat::class, 'surat_id');
     }
 }

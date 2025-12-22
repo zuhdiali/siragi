@@ -173,7 +173,7 @@
                             data-bs-target="{{'#exampleModal'.$user->id}}"
                             data-original-title="Hapus"
                           >
-                            <i class="fa fa-times"></i>
+                            <i class="fa fa-trash-alt"></i>
                           </button>
                         </div>
                     

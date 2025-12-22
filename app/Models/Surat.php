@@ -14,6 +14,7 @@ class Surat extends Model
     protected $fillable = [
         'nomor_surat',
         'jenis_surat',
+        'tipe_surat',
         'tim',
         'no_terakhir',
         'tgl_awal_kegiatan',
@@ -29,6 +30,8 @@ class Surat extends Model
         'mitra_spk',
         'bulan_spk',
         'tahun_spk',
+        'surat_tugas_id',
+        'spd_id',
         'flag',
     ];
 }

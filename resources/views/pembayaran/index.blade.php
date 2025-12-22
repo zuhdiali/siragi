@@ -134,7 +134,7 @@
                             data-bs-target="{{'#exampleModal'.$pembayaran->id}}"
                             data-original-title="Hapus"
                           >
-                            <i class="fa fa-times"></i>
+                            <i class="fa fa-trash-alt"></i>
                           </button>
                           @endif
                         </div>

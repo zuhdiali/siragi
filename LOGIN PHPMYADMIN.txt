@@ -1,0 +1,3 @@
+server: mysql
+username: root
+password: takwa

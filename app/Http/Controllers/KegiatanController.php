@@ -8,12 +8,14 @@ use App\Models\Pegawai;
 use App\Models\Mitra;
 use App\Models\Surat;
 use App\Models\SBKS;
+use App\Models\POK;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Imports\KegiatanMitraImport;
 use App\Exports\ExportHonorKegiatan;
 use App\Exports\ExportTranslok;
 use App\Exports\ExportMitra;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
 class KegiatanController extends Controller
@@ -33,6 +35,93 @@ class KegiatanController extends Controller
             $kegiatan->namaTim = $this->konversiTim($kegiatan->tim);
         }
         return view('kegiatan.index', ['kegiatans' => $kegiatans, 'kegiatanTahunIni' => $kegiatanTahunIni]);
+    }
+
+    private function loadCreateEditView($viewPath, $id = null)
+    {
+        $data = [
+            'pegawais' => Pegawai::where('flag', null)->where('nama', 'not like', '%Admin%')->where('nama', 'not like', '%Dummy%')->orderBy('nama', 'asc')->get(),
+            'mitras' => Mitra::where('flag', null)->orderBy('nama', 'asc')->get(),
+            'pok_awals' => POK::where('kode_aktivitas', null)->get(),
+            'sbks' => SBKS::select(['nama_kegiatan', 'singkatan_resmi'])->where('ada_di_simeulue', 1)->distinct('nama_kegiatan')->orderBy('nama_kegiatan', 'asc')->get(),
+        ];
+        foreach ($data['sbks'] as $item) {
+            if ($item->singkatan_resmi) {
+                $item->nama_kegiatan_dan_singkatan = $item->nama_kegiatan . ' (' . $item->singkatan_resmi . ')';
+            } else {
+                $item->nama_kegiatan_dan_singkatan = $item->nama_kegiatan;
+            }
+        }
+        // untuk edit
+        if ($id) {
+            $data['kegiatan'] = Kegiatan::with([
+                'kegiatanRincian.pok', // Agar nama akun (uraian) muncul
+                'kegiatanLampiran',    // Agar data transport muncul
+                'pokProgram',
+                'pokAktivitas',
+                'pokKro',
+                'pokRo',
+                'pokKomponen',
+                'pokSubKomponen',
+            ])->find($id);
+        }
+        // dd($data['kegiatan']);
+        return view($viewPath, $data);
+    }
+
+    public function translokBiasaCreate()
+    {
+        return $this->loadCreateEditView('kegiatan.translok-biasa.create');
+    }
+
+    public function translokBiasaEdit($id)
+    {
+        return $this->loadCreateEditView('kegiatan.translok-biasa.edit', $id);
+    }
+
+    public function translokBiasaShow($id)
+    {
+        return $this->loadCreateEditView('kegiatan.translok-biasa.show', $id);
+    }
+
+    public function translok8JamCreate()
+    {
+        return $this->loadCreateEditView('kegiatan.translok-8jam.create');
+    }
+
+    public function translok8JamEdit($id)
+    {
+        return $this->loadCreateEditView('kegiatan.translok-8jam.edit', $id);
+    }
+
+    public function pemanggilanKonsultasiCreate()
+    {
+        return $this->loadCreateEditView('kegiatan.pemanggilan-konsultasi.create');
+    }
+
+    public function pemanggilanKonsultasiEdit($id)
+    {
+        return $this->loadCreateEditView('kegiatan.pemanggilan-konsultasi.edit', $id);
+    }
+
+    public function honorMitraCreate()
+    {
+        return $this->loadCreateEditView('kegiatan.honor-mitra.create');
+    }
+
+    public function honorMitraEdit($id)
+    {
+        return $this->loadCreateEditView('kegiatan.honor-mitra.edit', $id);
+    }
+
+    public function honorIndaCreate()
+    {
+        return $this->loadCreateEditView('kegiatan.honor-inda.create');
+    }
+
+    public function honorIndaEdit($id)
+    {
+        return $this->loadCreateEditView('kegiatan.honor-inda.edit', $id);
     }
 
     public function create()
@@ -57,55 +146,109 @@ class KegiatanController extends Controller
         // dd($request->all());
         // Validate the request...
         $request->validate([
-            'nama' => 'required|max:254',
-            'tgl_mulai' => 'required|date',
-            'tgl_selesai' => 'required|date|after_or_equal:tgl_mulai',
-            'honor_pengawasan' => 'nullable|numeric',
-            'honor_pencacahan' => 'nullable|numeric',
-            'satuan_honor_pengawasan' => 'required',
-            'satuan_honor_pencacahan' => 'required',
-            'id_pjk' => 'required',
-            'tim' => 'required',
+            // 'nama' => 'required|max:254',
+            // 'tgl_mulai' => 'required|date',
+            // 'tgl_selesai' => 'required|date|after_or_equal:tgl_mulai',
+            // 'honor_pengawasan' => 'nullable|numeric',
+            // 'honor_pencacahan' => 'nullable|numeric',
+            // 'satuan_honor_pengawasan' => 'required',
+            // 'satuan_honor_pencacahan' => 'required',
+            // 'id_pjk' => 'required',
+            // 'tim' => 'required',
         ]);
 
         //untuk menandai apakah ada mitra yang melebihi batas honor
-        $mitraMelebihiHonor = $this->validasiHonorMitra($request->mitra, $request->tgl_mulai);
-        if (count($mitraMelebihiHonor) > 0) {
-            return redirect()->route('kegiatan.create')->with('error', 'Mitra ' . implode(",", $mitraMelebihiHonor) . ' yang melebihi batas honor.')->withInput();
+        // $mitraMelebihiHonor = $this->validasiHonorMitra($request->mitra_id, $request->tgl_mulai);
+        // if (count($mitraMelebihiHonor) > 0) {
+        //     return redirect()->route('kegiatan.create')->with('error', 'Mitra ' . implode(",", $mitraMelebihiHonor) . ' yang melebihi batas honor.')->withInput();
+        // }
+
+        $kegiatan = Kegiatan::create([
+            'nama' => $request->judul_kak,
+            'jenis_kak' => $request->jenis_kak,
+            'singkatan_resmi' => $request->singkatan_resmi,
+            'kak1_latar_belakang' => $request->kak1_latar_belakang,
+            'kak2_maksud' => $request->kak2_maksud,
+            'kak2_tujuan' => $request->kak2_tujuan,
+            'kak3_target' => $request->kak3_target,
+            'tgl_mulai' => $request->tgl_mulai,
+            'tgl_selesai' => $request->tgl_selesai,
+            'kak4_pjk' => $request->kak4_pjk,
+            'kak6_program' => $request->kak6_program,
+            'kak6_aktivitas' => $request->kak6_aktivitas,
+            'kak6_kro' => $request->kak6_kro,
+            'kak6_ro' => $request->kak6_ro,
+            'kak6_komponen' => $request->kak6_komponen,
+            'kak6_sub_komponen' => $request->kak6_sub_komponen,
+            'kak6_pembiayaan' => $request->kak6_pembiayaan,
+            'kak6_total' => $request->kak6_total,
+            'kak8_pengaju' => $request->kak8_pengaju,
+            'kak8_tgl' => $request->kak8_tgl,
+            'id_pjk' => $request->id_pjk,
+        ]);
+        $jumlah = 0;
+        foreach ($request->akun_kode as $index => $akun_kode) {
+            $kegiatan->kegiatanRincian()->create([
+                'kegiatan_id' => $kegiatan->id,
+                'pok_id' => $request->akun_kode[$index],
+                'rincian' => $request->rincian_detail[$index],
+                'vol' => $request->rincian_volume[$index],
+                'satuan' => $request->rincian_satuan[$index],
+                'harga_satuan' => $request->rincian_harga[$index],
+                'jumlah' => $request->rincian_total[$index],
+            ]);
+            $jumlah += $request->rincian_total[$index];
         }
-        $kegiatan = new Kegiatan;
-        $kegiatan->nama = $request->nama;
-        $kegiatan->tgl_mulai = $request->tgl_mulai;
-        $kegiatan->tgl_selesai = $request->tgl_selesai;
-        $kegiatan->satuan_honor_pengawasan = $request->satuan_honor_pengawasan;
-        $kegiatan->honor_pengawasan = $request->honor_pengawasan;
-        $kegiatan->satuan_honor_pencacahan = $request->satuan_honor_pencacahan;
-        $kegiatan->honor_pencacahan = $request->honor_pencacahan;
-        $kegiatan->id_pjk = $request->id_pjk;
-        $kegiatan->tim = $request->tim;
-        $kegiatan->progress = $request->progress;
-        if ($request->filter_sbks) {
-            $sbks = SBKS::where('nama_kegiatan', $request->filter_sbks)->where('beban_anggaran', '!=', null)->first();
-            if ($sbks) {
-                $kegiatan->beban_anggaran = $sbks->beban_anggaran;
-            }
-        } else {
-            $kegiatan->beban_anggaran = $request->beban_anggaran ?? '{#beban_anggaran#}';
-        }
+        $kegiatan->kak6_total = $jumlah;
         $kegiatan->save();
-        if ($request->pegawai != null) {
-            $kegiatan->pegawai()->attach($request->pegawai);
+
+        foreach ($request->tipe_peserta as $index => $tipe_personil) {
+            $kegiatan->kegiatanLampiran()->create([
+                'peserta_id' => $request->peserta_id[$index],
+                'tipe_personil' => $request->tipe_peserta[$index],
+                'nip_nik' => $request->nip[$index],
+                'kec_tujuan' => $request->kecamatan_tujuan[$index],
+                'tgl_pelaksanaan' => $request->tanggal_pelaksanaan[$index],
+                'pcl_diawasi' => $request->pcl_diawasi[$index],
+                'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
+                'jml_sampel_diawasi' => $request->jml_sampel_diawasi[$index],
+                'jml_ok' => $request->jml_ok[$index],
+                'transport_bayar' => $request->transport_bayar[$index],
+            ]);
         }
-        if ($request->mitra != null) {
-            $kegiatan->mitra()->attach($request->mitra);
-        }
+        // $kegiatan = new Kegiatan;
+        // $kegiatan->nama = $request->nama;
+        // $kegiatan->tgl_mulai = $request->tgl_mulai;
+        // $kegiatan->tgl_selesai = $request->tgl_selesai;
+        // $kegiatan->satuan_honor_pengawasan = $request->satuan_honor_pengawasan;
+        // $kegiatan->honor_pengawasan = $request->honor_pengawasan;
+        // $kegiatan->satuan_honor_pencacahan = $request->satuan_honor_pencacahan;
+        // $kegiatan->honor_pencacahan = $request->honor_pencacahan;
+        // $kegiatan->id_pjk = $request->id_pjk;
+        // $kegiatan->tim = $request->tim;
+        // $kegiatan->progress = $request->progress;
+        // if ($request->filter_sbks) {
+        //     $sbks = SBKS::where('nama_kegiatan', $request->filter_sbks)->where('beban_anggaran', '!=', null)->first();
+        //     if ($sbks) {
+        //         $kegiatan->beban_anggaran = $sbks->beban_anggaran;
+        //     }
+        // } else {
+        //     $kegiatan->beban_anggaran = $request->beban_anggaran ?? '{#beban_anggaran#}';
+        // }
+        // $kegiatan->save();
+        // if ($request->pegawai != null) {
+        //     $kegiatan->pegawai()->attach($request->pegawai);
+        // }
+        // if ($request->mitra != null) {
+        //     $kegiatan->mitra()->attach($request->mitra);
+        // }
 
 
         if (!$kegiatan->wasRecentlyCreated) {
             return redirect()->route('kegiatan.create')->with('error', 'Gagal.');
         }
 
-        return redirect()->route('kegiatan.show', ['id' => $kegiatan->id])->with('success', 'Kegiatan berhasil ditambahkan.');
+        return redirect()->route('kegiatan' . str_replace('_', '-', $request->jenis_kak) . 'show', ['id' => $kegiatan->id])->with('success', 'KAK berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -119,79 +262,170 @@ class KegiatanController extends Controller
     public function update(Request $request, $id)
     {
         // dd($request->all());
-        // Validate the request...
-        $request->validate([
-            'nama' => 'required|max:254',
-            'tgl_mulai' => 'required|date',
-            'tgl_selesai' => 'required|date',
-            'honor_pengawasan' => 'nullable|numeric',
-            'honor_pencacahan' => 'nullable|numeric',
-            'satuan_honor_pengawasan' => 'required',
-            'satuan_honor_pencacahan' => 'required',
-            'id_pjk' => 'required',
-            'tim' => 'required',
+        // 1. Validasi (Sesuaikan jika perlu)
+        // $request->validate([
+        //     'nama' => 'required',
+        //     'tgl_mulai' => 'required|date',
+        //     // ... validasi lainnya ...
+        // ]);
+
+        // 2. Ambil Data Kegiatan Lama
+        $kegiatan = Kegiatan::findOrFail($id);
+
+        // 3. Gabungkan Target 1 dan Target 2 (jika di form dipisah)
+        $gabungan_target = $request->kak3_target;
+
+        // 4. Update Data Utama
+        $kegiatan->update([
+            'nama' => $request->judul_kak, // Pastikan name di form edit adalah 'nama'
+            'jenis_kak' => $request->jenis_kak,
+            'singkatan_resmi' => $request->singkatan_resmi,
+            'kak1_latar_belakang' => $request->kak1_latar_belakang,
+            'kak2_maksud' => $request->kak2_maksud,
+            'kak2_tujuan' => $request->kak2_tujuan,
+            'kak3_target' => $gabungan_target,
+            'tgl_mulai' => $request->tgl_mulai,
+            'tgl_selesai' => $request->tgl_selesai,
+            'kak4_pjk' => $request->kak4_pjk,
+            'kak6_program' => $request->kak6_program,
+            'kak6_aktivitas' => $request->kak6_aktivitas,
+            'kak6_kro' => $request->kak6_kro,
+            'kak6_ro' => $request->kak6_ro,
+            'kak6_komponen' => $request->kak6_komponen,
+            'kak6_sub_komponen' => $request->kak6_sub_komponen,
+            'kak6_pembiayaan' => $request->kak6_pembiayaan,
+            // 'kak6_total' => dihitung ulang di bawah
+            'kak8_pengaju' => $request->kak8_pengaju,
+            'kak8_tgl' => $request->kak8_tgl,
+            'id_pjk' => $request->id_pjk,
         ]);
 
-        try {
-            $kegiatan = Kegiatan::find($id);
-            $tgl_mulai_sebelumnya = $kegiatan->tgl_mulai;
-            $kegiatan->tgl_mulai = $request->tgl_mulai;
-            $kegiatan->save();
-            // validasi honor mitra
-            $mitraMelebihiHonor = $this->validasiHonorMitra($kegiatan->mitra, $request->tgl_mulai);
-            // dd($mitraMelebihiHonor);
-            if ($mitraMelebihiHonor) {
-                $kegiatan->tgl_mulai = $tgl_mulai_sebelumnya;
-                $kegiatan->save();
-                return redirect()->route('kegiatan.edit', ['id' => $id])->with('error', 'Mitra ' . implode(", ", $mitraMelebihiHonor) . ' melebihi batas honor jika kegiatan diubah ke tanggal ' . $request->tgl_mulai . '.');
-            }
-            $kegiatan->nama = $request->nama;
-            $kegiatan->tgl_mulai = $request->tgl_mulai;
-            $kegiatan->tgl_selesai = $request->tgl_selesai;
-            $honor_pengawasan_sebelumnya = $kegiatan->honor_pengawasan;
-            $kegiatan->satuan_honor_pengawasan = $request->satuan_honor_pengawasan;
-            $kegiatan->honor_pengawasan = $request->honor_pengawasan;
-            $honor_pencacahan_sebelumnya = $kegiatan->honor_pencacahan;
-            $kegiatan->satuan_honor_pencacahan = $request->satuan_honor_pencacahan;
-            $kegiatan->honor_pencacahan = $request->honor_pencacahan;
-            $kegiatan->id_pjk = $request->id_pjk;
-            $kegiatan->tim = $request->tim;
-            $kegiatan->progress = $request->progress;
-            $kegiatan->beban_anggaran = $request->beban_anggaran;
-            $kegiatan->pegawai()->sync($request->pegawai);
-            $kegiatan->mitra()->sync($request->mitra);
-            $kegiatan->save();
+        // 5. Update Rincian Akun (Hapus Lama -> Buat Baru)
+        // Hapus semua rincian lama
+        $kegiatan->kegiatanRincian()->delete();
 
-            // Flag apakah ada perubahan honor
-            $flag = false;
-            if ($honor_pencacahan_sebelumnya != $request->honor_pencacahan || $honor_pengawasan_sebelumnya != $request->honor_pengawasan) {
-                $flag = true;
+        $jumlah_total = 0;
+        if ($request->has('rincian_akun_kode')) {
+            foreach ($request->rincian_akun_kode as $index => $akun_kode) {
+                $kegiatan->kegiatanRincian()->create([
+                    'kegiatan_id' => $kegiatan->id,
+                    'pok_id' => $request->rincian_akun_kode[$index],
+                    'rincian' => $request->rincian_detail[$index],
+                    'vol' => $request->rincian_volume[$index],
+                    'satuan' => $request->rincian_satuan[$index],
+                    'harga_satuan' => $request->rincian_harga[$index],
+                    'jumlah' => $request->rincian_total[$index],
+                ]);
+                $jumlah_total += $request->rincian_total[$index];
             }
-            foreach ($kegiatan->mitra as $mitra) {
-                // Isi default tanggal realisasi jika belum diisi
-                // if ($mitra->pivot->tgl_realisasi == null) {
-                //     $kegiatan->mitra()->updateExistingPivot($mitra->id, ['tgl_realisasi' => $kegiatan->tgl_selesai]);
-                // }
-
-                // Hitung estimasi honor
-                if ($flag) {
-                    $estimasi_honor = 0;
-                    $is_pml = 0;
-                    if ($mitra->pivot->is_pml == 1) {
-                        $estimasi_honor = $request->honor_pengawasan * $mitra->pivot->jumlah;
-                        $is_pml = 1;
-                    } else {
-                        $estimasi_honor = $request->honor_pencacahan * $mitra->pivot->jumlah;
-                    }
-                    $kegiatan->mitra()->updateExistingPivot($mitra->id, ['estimasi_honor' => $estimasi_honor, 'is_pml' => $is_pml]);
-                }
-            }
-        } catch (\Throwable $th) {
-            return redirect()->route('kegiatan.edit', ['id' => $id])->with('error', 'Gagal.');
         }
 
-        return redirect()->route('kegiatan.show', ['id' => $kegiatan->id])->with('success', 'Kegiatan berhasil diubah.');
+        // Simpan total baru ke tabel utama
+        $kegiatan->kak6_total = $jumlah_total;
+        $kegiatan->save();
+
+        // 6. Update Lampiran/Personil (Hapus Lama -> Buat Baru)
+        // Hapus semua lampiran lama
+        $kegiatan->kegiatanLampiran()->delete();
+
+        if ($request->has('peserta_id')) {
+            foreach ($request->peserta_id as $index => $peserta_id) {
+                $kegiatan->kegiatanLampiran()->create([
+                    'kegiatan_id' => $kegiatan->id, // Penting! Jangan lupa ini
+                    'peserta_id' => $request->peserta_id[$index],
+                    'tipe_personil' => $request->tipe_peserta[$index],
+                    'nip_nik' => $request->nip[$index],
+                    'kec_tujuan' => $request->kecamatan_tujuan[$index],
+                    'tgl_pelaksanaan' => $request->tanggal_pelaksanaan[$index],
+                    'pcl_diawasi' => $request->pcl_diawasi[$index],
+                    'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
+                    'jml_sampel_diawasi' => $request->jml_sampel_diawasi[$index],
+                    'jml_ok' => $request->jml_ok[$index],
+                    'transport_bayar' => $request->transport_bayar[$index],
+                ]);
+            }
+        }
+
+        return redirect()->route('kegiatan.' . str_replace('_', '-', $request->jenis_kak) . '.show', ['id' => $kegiatan->id])->with('success', 'KAK berhasil diperbarui.');
     }
+
+    // public function update(Request $request, $id)
+    // {
+    //     // dd($request->all());
+    //     // Validate the request...
+    //     // $request->validate([
+    //     //     'nama' => 'required|max:254',
+    //     //     'tgl_mulai' => 'required|date',
+    //     //     'tgl_selesai' => 'required|date',
+    //     //     'honor_pengawasan' => 'nullable|numeric',
+    //     //     'honor_pencacahan' => 'nullable|numeric',
+    //     //     'satuan_honor_pengawasan' => 'required',
+    //     //     'satuan_honor_pencacahan' => 'required',
+    //     //     'id_pjk' => 'required',
+    //     //     'tim' => 'required',
+    //     // ]);
+
+
+    //     try {
+    //         $kegiatan = Kegiatan::find($id);
+    //         $tgl_mulai_sebelumnya = $kegiatan->tgl_mulai;
+    //         $kegiatan->tgl_mulai = $request->tgl_mulai;
+    //         $kegiatan->save();
+    //         // validasi honor mitra
+    //         $mitraMelebihiHonor = $this->validasiHonorMitra($kegiatan->mitra, $request->tgl_mulai);
+    //         // dd($mitraMelebihiHonor);
+    //         if ($mitraMelebihiHonor) {
+    //             $kegiatan->tgl_mulai = $tgl_mulai_sebelumnya;
+    //             $kegiatan->save();
+    //             return redirect()->route('kegiatan.edit', ['id' => $id])->with('error', 'Mitra ' . implode(", ", $mitraMelebihiHonor) . ' melebihi batas honor jika kegiatan diubah ke tanggal ' . $request->tgl_mulai . '.');
+    //         }
+    //         $kegiatan->nama = $request->nama;
+    //         $kegiatan->tgl_mulai = $request->tgl_mulai;
+    //         $kegiatan->tgl_selesai = $request->tgl_selesai;
+    //         $honor_pengawasan_sebelumnya = $kegiatan->honor_pengawasan;
+    //         $kegiatan->satuan_honor_pengawasan = $request->satuan_honor_pengawasan;
+    //         $kegiatan->honor_pengawasan = $request->honor_pengawasan;
+    //         $honor_pencacahan_sebelumnya = $kegiatan->honor_pencacahan;
+    //         $kegiatan->satuan_honor_pencacahan = $request->satuan_honor_pencacahan;
+    //         $kegiatan->honor_pencacahan = $request->honor_pencacahan;
+    //         $kegiatan->id_pjk = $request->id_pjk;
+    //         $kegiatan->tim = $request->tim;
+    //         $kegiatan->progress = $request->progress;
+    //         $kegiatan->beban_anggaran = $request->beban_anggaran;
+    //         $kegiatan->pegawai()->sync($request->pegawai);
+    //         $kegiatan->mitra()->sync($request->mitra);
+    //         $kegiatan->save();
+
+    //         // Flag apakah ada perubahan honor
+    //         $flag = false;
+    //         if ($honor_pencacahan_sebelumnya != $request->honor_pencacahan || $honor_pengawasan_sebelumnya != $request->honor_pengawasan) {
+    //             $flag = true;
+    //         }
+    //         foreach ($kegiatan->mitra as $mitra) {
+    //             // Isi default tanggal realisasi jika belum diisi
+    //             // if ($mitra->pivot->tgl_realisasi == null) {
+    //             //     $kegiatan->mitra()->updateExistingPivot($mitra->id, ['tgl_realisasi' => $kegiatan->tgl_selesai]);
+    //             // }
+
+    //             // Hitung estimasi honor
+    //             if ($flag) {
+    //                 $estimasi_honor = 0;
+    //                 $is_pml = 0;
+    //                 if ($mitra->pivot->is_pml == 1) {
+    //                     $estimasi_honor = $request->honor_pengawasan * $mitra->pivot->jumlah;
+    //                     $is_pml = 1;
+    //                 } else {
+    //                     $estimasi_honor = $request->honor_pencacahan * $mitra->pivot->jumlah;
+    //                 }
+    //                 $kegiatan->mitra()->updateExistingPivot($mitra->id, ['estimasi_honor' => $estimasi_honor, 'is_pml' => $is_pml]);
+    //             }
+    //         }
+    //     } catch (\Throwable $th) {
+    //         return redirect()->route('kegiatan.edit', ['id' => $id])->with('error', 'Gagal.');
+    //     }
+
+    //     return redirect()->route('kegiatan.show', ['id' => $kegiatan->id])->with('success', 'Kegiatan berhasil diubah.');
+    // }
 
     public function show($id)
     {
@@ -252,6 +486,28 @@ class KegiatanController extends Controller
         $nama = $kegiatan->nama;
         $kegiatan->delete();
         return redirect()->route('kegiatan.index')->with('success', 'Kegiatan ' . $nama . ' berhasil dihapus.');
+    }
+
+    public function approveKegiatan($id)
+    {
+        $kegiatan = Kegiatan::find($id);
+        if (Auth::user()->nama != env('NAMA_PPK')) {
+            return redirect()->route('kegiatan.' . str_replace('_', '-', $kegiatan->jenis_kak) . '.edit', ['id' => $id])->with('error', 'Hanya PPK yang dapat menyetujui KAK.');
+        }
+        $kegiatan->is_approved = 1;
+        $kegiatan->save();
+        return redirect()->route('kegiatan.index', ['id' => $id])->with('success', 'KAK berhasil disetujui.');
+    }
+
+    public function rejectKegiatan($id)
+    {
+        $kegiatan = Kegiatan::find($id);
+        if (Auth::user()->nama != env('NAMA_PPK')) {
+            return redirect()->route('kegiatan.' . str_replace('_', '-', $kegiatan->jenis_kak) . '.edit', ['id' => $id])->with('error', 'Hanya PPK yang dapat membatalkan persetujuan KAK.');
+        }
+        $kegiatan->is_approved = 0;
+        $kegiatan->save();
+        return redirect()->route('kegiatan.index', ['id' => $id])->with('success', 'Persetujuan KAK berhasil dibatalkan.');
     }
 
     public function editTerlibat($id)
@@ -414,18 +670,58 @@ class KegiatanController extends Controller
 
     public function duplicate($id)
     {
-        $kegiatan = Kegiatan::find($id);
-        $kegiatanBaru = $kegiatan->replicate();
-        $mitraMelebihiHonor = $this->validasiHonorMitra($kegiatan->mitra, $kegiatanBaru->tgl_mulai);
-        if (count($mitraMelebihiHonor) > 0) {
-            return redirect()->route('kegiatan.index')->with('error', 'Mitra (' . implode(",", $mitraMelebihiHonor) . ')  melebihi batas honor.')->withInput();
+        // 1. Cari Data Lama beserta Relasinya (PENTING: pakai 'with')
+        $kegiatanLama = Kegiatan::with(['kegiatanRincian', 'kegiatanLampiran'])->findOrFail($id);
+
+        // 2. Replicate Data Induk (Kegiatan)
+        $kegiatanBaru = $kegiatanLama->replicate();
+
+        // 3. Modifikasi data unik (Opsional)
+        // Agar tidak bingung, kita tambahkan kata "(Copy)" di nama kegiatan baru
+        // dan reset tanggal agar tidak dianggap kegiatan lama
+        $kegiatanBaru->nama = '(Duplikat) ' . $kegiatanLama->nama;
+        $kegiatanBaru->created_at = now();
+        $kegiatanBaru->updated_at = now();
+        $kegiatanBaru->save(); // Simpan dulu agar dapat ID baru
+
+        // 4. Duplikat Data Anak: Rincian Akun (kegiatanRincian)
+        foreach ($kegiatanLama->kegiatanRincian as $rincianLama) {
+            $rincianBaru = $rincianLama->replicate();
+            $rincianBaru->kegiatan_id = $kegiatanBaru->id; // Tautkan ke ID Baru
+            $rincianBaru->created_at = now();
+            $rincianBaru->updated_at = now();
+            $rincianBaru->save();
         }
-        $kegiatanBaru->nama = '(Duplikat) ' . $kegiatan->nama;
-        $kegiatanBaru->save();
-        $kegiatanBaru->pegawai()->attach($kegiatan->pegawai);
-        $kegiatanBaru->mitra()->attach($kegiatan->mitra);
-        return redirect()->route('kegiatan.index')->with('success', 'Kegiatan berhasil diduplikasi.');
+
+        // 5. Duplikat Data Anak: Lampiran/Personil (kegiatanLampiran)
+        foreach ($kegiatanLama->kegiatanLampiran as $lampiranLama) {
+            $lampiranBaru = $lampiranLama->replicate();
+            $lampiranBaru->kegiatan_id = $kegiatanBaru->id; // Tautkan ke ID Baru
+            $lampiranBaru->created_at = now();
+            $lampiranBaru->updated_at = now();
+            $lampiranBaru->save();
+        }
+
+        // 6. Redirect (Bisa ke halaman Edit kegiatan baru, atau ke Index)
+        // Saya sarankan redirect ke halaman EDIT agar user bisa langsung ubah tanggalnya
+        return redirect()->route('kegiatan.index', $kegiatanBaru->id)
+            ->with('success', 'Kegiatan berhasil diduplikat! Silakan sesuaikan tanggalnya.');
     }
+
+    // public function duplicate($id)
+    // {
+    //     $kegiatan = Kegiatan::find($id);
+    //     $kegiatanBaru = $kegiatan->replicate();
+    //     $mitraMelebihiHonor = $this->validasiHonorMitra($kegiatan->mitra, $kegiatanBaru->tgl_mulai);
+    //     if (count($mitraMelebihiHonor) > 0) {
+    //         return redirect()->route('kegiatan.index')->with('error', 'Mitra (' . implode(",", $mitraMelebihiHonor) . ')  melebihi batas honor.')->withInput();
+    //     }
+    //     $kegiatanBaru->nama = '(Duplikat) ' . $kegiatan->nama;
+    //     $kegiatanBaru->save();
+    //     $kegiatanBaru->pegawai()->attach($kegiatan->pegawai);
+    //     $kegiatanBaru->mitra()->attach($kegiatan->mitra);
+    //     return redirect()->route('kegiatan.index')->with('success', 'Kegiatan berhasil diduplikasi.');
+    // }
 
 
     private function konversiTim($kodeTim)

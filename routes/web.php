@@ -8,6 +8,7 @@ use App\Http\Controllers\MitraController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\POKController;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,11 +99,44 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/get-kegiatan-api', [SuratController::class, 'getKegiatanApi'])->name('get-kegiatan-api');
 
+        Route::post('/approve/{id}', [KegiatanController::class, 'approveKegiatan'])->name('approve');
+        Route::post('/reject/{id}', [KegiatanController::class, 'rejectKegiatan'])->name('reject');
+
         Route::post('/import-mitra-dan-honor/{id}', [KegiatanController::class, 'importMitraDanHonor'])->name('import-mitra-dan-honor');
         // Route::post('/honor-mitra', [MainController::class, 'jumlahHonorMitra'])->name('jumlah-honor-mitra');
         Route::get('/export-mitra-dan-honor/{id}', [KegiatanController::class, 'exportMitraDanHonor'])->name('export-mitra-dan-honor');
         Route::post('/export-translok/{id}', [KegiatanController::class, 'exportTranslok'])->name('export-translok');
         Route::get('/export-mitra-id', [KegiatanController::class, 'exportMitraId'])->name('export-mitra-id');
+
+        Route::prefix('translok-biasa')->name('translok-biasa.')->group(function () {
+            Route::get('/create', [KegiatanController::class, 'translokBiasaCreate'])->name('create');
+            Route::get('/edit/{id}', [KegiatanController::class, 'translokBiasaEdit'])->name('edit');
+            Route::get('/show/{id}', [KegiatanController::class, 'translokBiasaShow'])->name('show');
+        });
+
+        Route::prefix('translok-8jam')->name('translok-8jam.')->group(function () {
+            Route::get('/create', [KegiatanController::class, 'translok8JamCreate'])->name('create');
+            Route::get('/edit/{id}', [KegiatanController::class, 'translok8JamEdit'])->name('edit');
+        });
+
+        Route::prefix('pemanggilan-konsultasi')->name('pemanggilan-konsultasi.')->group(function () {
+            Route::get('/create', [KegiatanController::class, 'pemanggilanKonsultasiCreate'])->name('create');
+            Route::get('/edit/{id}', [KegiatanController::class, 'pemanggilanKonsultasiEdit'])->name('edit');
+        });
+
+        Route::prefix('honor-mitra')->name('honor-mitra.')->group(function () {
+            Route::get('/create', [KegiatanController::class, 'honorMitraCreate'])->name('create');
+            Route::get('/edit/{id}', [KegiatanController::class, 'honorMitraEdit'])->name('edit');
+        });
+
+        Route::prefix('honor-inda')->name('honor-inda.')->group(function () {
+            Route::get('/create', [KegiatanController::class, 'honorIndaCreate'])->name('create');
+            Route::get('/edit/{id}', [KegiatanController::class, 'honorIndaEdit'])->name('edit');
+        });
+    });
+
+    Route::prefix('pok')->name('pok.')->group(function () {
+        Route::post('/filter', [POKController::class, 'filterPOK'])->name('filter');
     });
 
     Route::prefix('surat')->name('surat.')->group(function () {

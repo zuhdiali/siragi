@@ -530,7 +530,18 @@
         };
       })();
 
+      function copyText(text) {
+          navigator.clipboard.writeText(text).then(() => {
+              // Pesan muncul di sini
+              alert('Teks berhasil disalin: ' + text);
+          }).catch(err => {
+              console.error('Gagal salin:', err);
+          });
+      }
     </script>
+
+
+
 
     @yield('script')
   </body>
