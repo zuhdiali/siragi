@@ -16,7 +16,7 @@
                         @csrf
                         @method('PUT')
 
-                        <input type="hidden" name="jenis_kak" value="translok_biasa" />
+                        <input type="hidden" name="jenis_kak" value="translok-biasa" />
 
                         <div class="card">
                             <div class="card-header">

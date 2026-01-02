@@ -88,22 +88,21 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 10%">Aksi</th>
-                                            <th>Nama Kegiatan</th>
+                                            <th>Nama Singkatan Resmi</th>
+                                            <th>Jenis KAK</th>
                                             <th>Nama KAK</th>
                                             <th>PJK</th>
-                                            <th>Tanggal Mulai</th>
-                                            <th>Tanggal Selesai</th>
+                                            <th>Tanggal Pelaksanaan</th>
                                             <th>Progress</th>
                                         </tr>
                                     </thead>
                                     <tfoot>
                                         <tr>
-                                            <th>Aksi</th>
-                                            <th>Nama Kegiatan</th>
+                                            <th>Nama Singkatan Resmi</th>
+                                            <th>Jenis KAK</th>
                                             <th>Nama KAK</th>
                                             <th>PJK</th>
-                                            <th>Tanggal Mulai</th>
-                                            <th>Tanggal Selesai</th>
+                                            <th>Tanggal Pelaksanaan</th>
                                             <th>Progress</th>
                                         </tr>
                                     </tfoot>
@@ -238,12 +237,16 @@
                                                 <th scope="row">
                                                     {{ $kegiatan->singkatan_resmi }}
                                                 </th>
+                                                <td>{{ $kegiatan->jenis_kak }}</td>
                                                 <td>{{ strlen($kegiatan->nama) > 90 ? substr($kegiatan->nama, 0, 90) . '...' : $kegiatan->nama }}
                                                 </td>
                                                 <td>{{ $kegiatan->pjk->nama }}</td>
-                                                <td>{{ Carbon\Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d M Y') }}
-                                                </td>
-                                                <td>{{ Carbon\Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d M Y') }}
+                                                <td>
+                                                    <p>{{ Carbon\Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d M Y') }}
+                                                    </p>
+                                                    <p>s/d</p>
+                                                    <p>{{ Carbon\Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d M Y') }}
+                                                    </p>
                                                 </td>
                                                 <td>{{ $kegiatan->progress }} %</td>
                                                 {{-- <td>

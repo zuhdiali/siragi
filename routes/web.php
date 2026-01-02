@@ -117,21 +117,25 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('translok-8jam')->name('translok-8jam.')->group(function () {
             Route::get('/create', [KegiatanController::class, 'translok8JamCreate'])->name('create');
             Route::get('/edit/{id}', [KegiatanController::class, 'translok8JamEdit'])->name('edit');
+            Route::get('/show/{id}', [KegiatanController::class, 'translok8JamShow'])->name('show');
         });
 
         Route::prefix('pemanggilan-konsultasi')->name('pemanggilan-konsultasi.')->group(function () {
             Route::get('/create', [KegiatanController::class, 'pemanggilanKonsultasiCreate'])->name('create');
             Route::get('/edit/{id}', [KegiatanController::class, 'pemanggilanKonsultasiEdit'])->name('edit');
+            Route::get('/show/{id}', [KegiatanController::class, 'pemanggilanKonsultasiShow'])->name('show');
         });
 
         Route::prefix('honor-mitra')->name('honor-mitra.')->group(function () {
             Route::get('/create', [KegiatanController::class, 'honorMitraCreate'])->name('create');
             Route::get('/edit/{id}', [KegiatanController::class, 'honorMitraEdit'])->name('edit');
+            Route::get('/show/{id}', [KegiatanController::class, 'honorMitraShow'])->name('show');
         });
 
         Route::prefix('honor-inda')->name('honor-inda.')->group(function () {
             Route::get('/create', [KegiatanController::class, 'honorIndaCreate'])->name('create');
             Route::get('/edit/{id}', [KegiatanController::class, 'honorIndaEdit'])->name('edit');
+            Route::get('/show/{id}', [KegiatanController::class, 'honorIndaShow'])->name('show');
         });
     });
 

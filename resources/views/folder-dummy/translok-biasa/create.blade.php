@@ -13,7 +13,7 @@
                 <div class="col-md-12">
                     <form action="{{ route('kegiatan.store') }}" method="POST">
                         @csrf
-                        <input type="hidden" name="jenis_kak" value="translok_biasa" />
+                        <input type="hidden" name="jenis_kak" value="translok-biasa" />
                         <div class="card">
                             <div class="card-header">
                                 <div class="card-title">SBKS (Standard Biaya Kegiatan Statistik) </div>
@@ -584,7 +584,7 @@
                                                             class="form-text text-muted">{{ $errors->first('judul_kak') }}</small>
                                                     @else
                                                         <small class="form-text text-muted">
-                                                            petunjuk pengisian: TRANSPORT LOKAL DIBAWAH 8 JAM
+                                                            petunjuk pengisian: TRANSPORT LOKAL DI BAWAH 8 JAM
                                                             [ORGANIK/MITRA] [SUPERVISI/PENGAWASAN/PENDATAAN]
                                                             [UPDATING/PENDATAAN] [nama_kegiatan] TAHUN 2026 BPS KABUPATEN
                                                             SIMEULUE TAHUN ANGGARAN 2026

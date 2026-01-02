@@ -37,7 +37,7 @@ class KegiatanController extends Controller
         return view('kegiatan.index', ['kegiatans' => $kegiatans, 'kegiatanTahunIni' => $kegiatanTahunIni]);
     }
 
-    private function loadCreateEditView($viewPath, $id = null)
+    private function loadCreateEditView($viewPath, $jenis_kak, $id = null)
     {
         $data = [
             'pegawais' => Pegawai::where('flag', null)->where('nama', 'not like', '%Admin%')->where('nama', 'not like', '%Dummy%')->orderBy('nama', 'asc')->get(),
@@ -65,63 +65,84 @@ class KegiatanController extends Controller
                 'pokSubKomponen',
             ])->find($id);
         }
+        $data['jenis_kak'] = $jenis_kak;
         // dd($data['kegiatan']);
         return view($viewPath, $data);
     }
 
     public function translokBiasaCreate()
     {
-        return $this->loadCreateEditView('kegiatan.translok-biasa.create');
+        return $this->loadCreateEditView('kegiatan.create', 'translok-biasa');
     }
 
     public function translokBiasaEdit($id)
     {
-        return $this->loadCreateEditView('kegiatan.translok-biasa.edit', $id);
+        return $this->loadCreateEditView('kegiatan.edit', 'translok-biasa', $id);
     }
 
     public function translokBiasaShow($id)
     {
-        return $this->loadCreateEditView('kegiatan.translok-biasa.show', $id);
+        return $this->loadCreateEditView('kegiatan.show', 'translok-biasa', $id);
     }
 
     public function translok8JamCreate()
     {
-        return $this->loadCreateEditView('kegiatan.translok-8jam.create');
+        return $this->loadCreateEditView('kegiatan.create', 'translok-8jam');
     }
 
     public function translok8JamEdit($id)
     {
-        return $this->loadCreateEditView('kegiatan.translok-8jam.edit', $id);
+        return $this->loadCreateEditView('kegiatan.edit', 'translok-8jam', $id);
+    }
+
+    public function translok8JamShow($id)
+    {
+        return $this->loadCreateEditView('kegiatan.show', 'translok-8jam', $id);
     }
 
     public function pemanggilanKonsultasiCreate()
     {
-        return $this->loadCreateEditView('kegiatan.pemanggilan-konsultasi.create');
+        return $this->loadCreateEditView('kegiatan.create', 'pemanggilan-konsultasi');
     }
 
     public function pemanggilanKonsultasiEdit($id)
     {
-        return $this->loadCreateEditView('kegiatan.pemanggilan-konsultasi.edit', $id);
+        return $this->loadCreateEditView('kegiatan.edit', 'pemanggilan-konsultasi', $id);
+    }
+
+    public function pemanggilanKonsultasiShow($id)
+    {
+        return $this->loadCreateEditView('kegiatan.show', 'pemanggilan-konsultasi', $id);
     }
 
     public function honorMitraCreate()
     {
-        return $this->loadCreateEditView('kegiatan.honor-mitra.create');
+        return $this->loadCreateEditView('kegiatan.create', 'honor-mitra');
     }
 
     public function honorMitraEdit($id)
     {
-        return $this->loadCreateEditView('kegiatan.honor-mitra.edit', $id);
+        return $this->loadCreateEditView('kegiatan.edit', 'honor-mitra', $id);
+    }
+
+    public function honorMitraShow($id)
+    {
+        return $this->loadCreateEditView('kegiatan.show', 'honor-mitra', $id);
     }
 
     public function honorIndaCreate()
     {
-        return $this->loadCreateEditView('kegiatan.honor-inda.create');
+        return $this->loadCreateEditView('kegiatan.create', 'honor-inda');
     }
 
     public function honorIndaEdit($id)
     {
-        return $this->loadCreateEditView('kegiatan.honor-inda.edit', $id);
+        return $this->loadCreateEditView('kegiatan.edit', 'honor-inda', $id);
+    }
+
+    public function honorIndaShow($id)
+    {
+        return $this->loadCreateEditView('kegiatan.show', 'honor-inda', $id);
     }
 
     public function create()
@@ -185,6 +206,8 @@ class KegiatanController extends Controller
             'kak8_pengaju' => $request->kak8_pengaju,
             'kak8_tgl' => $request->kak8_tgl,
             'id_pjk' => $request->id_pjk,
+            'honor_pengawasan' => $request->honor_pengawasan,
+            'honor_pencacahan' => $request->honor_pencacahan,
         ]);
         $jumlah = 0;
         foreach ($request->akun_kode as $index => $akun_kode) {
@@ -202,19 +225,59 @@ class KegiatanController extends Controller
         $kegiatan->kak6_total = $jumlah;
         $kegiatan->save();
 
-        foreach ($request->tipe_peserta as $index => $tipe_personil) {
-            $kegiatan->kegiatanLampiran()->create([
-                'peserta_id' => $request->peserta_id[$index],
-                'tipe_personil' => $request->tipe_peserta[$index],
-                'nip_nik' => $request->nip[$index],
-                'kec_tujuan' => $request->kecamatan_tujuan[$index],
-                'tgl_pelaksanaan' => $request->tanggal_pelaksanaan[$index],
-                'pcl_diawasi' => $request->pcl_diawasi[$index],
-                'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
-                'jml_sampel_diawasi' => $request->jml_sampel_diawasi[$index],
-                'jml_ok' => $request->jml_ok[$index],
-                'transport_bayar' => $request->transport_bayar[$index],
-            ]);
+        if ($request->jenis_kak == 'translok-biasa' || $request->jenis_kak == 'translok-8jam') {
+            foreach ($request->tipe_peserta as $index => $tipe_personil) {
+                $kegiatan->kegiatanLampiran()->create([
+                    'peserta_id' => $request->peserta_id[$index],
+                    'tipe_personil' => $request->tipe_peserta[$index],
+                    'nip_nik' => $request->nip[$index],
+                    'kec_tujuan' => $request->kecamatan_tujuan[$index],
+                    'tgl_pelaksanaan' => $request->tanggal_pelaksanaan[$index],
+                    'pcl_diawasi' => $request->pcl_diawasi[$index],
+                    'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
+                    'jml_sampel_diawasi' => $request->jml_sampel_diawasi[$index],
+                    'jml_ok' => $request->jml_ok[$index],
+                    'transport_bayar' => $request->transport_bayar[$index],
+                ]);
+            }
+        } else if ($request->jenis_kak == 'pemanggilan-konsultasi') {
+            foreach ($request->tipe_peserta as $index => $tipe_personil) {
+                $kegiatan->kegiatanLampiran()->create([
+                    'peserta_id' => $request->peserta_id[$index],
+                    'tipe_personil' => $request->tipe_peserta[$index],
+                    'nip_nik' => $request->nip[$index],
+                    'nama_sls' => $request->nama_sls[$index],
+                    'lampiran_tgl_mulai' => $request->lampiran_tgl_mulai[$index],
+                    'lampiran_tgl_selesai' => $request->lampiran_tgl_selesai[$index],
+                    'transport_bayar' => $request->transport_bayar[$index],
+                ]);
+            }
+        } else if ($request->jenis_kak == 'honor-inda') {
+            foreach ($request->tipe_peserta as $index => $tipe_personil) {
+                $kegiatan->kegiatanLampiran()->create([
+                    'peserta_id' => $request->peserta_id[$index],
+                    'tipe_personil' => $request->tipe_peserta[$index],
+                    'nip_nik' => $request->nip[$index],
+                    'transport_bayar' => $request->transport_bayar[$index],
+                ]);
+            }
+        } else if ($request->jenis_kak == 'honor-mitra') {
+            foreach ($request->peserta_id as $index => $peserta_id) {
+                $kegiatan->kegiatanLampiran()->create([
+                    'peserta_id' => $request->peserta_id[$index],
+                    'tipe_personil' => $request->tipe_peserta[$index],
+                    'nip_nik' => $request->nip[$index],
+                    'pcl_or_pml' => $request->pcl_or_pml[$index],
+                    'kec_tujuan' => $request->kecamatan_tujuan[$index],
+                    'nama_sls' => $request->nama_sls[$index],
+                    'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
+                    'tipe_pengawas' => $request->tipe_pengawas[$index],
+                    'pengawas_id' => $request->pengawas_id[$index],
+                    'lampiran_tgl_mulai' => $request->lampiran_tgl_mulai[$index],
+                    'lampiran_tgl_selesai' => $request->lampiran_tgl_selesai[$index],
+                    'transport_bayar' => $this->hitungTransportBayar($request, $index, $kegiatan),
+                ]);
+            }
         }
         // $kegiatan = new Kegiatan;
         // $kegiatan->nama = $request->nama;
@@ -248,7 +311,7 @@ class KegiatanController extends Controller
             return redirect()->route('kegiatan.create')->with('error', 'Gagal.');
         }
 
-        return redirect()->route('kegiatan' . str_replace('_', '-', $request->jenis_kak) . 'show', ['id' => $kegiatan->id])->with('success', 'KAK berhasil ditambahkan.');
+        return redirect()->route('kegiatan.' . str_replace('_', '-', $request->jenis_kak) . '.show', ['id' => $kegiatan->id])->with('success', 'KAK berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -305,11 +368,11 @@ class KegiatanController extends Controller
         $kegiatan->kegiatanRincian()->delete();
 
         $jumlah_total = 0;
-        if ($request->has('rincian_akun_kode')) {
-            foreach ($request->rincian_akun_kode as $index => $akun_kode) {
+        if ($request->has('akun_kode')) {
+            foreach ($request->akun_kode as $index => $akun_kode) {
                 $kegiatan->kegiatanRincian()->create([
                     'kegiatan_id' => $kegiatan->id,
-                    'pok_id' => $request->rincian_akun_kode[$index],
+                    'pok_id' => $request->akun_kode[$index],
                     'rincian' => $request->rincian_detail[$index],
                     'vol' => $request->rincian_volume[$index],
                     'satuan' => $request->rincian_satuan[$index],
@@ -329,20 +392,61 @@ class KegiatanController extends Controller
         $kegiatan->kegiatanLampiran()->delete();
 
         if ($request->has('peserta_id')) {
-            foreach ($request->peserta_id as $index => $peserta_id) {
-                $kegiatan->kegiatanLampiran()->create([
-                    'kegiatan_id' => $kegiatan->id, // Penting! Jangan lupa ini
-                    'peserta_id' => $request->peserta_id[$index],
-                    'tipe_personil' => $request->tipe_peserta[$index],
-                    'nip_nik' => $request->nip[$index],
-                    'kec_tujuan' => $request->kecamatan_tujuan[$index],
-                    'tgl_pelaksanaan' => $request->tanggal_pelaksanaan[$index],
-                    'pcl_diawasi' => $request->pcl_diawasi[$index],
-                    'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
-                    'jml_sampel_diawasi' => $request->jml_sampel_diawasi[$index],
-                    'jml_ok' => $request->jml_ok[$index],
-                    'transport_bayar' => $request->transport_bayar[$index],
-                ]);
+            if ($request->jenis_kak == 'translok-biasa' || $request->jenis_kak == 'translok-8jam') {
+                foreach ($request->peserta_id as $index => $peserta_id) {
+                    $kegiatan->kegiatanLampiran()->create([
+                        'kegiatan_id' => $kegiatan->id, // Penting! Jangan lupa ini
+                        'peserta_id' => $request->peserta_id[$index],
+                        'tipe_personil' => $request->tipe_peserta[$index],
+                        'nip_nik' => $request->nip[$index],
+                        'kec_tujuan' => $request->kecamatan_tujuan[$index],
+                        'tgl_pelaksanaan' => $request->tanggal_pelaksanaan[$index],
+                        'pcl_diawasi' => $request->pcl_diawasi[$index],
+                        'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
+                        'jml_sampel_diawasi' => $request->jml_sampel_diawasi[$index],
+                        'jml_ok' => $request->jml_ok[$index],
+                        'transport_bayar' => $request->transport_bayar[$index],
+                    ]);
+                }
+            } else if ($request->jenis_kak == 'pemanggilan-konsultasi') {
+                foreach ($request->peserta_id as $index => $peserta_id) {
+                    $kegiatan->kegiatanLampiran()->create([
+                        'kegiatan_id' => $kegiatan->id, // Penting! Jangan lupa ini
+                        'peserta_id' => $request->peserta_id[$index],
+                        'tipe_personil' => $request->tipe_peserta[$index],
+                        'nip_nik' => $request->nip[$index],
+                        'nama_sls' => $request->nama_sls[$index],
+                        'lampiran_tgl_mulai' => $request->lampiran_tgl_mulai[$index],
+                        'lampiran_tgl_selesai' => $request->lampiran_tgl_selesai[$index],
+                        'transport_bayar' => $request->transport_bayar[$index],
+                    ]);
+                }
+            } else if ($request->jenis_kak == 'honor-inda') {
+                foreach ($request->tipe_peserta as $index => $tipe_personil) {
+                    $kegiatan->kegiatanLampiran()->create([
+                        'peserta_id' => $request->peserta_id[$index],
+                        'tipe_personil' => $request->tipe_peserta[$index],
+                        'nip_nik' => $request->nip[$index],
+                        'transport_bayar' => $request->transport_bayar[$index],
+                    ]);
+                }
+            } else if ($request->jenis_kak == 'honor-mitra') {
+                foreach ($request->peserta_id as $index => $peserta_id) {
+                    $kegiatan->kegiatanLampiran()->create([
+                        'peserta_id' => $request->peserta_id[$index],
+                        'tipe_personil' => $request->tipe_peserta[$index],
+                        'nip_nik' => $request->nip[$index],
+                        'pcl_or_pml' => $request->pcl_or_pml[$index],
+                        'kec_tujuan' => $request->kecamatan_tujuan[$index],
+                        'nama_sls' => $request->nama_sls[$index],
+                        'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
+                        'tipe_pengawas' => $request->tipe_pengawas[$index],
+                        'pengawas_id' => $request->pengawas_id[$index],
+                        'lampiran_tgl_mulai' => $request->lampiran_tgl_mulai[$index],
+                        'lampiran_tgl_selesai' => $request->lampiran_tgl_selesai[$index],
+                        'transport_bayar' => $this->hitungTransportBayar($request, $index, $kegiatan),
+                    ]);
+                }
             }
         }
 
@@ -781,6 +885,19 @@ class KegiatanController extends Controller
             }
         }
         return $mitraMelebihiHonor;
+    }
+
+    private function hitungTransportBayar($request, $index, $kegiatan)
+    {
+        if ($request->tipe_peserta[$index] == 'pegawai') {
+            return 0;
+        }
+
+        if ($request->pcl_or_pml[$index] == 1) {
+            return $request->jml_sampel_pcl[$index] * $kegiatan->honor_pengawasan;
+        }
+
+        return $request->jml_sampel_pcl[$index] * $kegiatan->honor_pencacahan;
     }
 
     public static function jumlahHonorMitra($id_mitra, $bulan, $tahun, $idKegiatanPengecualian = null)

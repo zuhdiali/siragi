@@ -13,7 +13,7 @@
                 <div class="col-md-12">
                     <form action="{{ route('kegiatan.store') }}" method="POST">
                         @csrf
-                        <input type="hidden" name="jenis_kak" value="{{ $jenis_kak }}" />
+                        <input type="hidden" name="jenis_kak" value="translok-8jam" />
                         <div class="card">
                             <div class="card-header">
                                 <div class="card-title">SBKS (Standard Biaya Kegiatan Statistik) </div>
@@ -27,8 +27,7 @@
                                                 <option value=""></option>
                                                 @foreach ($sbks as $item)
                                                     <option value="{{ $item->singkatan_resmi }}"
-                                                        {{ old('filter_sbks') == $item->nama_kegiatan ? 'selected' : '' }}
-                                                        data-nama-lengkap="{{ $item->nama_kegiatan }}">
+                                                        {{ old('filter_sbks') == $item->nama_kegiatan ? 'selected' : '' }}>
                                                         {{ $item->nama_kegiatan_dan_singkatan }}</option>
                                                 @endforeach
                                                 <option value="LAINNYA"
@@ -74,17 +73,7 @@
                         </div>
                         <div class="card">
                             <div class="card-header">
-                                @if ($jenis_kak == 'translok-biasa')
-                                    <div class="card-title">Tambah KAK Translok Biasa</div>
-                                @elseif ($jenis_kak == 'translok-8jam')
-                                    <div class="card-title">Tambah KAK Translok 8 Jam</div>
-                                @elseif ($jenis_kak == 'pemanggilan-konsultasi')
-                                    <div class="card-title">Tambah KAK Pemanggilan Konsultasi</div>
-                                @elseif ($jenis_kak == 'honor-mitra')
-                                    <div class="card-title">Tambah KAK Honor Mitra</div>
-                                @elseif ($jenis_kak == 'honor-inda')
-                                    <div class="card-title">Tambah KAK Honor Inda</div>
-                                @endif
+                                <div class="card-title">Tambah KAK Translok Di Atas 8 Jam</div>
                             </div>
                             <div class="card-body">
                                 <div class="row">
@@ -102,9 +91,7 @@
                                                             class="form-text text-muted">{{ $errors->first('singkatan_resmi') }}</small>
                                                     @else
                                                         <small class="form-text text-muted">
-                                                            contoh pengisian: PODES 2026, SUPAS 2026, SUSENAS Maret, KSA
-                                                            Padi Triwulan
-                                                            I,
+                                                            contoh pengisian: SUSENAS Maret, SUPAS, KSA Padi Triwulan I,
                                                             VHTS Januari
                                                         </small>
                                                     @endif
@@ -140,47 +127,29 @@
                                             <p>2. MAKSUD DAN TUJUAN</p>
                                             <div class="row">
                                                 <div class="col">
-                                                    @if ($jenis_kak != 'honor-inda' && $jenis_kak != 'honor-mitra')
-                                                        <label for="kak2_maksud">Maksud dari pengadaan ini adalah
-                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                                                untuk pembayaran transport lokal
-                                                            @endif
-                                                        </label>
+                                                    <label for="kak2_maksud">Maksud dari pengadaan ini adalah
+                                                        untuk pembayaran transport lokal </label>
 
-                                                        <select name="kak2_maksud" id="kak2_maksud" class="form-control">
-                                                            <option value="">( Pilih salah satu )</option>
-                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                                                <option value="pengawasan">Pengawasan</option>
-                                                                <option value="supervisi">Supervisi</option>
-                                                                <option value="pendataan">Pendataan</option>
-                                                            @elseif ($jenis_kak == 'pemanggilan-konsultasi')
-                                                                <option value="pemanggilan">Pemanggilan</option>
-                                                                <option value="konsultasi">Konsultasi</option>
-                                                            @endif
-                                                        </select>
-                                                        @if ($errors->has('kak2_maksud'))
-                                                            <small
-                                                                class="form-text text-muted">{{ $errors->first('kak2_maksud') }}</small>
-                                                        @endif
+                                                    <select name="kak2_maksud" id="kak2_maksud" class="form-control">
+                                                        <option value="">( Pilih salah satu )</option>
+                                                        <option value="pengawasan">Pengawasan</option>
+                                                        <option value="supervisi">Supervisi</option>
+                                                        <option value="pendataan">Pendataan</option>
+                                                    </select>
+                                                    @if ($errors->has('kak2_maksud'))
+                                                        <small
+                                                            class="form-text text-muted">{{ $errors->first('kak2_maksud') }}</small>
                                                     @endif
                                                 </div>
                                                 <div class="col">
-                                                    @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                                        <label for="kak2_tujuan">Tujuan pengadaan ini adalah untuk
-                                                            pembayaran
-                                                            transport lokal
-                                                        </label>
-                                                        <select name="kak2_tujuan" id="kak2_tujuan" class="form-control">
-                                                            <option value="">( Pilih salah satu )</option>
-                                                            <option value="mitra">Mitra</option>
-                                                            <option value="organik">Organik</option>
-                                                        </select>
-                                                    @elseif ($jenis_kak == 'pemanggilan-konsultasi')
-                                                        <label for="kak2_tujuan">Tujuan pengadaan ini adalah
-                                                        </label>
-                                                        <input type="text" name="kak2_tujuan" id="kak2_tujuan"
-                                                            class="form-control" value="BPS Provinsi Aceh" />
-                                                    @endif
+                                                    <label for="kak2_tujuan">Tujuan pengadaan ini adalah untuk pembayaran
+                                                        transport lokal
+                                                    </label>
+                                                    <select name="kak2_tujuan" id="kak2_tujuan" class="form-control">
+                                                        <option value="">( Pilih salah satu )</option>
+                                                        <option value="mitra">Mitra</option>
+                                                        <option value="organik">Organik</option>
+                                                    </select>
                                                     @if ($errors->has('kak2_tujuan'))
                                                         <small
                                                             class="form-text text-muted">{{ $errors->first('kak2_tujuan') }}</small>
@@ -200,25 +169,18 @@
                                             <p>3. TARGET/SASARAN</p>
                                             <div class="row" id="kak3_target_wrap">
                                                 <div class="col">
-                                                    <label for="kak3_target" id="label_kak3_target">
-                                                        @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                                            Mitra yang diawasi
-                                                            ada sejumlah
-                                                        @elseif ($jenis_kak == 'pemanggilan-konsultasi')
-                                                            Jumlah pegawai yang melakukan perjalanan dinas
-                                                        @endif
+                                                    <label for="kak3_target" id="label_kak3_target">Mitra yang diawasi
+                                                        ada sejumlah
                                                     </label>
-                                                    @if ($jenis_kak != 'honor-inda' && $jenis_kak != 'honor-mitra')
-                                                        <input type="number" name="kak3_target" id="kak3_target"
-                                                            class="form-control" />
-                                                        @if ($errors->has('kak3_target'))
-                                                            <small
-                                                                class="form-text text-muted">{{ $errors->first('kak3_target') }}</small>
-                                                        @else
-                                                            <small class="form-text text-muted">
-                                                                petunjuk: isi dengan angka saja
-                                                            </small>
-                                                        @endif
+                                                    <input type="number" name="kak3_target" id="kak3_target"
+                                                        class="form-control" />
+                                                    @if ($errors->has('kak3_target'))
+                                                        <small
+                                                            class="form-text text-muted">{{ $errors->first('kak3_target') }}</small>
+                                                    @else
+                                                        <small class="form-text text-muted">
+                                                            petunjuk: isi dengan angka saja
+                                                        </small>
                                                     @endif
                                                 </div>
                                             </div>
@@ -309,21 +271,9 @@
                                     <div class="col">
                                         <div class="form-group">
                                             <p>5. SPESIFIKASI PENGADAAN BARANG/JASA</p>
-                                            <p>
-                                                @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                                    Transport lokal sesuai SK Kepala BPS Kabupaten Simeulue nomor XX Tahun
-                                                    2025
-                                                    tanggal DD-MM-YYYY tentang Penetapan Rate Biaya Transport dari Kabupaten
-                                                    Simeulue Ke Kecamatan Tahun 2026
-                                                @elseif ($jenis_kak == 'pemanggilan-konsultasi')
-                                                    Perjalanan dinas ini sesuai dengan PMK Nomor 32 Tahun 2025 tanggal 14
-                                                    Mei
-                                                    2025 tetang Standar biaya Masukan (SBM) Tahun Anggaran 2026
-                                                @elseif($jenis_kak == 'honor-inda')
-                                                    Pembayaran sesuai dengan SK Kepala BPS Kabupaten Simeulue Tanggal 5
-                                                    November 2025 nomor XX Tahun 2025 tentang xxxxxxxxxxx
-                                                @endif
-                                            </p>
+                                            <p>Transport lokal sesuai SK Kepala BPS Kabupaten Simeulue nomor XX Tahun 2025
+                                                tanggal DD-MM-YYYY tentang Penetapan Rate Biaya Transport dari Kabupaten
+                                                Simeulue Ke Kecamatan Tahun 2026</p>
                                         </div>
                                     </div>
                                 </div>
@@ -471,49 +421,7 @@
 
                                 <div class="row">
                                     <div class="col-12">
-                                        @if ($jenis_kak == 'honor-mitra')
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div
-                                                        class="form-group {{ $errors->has('honor_pengawasan') ? 'has-error has-feedback' : '' }}">
-                                                        <label for="honor_pengawasan">Honor
-                                                            <strong>Pengawasan</strong></label>
-                                                        <input type="number" class="form-control" id="honor_pengawasan"
-                                                            name="honor_pengawasan"
-                                                            placeholder="Masukkan honor per satuan"
-                                                            value="{{ old('honor_pengawasan') }}" />
-                                                        @if ($errors->has('honor_pengawasan'))
-                                                            <small
-                                                                class="form-text text-muted">{{ $errors->first('honor_pengawasan') }}</small>
-                                                        @else
-                                                            <small class="form-text text-muted">
-                                                                {{-- (isian honor dapat dikosongkan jika satuan honor belum dipilih) --}}
-                                                            </small>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div
-                                                        class="form-group {{ $errors->has('honor_pencacahan') ? 'has-error has-feedback' : '' }}">
-                                                        <label for="honor_pencacahan">Honor <strong>Pencacahan /
-                                                                Pengolahan</strong></label>
-                                                        <input type="number" class="form-control" id="honor_pencacahan"
-                                                            name="honor_pencacahan"
-                                                            placeholder="Masukkan honor per satuan"
-                                                            value="{{ old('honor_pencacahan') }}" />
-                                                        @if ($errors->has('honor_pencacahan'))
-                                                            <small
-                                                                class="form-text text-muted">{{ $errors->first('honor_pencacahan') }}</small>
-                                                        @else
-                                                            <small class="form-text text-muted">
-                                                                {{-- (isian honor dapat dikosongkan jika satuan honor belum dipilih) --}}
-                                                            </small>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-                                        <p>Rincian Biaya </p>
+                                        <p>Rincian Biaya Transport & Obyek Pengawasan</p>
 
                                         <div class="table-responsive">
                                             <table class="table table-bordered table-hover align-middle"
@@ -522,59 +430,31 @@
                                                     <tr>
                                                         <th style="width: 250px;">Nama Pelaksana</th>
                                                         <th style="width: 150px;">NIP / NIK</th>
-                                                        @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                                            <th style="width: 150px;">Kecamatan Tujuan</th>
-                                                            <th style="width: 120px;">Tanggal Pelaksanaan</th>
-                                                            <th style="width: 200px;">Nama PCL yang Diawasi</th>
-                                                            <th style="width: 80px;">Jml Sampel PCL</th>
-                                                            <th style="width: 80px;">Jml Sampel Diawasi</th>
-                                                            <th style="width: 100px;">Jml OK</th>
-                                                            <th style="width: 150px;">Perkiraan Transport</th>
-                                                        @elseif ($jenis_kak == 'pemanggilan-konsultasi')
-                                                            <th style="width: 150px;">Tujuan Perjalanan Dinas</th>
-                                                            <th style="width: 120px">Tanggal Mulai</th>
-                                                            <th style="width: 120px">Tanggal Selesai</th>
-                                                            <th style="width: 150px;">Perkiraan Biaya Per Orang</th>
-                                                        @elseif($jenis_kak == 'honor-inda')
-                                                            <th style="width: 150px;">Honor per OJP</th>
-                                                        @elseif($jenis_kak == 'honor-mitra')
-                                                            <th style="width: 80px;">Tugas (PCL/PML)</th>
-                                                            <th style="width: 150px;">Kecamatan Tujuan</th>
-                                                            <th style="width: 150px;">Nama SLS</th>
-                                                            <th style="width: 80px;">Jml Sampel PCL</th>
-                                                            <th style="width: 200px;">Nama Pengawas</th>
-                                                            <th style="width: 120px">Tanggal Mulai</th>
-                                                            <th style="width: 120px">Tanggal Selesai</th>
-                                                        @endif
+                                                        <th style="width: 150px;">Kecamatan Tujuan</th>
+                                                        <th style="width: 120px;">Tanggal Pelaksanaan</th>
+                                                        <th style="width: 200px;">Nama PCL yang Diawasi</th>
+                                                        <th style="width: 80px;">Jml Sampel PCL</th>
+                                                        <th style="width: 80px;">Jml Sampel Diawasi</th>
+                                                        <th style="width: 100px;">Jml OK</th>
+                                                        <th style="width: 150px;">Perkiraan Transport</th>
                                                         <th style="width: 50px;">Aksi</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="body_transport">
                                                     {{-- Baris akan ditambahkan via JavaScript --}}
                                                 </tbody>
-                                                @if ($jenis_kak != 'honor-mitra')
-                                                    <tfoot class="table-light fw-bold">
-                                                        <tr>
-                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                                                <td colspan="8" class="text-end">TOTAL ESTIMASI BIAYA
-                                                                    TRANSPORT:</td>
-                                                            @elseif ($jenis_kak == 'pemanggilan-konsultasi')
-                                                                <td colspan="5" class="text-end">TOTAL ESTIMASI BIAYA
-                                                                    PERJALANAN DINAS:</td>
-                                                            @elseif($jenis_kak == 'honor-inda')
-                                                                <td colspan="2" class="text-end">TOTAL ESTIMASI BIAYA
-                                                                    HONOR INDA:</td>
-                                                            @endif
-
-                                                            <td>
-                                                                <input type="text" id="grand_total_transport"
-                                                                    class="form-control fw-bold text-end" readonly
-                                                                    value="0">
-                                                            </td>
-                                                            <td></td>
-                                                        </tr>
-                                                    </tfoot>
-                                                @endif
+                                                <tfoot class="table-light fw-bold">
+                                                    <tr>
+                                                        <td colspan="8" class="text-end">TOTAL ESTIMASI BIAYA
+                                                            TRANSPORT:</td>
+                                                        <td>
+                                                            <input type="text" id="grand_total_transport"
+                                                                class="form-control fw-bold text-end" readonly
+                                                                value="0">
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tfoot>
                                             </table>
 
                                             <div class="mt-2">
@@ -582,21 +462,10 @@
                                                     id="btn_tambah_pegawai">
                                                     <i class="fa fa-user-plus"></i> Tambah Pegawai
                                                 </button>
-                                                @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                                    <button type="button" class="btn btn-warning btn-sm"
-                                                        id="btn_tambah_mitra">
-                                                        <i class="fa fa-users"></i> Tambah Mitra
-                                                    </button>
-                                                @elseif($jenis_kak == 'honor-mitra')
-                                                    <button type="button" class="btn btn-warning btn-sm"
-                                                        id="btn_tambah_mitra">
-                                                        <i class="fa fa-users"></i> Tambah Mitra Dengan Pengawas Organik
-                                                    </button>
-                                                    <button type="button" class="btn btn-warning btn-sm"
-                                                        id="btn_tambah_mitra2">
-                                                        <i class="fa fa-users"></i> Tambah Mitra Dengan Pengawas Mitra
-                                                    </button>
-                                                @endif
+                                                <button type="button" class="btn btn-warning btn-sm"
+                                                    id="btn_tambah_mitra">
+                                                    <i class="fa fa-users"></i> Tambah Mitra
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -626,27 +495,23 @@
                                 <hr />
 
                                 <div class="row">
-                                    @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                        <div class="col-md-4">
-                                            <div
-                                                class="form-group  {{ $errors->has('kak6_pembiayaan') ? 'has-error has-feedback' : '' }}">
-                                                <label for="kak6_pembiayaan">Pembiayaan digunakan untuk transport
-                                                    ...</label>
-                                                <input type="text" class="form-control" name="kak6_pembiayaan"
-                                                    id="kak6_pembiayaan" value="{{ old('kak6_pembiayaan') }}" />
-                                                @if ($errors->has('kak6_pembiayaan'))
-                                                    <small
-                                                        class="form-text text-muted">{{ $errors->first('kak6_pembiayaan') }}</small>
-                                                @else
-                                                    <small class="form-text text-muted">
-                                                        contoh pengisian: pengawasan, pendataan, responden roleplaying,
-                                                        peserta
-                                                        pembinaan
-                                                    </small>
-                                                @endif
-                                            </div>
+                                    <div class="col-md-4">
+                                        <div
+                                            class="form-group  {{ $errors->has('kak6_pembiayaan') ? 'has-error has-feedback' : '' }}">
+                                            <label for="kak6_pembiayaan">Pembiayaan digunakan untuk transport ...</label>
+                                            <input type="text" class="form-control" name="kak6_pembiayaan"
+                                                id="kak6_pembiayaan" value="{{ old('kak6_pembiayaan') }}" />
+                                            @if ($errors->has('kak6_pembiayaan'))
+                                                <small
+                                                    class="form-text text-muted">{{ $errors->first('kak6_pembiayaan') }}</small>
+                                            @else
+                                                <small class="form-text text-muted">
+                                                    contoh pengisian: pengawasan, pendataan, responden roleplaying, peserta
+                                                    pembinaan
+                                                </small>
+                                            @endif
                                         </div>
-                                    @endif
+                                    </div>
 
                                     <div class="col-md-4">
                                         <div
@@ -673,10 +538,6 @@
                                             @if ($errors->has('kak8_tgl'))
                                                 <small
                                                     class="form-text text-muted">{{ $errors->first('kak8_tgl') }}</small>
-                                            @else
-                                                <small class="form-text text-muted">
-                                                    format bulan/tanggal/tahun
-                                                </small>
                                             @endif
                                         </div>
                                     </div>
@@ -723,35 +584,10 @@
                                                             class="form-text text-muted">{{ $errors->first('judul_kak') }}</small>
                                                     @else
                                                         <small class="form-text text-muted">
-                                                            @if ($jenis_kak == 'translok-biasa')
-                                                                petunjuk pengisian: TRANSPORT LOKAL DI BAWAH 8 JAM
-                                                                [ORGANIK/MITRA] [SUPERVISI/PENGAWASAN/PENDATAAN]
-                                                                [UPDATING/PENDATAAN] [nama_kegiatan] TAHUN 2026 BPS
-                                                                KABUPATEN
-                                                                SIMEULUE TAHUN ANGGARAN 2026
-                                                            @elseif ($jenis_kak == 'translok-8jam')
-                                                                petunjuk pengisian: TRANSPORT LOKAL DI ATAS 8 JAM
-                                                                [ORGANIK/MITRA] [SUPERVISI/PENGAWASAN/PENDATAAN]
-                                                                [UPDATING/PENDATAAN] [nama_kegiatan] TAHUN 2026 BPS
-                                                                KABUPATEN
-                                                                SIMEULUE TAHUN ANGGARAN 2026
-                                                            @elseif ($jenis_kak == 'pemanggilan-konsultasi')
-                                                                petunjuk pengisian: PERJALANAN DINAS DALAM RANGKA
-                                                                [KONSULTASI/PEMANGGILAN] KE [tujuan] TAHUN 2026 BPS
-                                                                KABUPATEN
-                                                                SIMEULUE TAHUN ANGGARAN 2026
-                                                            @elseif($jenis_kak == 'honor-inda')
-                                                                petunjuk pengisian: HONOR INSTRUKTUR DAERAH (INDA)
-                                                                [nama_kegiatan]TAHUN 2026 BPS
-                                                                KABUPATEN
-                                                                SIMEULUE TAHUN ANGGARAN 2026
-                                                            @elseif($jenis_kak == 'honor-mitra')
-                                                                petunjuk pengisian: HONOR PETUGAS PEMUTAKHIRAN DAN PENDATAAN
-                                                                [nama_kegiatan] TAHUN 2026
-                                                                BPS
-                                                                KABUPATEN
-                                                                SIMEULUE TAHUN ANGGARAN 2026
-                                                            @endif
+                                                            petunjuk pengisian: TRANSPORT LOKAL DI ATAS 8 JAM
+                                                            [ORGANIK/MITRA] [SUPERVISI/PENGAWASAN/PENDATAAN]
+                                                            [UPDATING/PENDATAAN] [nama_kegiatan] TAHUN 2026 BPS KABUPATEN
+                                                            SIMEULUE TAHUN ANGGARAN 2026
                                                         </small>
                                                     @endif
                                                 </div>
@@ -797,20 +633,11 @@
                 closeOnSelect: false,
             });
 
-            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                $('#kak2_tujuan').select2({
-                    theme: "bootstrap-5",
-                    width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ?
-                        '100%' : 'style',
-                    placeholder: $(this).data('placeholder'),
-                    closeOnSelect: true,
-                });
-            @endif
-            $('#filter_sbks,#kak6_program, #kak6_aktivitas, #kak6_kro, #kak6_ro, #kak6_komponen, #kak6_sub_komponen, #kak6_akun, #kak2_maksud')
+            $('#filter_sbks,#kak6_program, #kak6_aktivitas, #kak6_kro, #kak6_ro, #kak6_komponen, #kak6_sub_komponen, #kak6_akun, #kak2_maksud, #kak2_tujuan')
                 .select2({
                     theme: "bootstrap-5",
-                    width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ?
-                        '100%' : 'style',
+                    width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' :
+                        'style',
                     placeholder: $(this).data('placeholder'),
                     closeOnSelect: true,
                 });
@@ -818,15 +645,12 @@
             $('#kak2_maksud').on('change',
                 function() {
                     var kode_maksud = $('#kak2_maksud').val();
-                    @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                        if (kode_maksud == 'pengawasan' || kode_maksud == 'supervisi') {
-                            $('#label_kak3_target').html('Mitra yang diawasi ada sejumlah');
-                        } else {
-                            $('#label_kak3_target').html('Sampel yang didata ada sejumlah');
-                        }
-
-                        $('#kak6_pembiayaan').val(kode_maksud);
-                    @endif
+                    if (kode_maksud == 'pengawasan' || kode_maksud == 'supervisi') {
+                        $('#label_kak3_target').html('Mitra yang diawasi ada sejumlah');
+                    } else {
+                        $('#label_kak3_target').html('Sampel yang didata ada sejumlah');
+                    }
+                    $('#kak6_pembiayaan').val(kode_maksud);
                 });
 
             $('#kak6_program').on('change',
@@ -1187,42 +1011,20 @@
                 var nama_kegiatan = $('#filter_sbks').val();
                 var maksud = $('#kak2_maksud').val();
                 var tujuan = $('#kak2_tujuan').val();
-                var singkatan_resmi = $('#singkatan_resmi').val();
 
-                @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || $jenis_kak == 'pemanggilan-konsultasi')
-                    if (jenis_kegiatan && nama_kegiatan && maksud && tujuan) {
-                        @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                if (jenis_kegiatan && nama_kegiatan && maksud && tujuan) {
 
-                            if (maksud == 'pendataan') {
-                                return 'TRANSPORT LOKAL DI BAWAH 8 JAM ' + tujuan.toUpperCase() + ' ' +
-                                    maksud.toUpperCase() + ' ' + nama_kegiatan.toUpperCase() +
-                                    ' TAHUN 2026 BPS KABUPATEN SIMEULUE TAHUN ANGGARAN 2026 ';
-                            } else {
-                                return 'TRANSPORT LOKAL DI BAWAH 8 JAM ' + tujuan.toUpperCase() + ' ' +
-                                    maksud.toUpperCase() + ' ' +
-                                    jenis_kegiatan.toUpperCase() + ' ' + nama_kegiatan.toUpperCase() +
-                                    ' TAHUN 2026 BPS KABUPATEN SIMEULUE TAHUN ANGGARAN 2026 ';
-                            }
-                        @elseif ($jenis_kak == 'pemanggilan-konsultasi')
-                            return 'PERJALANAN DINAS DALAM RANGKA ' + maksud.toUpperCase() + ' KE ' +
-                                tujuan.toUpperCase() + ' TAHUN 2026 BPS KABUPATEN SIMEULUE TAHUN ANGGARAN 2026 ';
-                        @endif
-                    };
-                @else
-
-                    if (nama_kegiatan || singkatan_resmi) {
-                        @if ($jenis_kak == 'honor-inda')
-                            return 'HONOR INSTRUKTUR DAERAH (INDA) ' + (nama_kegiatan ?? singkatan_resmi)
-                                .toUpperCase() +
-                                ' TAHUN 2026 BPS KABUPATEN SIMEULUE TAHUN ANGGARAN 2026 ';
-                        @elseif ($jenis_kak == 'honor-mitra')
-                            return 'HONOR PETUGAS PEMUTAKHIRAN DAN PENDATAAN LAPANGAN ' + (nama_kegiatan ??
-                                    singkatan_resmi)
-                                .toUpperCase() +
-                                ' TAHUN 2026 BPS KABUPATEN SIMEULUE TAHUN ANGGARAN 2026 ';
-                        @endif
+                    if (maksud == 'pendataan') {
+                        return 'TRANSPORT LOKAL DI ATAS 8 JAM ' + tujuan.toUpperCase() + ' ' +
+                            maksud.toUpperCase() + ' ' + nama_kegiatan.toUpperCase() +
+                            ' TAHUN 2026 BPS KABUPATEN SIMEULUE TAHUN ANGGARAN 2026 ';
+                    } else {
+                        return 'TRANSPORT LOKAL DI ATAS 8 JAM ' + tujuan.toUpperCase() + ' ' +
+                            maksud.toUpperCase() + ' ' +
+                            jenis_kegiatan.toUpperCase() + ' ' + nama_kegiatan.toUpperCase() +
+                            ' TAHUN 2026 BPS KABUPATEN SIMEULUE TAHUN ANGGARAN 2026 ';
                     }
-                @endif
+                };
                 return '';
             }
 
@@ -1235,8 +1037,7 @@
                         }));
                 });
 
-            $('#filter_sbks, input[name="jenis_kegiatan"], #kak2_maksud, #kak2_tujuan, #singkatan_resmi').on(
-                'change',
+            $('#filter_sbks, input[name="jenis_kegiatan"], #kak2_maksud, #kak2_tujuan').on('change',
                 function() {
                     var judulKAK = generateJudulKAK();
                     $('#judul_kak').val(judulKAK);
@@ -1307,7 +1108,7 @@
         }
 
         // --- 1. Fungsi Tambah Baris (Updated: Satu Array) ---
-        function tambahBarisTransport(tipe, pengawas = null) {
+        function tambahBarisTransport(tipe) {
             rowIndex++;
 
             var optionsHtml, badge;
@@ -1321,12 +1122,11 @@
             }
 
             var templateOpsiMitra = $('#template_opsi_mitra').html();
-            var templateOpsiPegawai = $('#template_opsi_pegawai').html();
 
             // Ambil opsi kecamatan
             var optionsKecamatan = getOptionsKecamatan();
-            @if ($jenis_kak == 'translok-8jam' || $jenis_kak == 'translok-biasa')
-                var tr = `
+
+            var tr = `
                     <tr>
                         <td>
                             ${badge}
@@ -1372,192 +1172,6 @@
                         </td>
                     </tr>
                 `;
-            @elseif ($jenis_kak == 'pemanggilan-konsultasi')
-                var tgl_mulai = $('#tgl_mulai').val();
-                var tgl_selesai = $('#tgl_selesai').val();
-                var tujuan = $('#kak2_tujuan').val();
-                var tr = `
-                    <tr>
-                        <td>
-                            ${badge}
-                            <select name="peserta_id[]" class="form-select select2-dinamis input-nama" id="row_${rowIndex}" required>
-                                ${optionsHtml}
-                            </select>
-                            
-                            <input type="hidden" name="tipe_peserta[]" value="${tipe}">
-                        </td>
-                        
-                        <td>
-                            <input type="text" name="nip[]" class="form-control form-control-sm text-center input-nip" readonly placeholder="-">
-                        </td>
-                        <td>
-                            <input type="text" name="nama_sls[]" class="form-control form-control-sm" value="${tujuan}">
-                        </td>
-                        <td>
-                            <input type="date" name="lampiran_tgl_mulai[]" class="form-control form-control-sm" value="${tgl_mulai}">
-                            <small class="text-muted">bulan/tanggal/tahun</small>
-                        </td>
-                        
-                        <td>
-                            <input type="date" name="lampiran_tgl_selesai[]" class="form-control form-control-sm" value="${tgl_selesai}">
-                            <small class="text-muted">bulan/tanggal/tahun</small>
-                        </td>
-                        
-                        <td>
-                            <input type="text" name="transport_bayar[]" class="form-control form-control-sm text-end input-transport input-mask-rupiah" placeholder="0">
-                        </td>
-                        <td class="text-center align-middle">
-                            <button type="button" class="btn btn-danger btn-sm hapus-baris">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            @elseif ($jenis_kak == 'honor-inda')
-                var tr = `
-                    <tr>
-                        <td>
-                            ${badge}
-                            <select name="peserta_id[]" class="form-select select2-dinamis input-nama" id="row_${rowIndex}" required>
-                                ${optionsHtml}
-                            </select>
-                            
-                            <input type="hidden" name="tipe_peserta[]" value="${tipe}">
-                        </td>
-                        
-                        <td>
-                            <input type="text" name="nip[]" class="form-control form-control-sm text-center input-nip" readonly placeholder="-">
-                        </td>
-                        <td>
-                            <input type="number" name="transport_bayar[]" class="form-control form-control-sm text-end input-transport input-mask-rupiah" placeholder="0">
-                        </td>
-                        <td class="text-center align-middle">
-                            <button type="button" class="btn btn-danger btn-sm hapus-baris">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            @elseif ($jenis_kak == 'honor-mitra')
-                var tgl_mulai = $('#tgl_mulai').val();
-                var tgl_selesai = $('#tgl_selesai').val();
-
-                if (!pengawas) {
-                    var tr = `
-                    <tr>
-                        <td>
-                            ${badge}
-                            <select name="peserta_id[]" class="form-select select2-dinamis input-nama" id="row_${rowIndex}" required>
-                                ${optionsHtml}
-                            </select>
-                            
-                            <input type="hidden" name="tipe_peserta[]" value="${tipe}">
-                        </td>
-                        
-                        <td>
-                            <input type="text" name="nip[]" class="form-control form-control-sm text-center input-nip" readonly placeholder="-">
-                        </td>
-                        <td>
-                            <select name="pcl_or_pml[]" class="form-select form-select-sm  select2-dinamis form-select-mitra">
-                                <option value="">- Pilih Salah Satu -</option>
-                                <option value="0">PCL</option>
-                                <option value="1">PML</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select name="kecamatan_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
-                                ${optionsKecamatan}
-                            </select>
-                        </td>
-                        <td>
-                            <input type="text" name="nama_sls[]" class="form-control form-control-sm" >
-                        </td>
-                        <td>
-                            <input type="number" name="jml_sampel_pcl[]" class="form-control form-control-sm text-center" min="0" value="0">
-
-                            <input type="hidden" name="tipe_pengawas[]" value="organik">
-                        </td>
-
-                        <td>
-                            <select name="pengawas_id[]" class="form-select form-select-sm  select2-dinamis form-select-mitra">
-                                ${templateOpsiPegawai}
-                            </select>
-                        </td>
-                        <td>
-                            <input type="date" name="lampiran_tgl_mulai[]" class="form-control form-control-sm" value="${tgl_mulai}">
-                        </td>
-                        
-                        <td>
-                            <input type="date" name="lampiran_tgl_selesai[]" class="form-control form-control-sm" value="${tgl_selesai}">
-                        </td>
-                        <td class="text-center align-middle">
-                            <button type="button" class="btn btn-danger btn-sm hapus-baris">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </td>
-                        
-                    </tr>
-                `;
-                } else {
-                    var tr = `
-                    <tr>
-                        <td>
-                            ${badge}
-                            <select name="peserta_id[]" class="form-select select2-dinamis input-nama" id="row_${rowIndex}" required>
-                                ${optionsHtml}
-                            </select>
-                            
-                            <input type="hidden" name="tipe_peserta[]" value="${tipe}">
-                        </td>
-                        
-                        <td>
-                            <input type="text" name="nip[]" class="form-control form-control-sm text-center input-nip" readonly placeholder="-">
-                        </td>
-                        <td>
-                            <select name="pcl_or_pml[]" class="form-select form-select-sm  select2-dinamis form-select-mitra">
-                                <option value="">- Pilih Salah Satu -</option>
-                                <option value="0">PCL</option>
-                                <option value="1">PML</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select name="kecamatan_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
-                                ${optionsKecamatan}
-                            </select>
-                        </td>
-                        <td>
-                            <input type="text" name="nama_sls[]" class="form-control form-control-sm" >
-                        </td>
-                        <td>
-                            <input type="number" name="jml_sampel_pcl[]" class="form-control form-control-sm text-center" min="0" value="0">
-
-                            <input type="hidden" name="tipe_pengawas[]" value="mitra">
-                        </td>
-
-                        <td>
-                            <select name="pengawas_id[]" class="form-select form-select-sm  select2-dinamis form-select-mitra">
-                                ${templateOpsiMitra}
-                            </select>
-                        </td>
-                        <td>
-                            <input type="date" name="lampiran_tgl_mulai[]" class="form-control form-control-sm" value="${tgl_mulai}">
-                            <small class="text-muted">bulan/tanggal/tahun</small>
-                        </td>
-                        
-                        <td>
-                            <input type="date" name="lampiran_tgl_selesai[]" class="form-control form-control-sm" value="${tgl_selesai}">
-                            <small class="text-muted">bulan/tanggal/tahun</small>
-                        </td>
-                        <td class="text-center align-middle">
-                            <button type="button" class="btn btn-danger btn-sm hapus-baris">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </td>
-                        
-                    </tr>
-                `;
-                }
-            @endif
 
             $('#body_transport').append(tr);
 
@@ -1574,9 +1188,6 @@
         });
         $('#btn_tambah_mitra').click(function() {
             tambahBarisTransport('mitra');
-        });
-        $('#btn_tambah_mitra2').click(function() {
-            tambahBarisTransport('mitra', 'mitra');
         });
 
         // --- 3. Event Listener Hapus ---

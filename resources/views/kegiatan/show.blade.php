@@ -1,374 +1,898 @@
 @extends('layouts.app')
 
+@section('meta')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ asset('select2/css/select2.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('select2/css/select2-bootstrap-5-theme.min.css') }}" />
+@endsection
+
 @section('content')
     <div class="container">
         <div class="page-inner">
-            <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-                <div>
-                    <h3 class="fw-bold mb-3">
-                        {{ strlen($kegiatan->nama) > 50 ? substr($kegiatan->nama, 0, 50) . '...' : $kegiatan->nama }}</h3>
-                    {{-- <h6 class="op-7 mb-2">Rincian kegiatan </h6> --}}
-                </div>
-                <div class="ms-md-auto py-2 py-md-0">
-                    @if (Auth::user()->role == 'Admin' ||
-                            Auth::user()->id == $kegiatan->id_pjk ||
-                            (Auth::user()->role == 'Ketua Tim' && Auth::user()->tim == $kegiatan->tim))
-                        <!-- Button to trigger modal -->
-                        <button type="button" class="btn btn-success btn-round mb-3" data-bs-toggle="modal"
-                            data-bs-target="#importMitraHonorModal">
-                            <i class="fa fa-upload"></i> Import
-                        </button>
+            <div class="row">
+                <div class="col-md-12">
+                    {{-- PERUBAHAN 1: Action ke Update dan Method PUT --}}
+                    <form action="{{ route('kegiatan.update', $kegiatan->id) }}" method="POST">
+                        @csrf
 
-                        <a href="{{ url('kegiatan/edit', $kegiatan->id) }}" class="btn btn-primary btn-round mb-3"><i
-                                class="fa fa-edit"></i> Edit </a>
-                        <a href="{{ url('kegiatan/estimasi-honor', $kegiatan->id) }}"
-                            class="btn btn-primary btn-round mb-3"><i class="fa fa-edit"></i> Perbarui Estimasi Honor</a>
+                        <input type="hidden" name="jenis_kak" value="translok-biasa" />
 
-                        <!-- Modal Import Mitra dan Honor -->
-                        <div class="modal fade" id="importMitraHonorModal" tabindex="-1"
-                            aria-labelledby="importMitraHonorModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="importMitraHonorModalLabel">Import Mitra dan Honor</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form action="{{ route('kegiatan.import-mitra-dan-honor', $kegiatan->id) }}"
-                                            method="POST" enctype="multipart/form-data">
-                                            @csrf
-                                            <input type="hidden" name="kegiatan_id" value="{{ $kegiatan->id }}">
-                                            <div class="form-group mb-3">
-                                                <label for="file">Pilih File (File harus bertipe Excel
-                                                    <strong>xlsx</strong>)</label>
-                                                <input type="file" class="form-control" name="file" id="file"
-                                                    required>
+                        <div class="card">
+                            <div class="card-header">
+                                @if ($jenis_kak == 'translok-biasa')
+                                    <div class="card-title">Rincian KAK Translok Biasa</div>
+                                @elseif ($jenis_kak == 'translok-8jam')
+                                    <div class="card-title">Rincian KAK Translok 8 Jam</div>
+                                @elseif ($jenis_kak == 'pemanggilan-konsultasi')
+                                    <div class="card-title">Rincian KAK Pemanggilan Konsultasi</div>
+                                @elseif ($jenis_kak == 'honor-mitra')
+                                    <div class="card-title">Rincian KAK Honor Mitra</div>
+                                @elseif ($jenis_kak == 'honor-inda')
+                                    <div class="card-title">Rincian KAK Honor Inda</div>
+                                @endif
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-sm-3">
+                                                    <p>NAMA SINGKATAN RESMI DARI SURVEI YANG DIPILIH</p>
+                                                </div>
+                                                <div class="col-sm-9">
+                                                    <input type="text" name="singkatan_resmi" id="singkatan_resmi"
+                                                        class="form-control" readonly
+                                                        value="{{ old('singkatan_resmi', $kegiatan->singkatan_resmi) }}" />
+                                                    @if ($errors->has('singkatan_resmi'))
+                                                        <small
+                                                            class="form-text text-muted">{{ $errors->first('singkatan_resmi') }}</small>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            <button type="submit" class="btn btn-success"> <i class="fa fa-upload"></i>
-                                                Import</button>
-                                            <a href="{{ route('kegiatan.export-mitra-id') }}" class="btn btn-primary "
-                                                rel="noopener noreferrer">
-                                                <i class="fa fa-download"></i> Export Template
-                                            </a>
-                                        </form>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- Modal Export Translok -->
-                        <div class="modal fade" id="exportTranslok" tabindex="-1" aria-labelledby="exportTranslokLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exportTranslokLabel">Export Translok</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-sm-3">
+                                                    <p>1. LATAR BELAKANG</p>
+                                                </div>
+                                                <div class="col-sm-9">
+                                                    <textarea name="kak1_latar_belakang" id="kak1_latar_belakang" rows="10" class="form-control" readonly
+                                                        placeholder="Masukkan latar belakang di sini">{{ old('kak1_latar_belakang', $kegiatan->kak1_latar_belakang) }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="modal-body">
-                                        <form action="{{ route('kegiatan.export-translok', $kegiatan->id) }}"
-                                            method="POST">
-                                            @csrf
-                                            <input type="hidden" name="kegiatan_id" value="{{ $kegiatan->id }}">
-                                            <div class="form-group mb-3">
-                                                <div class="row">
-                                                    <div class="col-6"><label for="tujuan">Tujuan</label></div>
-                                                    <div class="col-6">
-                                                        <select name="tujuan" id="tujuan" class="form-control mb-3">
-                                                            <option value="-- Pilih Tujuan --" selected disabled>-- Pilih
-                                                                Tujuan --</option>
-                                                            <option value="010">[010] Teupah Selatan</option>
-                                                            <option value="020">[020] Simeulue Timur</option>
-                                                            <option value="021">[021] Teupah Barat</option>
-                                                            <option value="022">[022] Teupah Tengah</option>
-                                                            <option value="030">[030] Simeulue Tengah</option>
-                                                            <option value="031">[031] Teluk Dalam</option>
-                                                            <option value="032">[032] Simeulue Cut</option>
-                                                            <option value="040">[040] Salang</option>
-                                                            <option value="050">[050] Simeulue Barat</option>
-                                                            <option value="051">[051] Alafan</option>
+                                </div>
+
+                                <hr />
+
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <p>2. MAKSUD DAN TUJUAN</p>
+                                            <div class="row">
+                                                <div class="col">
+                                                    @if ($jenis_kak != 'honor-inda' && $jenis_kak != 'honor-mitra')
+                                                        <label for="kak2_maksud">Maksud dari pengadaan ini adalah
+                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                                untuk pembayaran transport lokal
+                                                            @endif
+                                                        </label>
+
+                                                        <select name="kak2_maksud" id="kak2_maksud" class="form-control"
+                                                            disabled>
+                                                            <option value="">( Pilih salah satu )</option>
+                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                                <option value="pengawasan"
+                                                                    {{ old('kak2_maksud', $kegiatan->kak2_maksud) == 'pengawasan' ? 'selected' : '' }}>
+                                                                    Pengawasan</option>
+                                                                <option value="supervisi"
+                                                                    {{ old('kak2_maksud', $kegiatan->kak2_maksud) == 'supervisi' ? 'selected' : '' }}>
+                                                                    Supervisi</option>
+                                                                <option value="pendataan"
+                                                                    {{ old('kak2_maksud', $kegiatan->kak2_maksud) == 'pendataan' ? 'selected' : '' }}>
+                                                                    Pendataan</option>
+                                                            @elseif($jenis_kak == 'pemanggilan-konsultasi')
+                                                                <option value="konsultasi"
+                                                                    {{ old('kak2_maksud', $kegiatan->kak2_maksud) == 'konsultasi' ? 'selected' : '' }}>
+                                                                    Konsultasi</option>
+                                                                <option value="pemanggilan"
+                                                                    {{ old('kak2_maksud', $kegiatan->kak2_maksud) == 'pemanggilan' ? 'selected' : '' }}>
+                                                                    Pemanggilan</option>
+                                                            @endif
+                                                        </select>
+                                                    @endif
+                                                </div>
+                                                <div class="col">
+                                                    @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                        <label for="kak2_tujuan">Tujuan pengadaan ini adalah untuk
+                                                            pembayaran
+                                                            transport lokal
+                                                        </label>
+                                                        <select name="kak2_tujuan" id="kak2_tujuan" class="form-control"
+                                                            disabled>
+                                                            <option value="">( Pilih salah satu )</option>
+                                                            <option value="mitra"
+                                                                {{ old('kak2_tujuan', $kegiatan->kak2_tujuan) == 'mitra' ? 'selected' : '' }}>
+                                                                Mitra</option>
+                                                            <option value="organik"
+                                                                {{ old('kak2_tujuan', $kegiatan->kak2_tujuan) == 'organik' ? 'selected' : '' }}>
+                                                                Organik</option>
+                                                        </select>
+                                                    @elseif($jenis_kak == 'pemanggilan-konsultasi')
+                                                        <label for="kak2_tujuan">Tujuan pengadaan ini adalah
+                                                        </label>
+                                                        <input type="text" name="kak2_tujuan" id="kak2_tujuan"
+                                                            class="form-control"
+                                                            value="{{ old('kak2_tujuan', $kegiatan->kak2_tujuan) }}"
+                                                            readonly />
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <p>3. TARGET/SASARAN</p>
+                                            <div class="row" id="kak3_target_wrap">
+                                                <div class="col">
+                                                    @if ($jenis_kak != 'honor-inda' && $jenis_kak != 'honor-mitra')
+                                                        <label for="kak3_target" id="label_kak3_target">
+                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                                Mitra/Sampel yang
+                                                                diawasi/didata sejumlah
+                                                            @elseif($jenis_kak == 'pemanggilan-konsultasi')
+                                                                Jumlah pegawai yang melakukan perjalanan Dinas
+                                                            @endif
+                                                        </label>
+                                                        <input type="number" name="kak3_target" id="kak3_target"
+                                                            class="form-control" readonly
+                                                            value="{{ old('kak3_target', $kegiatan->kak3_target) }}" />
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <p>4. PELAKSANA PENGADAAN BARANG/JASA</p>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <label for="tgl_mulai">Kegiatan dimulai dari tanggal</label>
+                                                            <input type="date" class="form-control" id="tgl_mulai"
+                                                                name="tgl_mulai" readonly
+                                                                value="{{ old('tgl_mulai', $kegiatan->tgl_mulai) }}" />
+                                                        </div>
+                                                        <div class="col">
+                                                            <label for="tgl_selesai">sampai tanggal</label>
+                                                            <input type="date" class="form-control" id="tgl_selesai"
+                                                                name="tgl_selesai" readonly
+                                                                value="{{ old('tgl_selesai', $kegiatan->tgl_selesai) }}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <label for="kak4_pjk">dengan penanggung jawab kegiatan </label>
+                                                    <select class="form-select" id="kak4_pjk" name="kak4_pjk" disabled>
+                                                        <option value="">(Pilih salah satu)</option>
+                                                        <option value="11011"
+                                                            {{ old('kak4_pjk') ? (old('kak4_pjk') == '11011' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11011' ? 'selected' : '') }}>
+                                                            Umum</option>
+                                                        <option value="11012"
+                                                            {{ old('kak4_pjk') ? (old('kak4_pjk') == '11012' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11012' ? 'selected' : '') }}>
+                                                            Statistik Sosial</option>
+                                                        <option value="11013"
+                                                            {{ old('kak4_pjk') ? (old('kak4_pjk') == '11013' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11013' ? 'selected' : '') }}>
+                                                            Statistik Ekonomi Produksi</option>
+                                                        <option value="11014"
+                                                            {{ old('kak4_pjk') ? (old('kak4_pjk') == '11014' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11014' ? 'selected' : '') }}>
+                                                            Statistik Ekonomi Distribusi</option>
+                                                        <option value="11015"
+                                                            {{ old('kak4_pjk') ? (old('kak4_pjk') == '11015' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11015' ? 'selected' : '') }}>
+                                                            Neraca dan Analisis Statistik</option>
+                                                        <option value="11016"
+                                                            {{ old('kak4_pjk') ? (old('kak4_pjk') == '11016' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11016' ? 'selected' : '') }}>
+                                                            TI dan Pengolahan</option>
+                                                        <option value="11017"
+                                                            {{ old('kak4_pjk') ? (old('kak4_pjk') == '11017' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11017' ? 'selected' : '') }}>
+                                                            Diseminasi, Publisitas, dan Humas</option>
+                                                        <option value="11018"
+                                                            {{ old('kak4_pjk') ? (old('kak4_pjk') == '11018' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11018' ? 'selected' : '') }}>
+                                                            Pembinaan Statistik Sektoral</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <p>5. SPESIFIKASI PENGADAAN BARANG/JASA</p>
+                                            <p>
+                                                @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                    Transport lokal sesuai SK Kepala BPS Kabupaten Simeulue nomor XX Tahun
+                                                    2025
+                                                    tanggal DD-MM-YYYY tentang Penetapan Rate Biaya Transport dari Kabupaten
+                                                    Simeulue Ke Kecamatan Tahun 2026
+                                                @elseif ($jenis_kak == 'pemanggilan-konsultasi')
+                                                    Perjalanan dinas ini sesuai dengan PMK Nomor 32 Tahun 2025 tanggal 14
+                                                    Mei
+                                                    2025 tetang Standar biaya Masukan (SBM) Tahun Anggaran 2026
+                                                @elseif($jenis_kak == 'honor-inda')
+                                                    Pembayaran sesuai dengan SK Kepala BPS Kabupaten Simeulue Tanggal 5
+                                                    November 2025 nomor XX Tahun 2025 tentang xxxxxxxxxxx
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <p>6. SUMBER DANA DAN PERKIRAAN BIAYA</p>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    {{-- 1. PROGRAM --}}
+                                                    <div class="mb-2">
+                                                        <label for="kak6_program">Program</label>
+                                                        <select name="kak6_program" id="kak6_program"
+                                                            class="form-control" disabled>
+                                                            <option value="">(Pilih Program)</option>
+                                                            @foreach ($pok_awals as $item)
+                                                                <option value="{{ $item->id }}"
+                                                                    {{ $kegiatan->kak6_program == $item->id ? 'selected' : '' }}>
+                                                                    {{ $item->kode_program }} - {{ $item->uraian }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+
+                                                    {{-- 2. AKTIVITAS --}}
+                                                    <div class="mb-2">
+                                                        <label for="kak6_aktivitas">Aktivitas</label>
+                                                        <select name="kak6_aktivitas" id="kak6_aktivitas"
+                                                            class="form-control" disabled>
+                                                            @if ($kegiatan->pokAktivitas)
+                                                                <option value="{{ $kegiatan->kak6_aktivitas }}" selected>
+                                                                    {{ $kegiatan->pokAktivitas->kode_aktivitas }} -
+                                                                    {{ $kegiatan->pokAktivitas->uraian }}
+                                                                </option>
+                                                            @else
+                                                                <option value="">(Pilih Aktivitas)</option>
+                                                            @endif
+                                                        </select>
+                                                    </div>
+
+                                                    {{-- 3. KRO --}}
+                                                    <div class="mb-2">
+                                                        <label for="kak6_kro">Klasifikasi Rincian Output</label>
+                                                        <select name="kak6_kro" id="kak6_kro" class="form-control"
+                                                            disabled>
+                                                            @if ($kegiatan->pokKro)
+                                                                <option value="{{ $kegiatan->kak6_kro }}" selected>
+                                                                    {{ $kegiatan->pokKro->kode_klasifikasi_rincian_output }}
+                                                                    - {{ $kegiatan->pokKro->uraian }}
+                                                                </option>
+                                                            @endif
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="row">
-                                                    <div class="col-6"><label for="tgl_mulai">Tanggal Mulai
-                                                            Tranlsok</label></div>
-                                                    <div class="col-6"><input type="date" class="form-control mb-3"
-                                                            name="tgl_mulai" id="tgl_mulai" required></div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-6"><label for="tgl_selesai">Tanggal Selesai
-                                                            Translok</label></div>
-                                                    <div class="col-6"><input type="date" class="form-control mb-3"
-                                                            name="tgl_selesai" id="tgl_selesai" required></div>
-                                                </div>
 
+                                                <div class="col-md-6">
+                                                    {{-- 4. RO --}}
+                                                    <div class="mb-2">
+                                                        <label for="kak6_ro">Rincian Output</label>
+                                                        <select name="kak6_ro" id="kak6_ro" class="form-control"
+                                                            disabled>
+                                                            @if ($kegiatan->pokRo)
+                                                                <option value="{{ $kegiatan->kak6_ro }}" selected>
+                                                                    {{ $kegiatan->pokRo->kode_rincian_output }} -
+                                                                    {{ $kegiatan->pokRo->uraian }}
+                                                                </option>
+                                                            @endif
+                                                        </select>
+                                                    </div>
+
+                                                    {{-- 5. KOMPONEN --}}
+                                                    <div class="mb-2">
+                                                        <label for="kak6_komponen">Klasifikasi Komponen</label>
+                                                        <select name="kak6_komponen" id="kak6_komponen"
+                                                            class="form-control" disabled>
+                                                            @if ($kegiatan->pokKomponen)
+                                                                <option value="{{ $kegiatan->kak6_komponen }}" selected>
+                                                                    {{ $kegiatan->pokKomponen->kode_komponen }} -
+                                                                    {{ $kegiatan->pokKomponen->uraian }}
+                                                                </option>
+                                                            @endif
+                                                        </select>
+                                                    </div>
+
+                                                    {{-- 6. SUB KOMPONEN --}}
+                                                    <div class="mb-2">
+                                                        <label for="kak6_sub_komponen">Klasifikasi Sub Komponen</label>
+                                                        <select name="kak6_sub_komponen" id="kak6_sub_komponen"
+                                                            class="form-control" disabled>
+                                                            @if ($kegiatan->pokSubKomponen)
+                                                                <option value="{{ $kegiatan->kak6_sub_komponen }}"
+                                                                    selected>
+                                                                    {{ $kegiatan->pokSubKomponen->kode_sub_komponen }} -
+                                                                    {{ $kegiatan->pokSubKomponen->uraian }}
+                                                                </option>
+                                                            @endif
+                                                        </select>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <button type="submit" class="btn btn-primary"> <i
-                                                    class="fa fa-download"></i> Export</button>
-                                        </form>
+
+                                            <div class="row mt-4">
+                                                <div class="col-12">
+                                                    <p>Rincian Akun Belanja</p>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-bordered table-striped"
+                                                            id="tabel_rincian_akun">
+                                                            <thead class="table-dark">
+                                                                <tr>
+                                                                    <th width="200px">Akun</th>
+                                                                    <th width="250px">Rincian / Detail</th>
+                                                                    <th width="80px">Volume</th>
+                                                                    <th width="200px">Satuan</th>
+                                                                    <th width="200px">Harga Satuan</th>
+                                                                    <th width="200px">Total</th>
+                                                                    <th width="50px">Aksi</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="body_rincian_akun">
+                                                                @foreach ($kegiatan->kegiatanRincian as $akun)
+                                                                    <tr>
+                                                                        <td>
+                                                                            <input type="hidden" name="akun_kode[]"
+                                                                                value="{{ $akun->akun_id }}">
+                                                                            <small>{{ $akun->pok->kode_akun . '-' . $akun->pok->uraian }}</small>
+                                                                        </td>
+                                                                        <td>
+                                                                            <textarea name="rincian_detail[]" class="form-control form-control-sm" rows="4" readonly required>{{ $akun->rincian }}</textarea>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="number" name="rincian_volume[]"
+                                                                                class="form-control form-control-sm hitung-total input-volume"
+                                                                                min="0" readonly
+                                                                                value="{{ $akun->vol }}" required>
+                                                                        </td>
+                                                                        <td>
+                                                                            <select class="form-select form-control-sm"
+                                                                                name="rincian_satuan[]" disabled>
+                                                                                @php $satuans = ['Dokumen','SLS','BS','Ruta','OK','OH','OB','OP','Segmen','EA','Responden','Pasar']; @endphp
+                                                                                <option value="">(Pilih)</option>
+                                                                                @foreach ($satuans as $s)
+                                                                                    <option value="{{ $s }}"
+                                                                                        {{ $akun->satuan == $s ? 'selected' : '' }}>
+                                                                                        {{ $s }}</option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="number" name="rincian_harga[]"
+                                                                                class="form-control form-control-sm hitung-total input-harga"
+                                                                                min="0" readonly
+                                                                                value="{{ $akun->harga_satuan }}"
+                                                                                required>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="number" name="rincian_total[]"
+                                                                                class="form-control form-control-sm input-subtotal"
+                                                                                readonly value="{{ $akun->jumlah }}">
+                                                                        </td>
+                                                                        <td class="text-center">
+                                                                            <button type="button"
+                                                                                class="btn btn-danger btn-sm hapus-baris"
+                                                                                disabled>
+                                                                                <i class="fa fa-trash"></i>
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                            <tfoot>
+                                                                <tr class="table-light">
+                                                                    <td colspan="2">
+                                                                        <select id="pilih_akun" class="form-control"
+                                                                            disabled>
+                                                                            <option value="">-- Pilih Sub Komponen
+                                                                                Dahulu --</option>
+                                                                        </select>
+                                                                    </td>
+                                                                    <td colspan="5">
+                                                                        <button type="button"
+                                                                            class="btn btn-primary btn-sm"
+                                                                            id="btn_tambah_akun" disabled>
+                                                                            <i class="fa fa-plus"></i> Tambah Baris Akun
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td colspan="5" class="text-end fw-bold">Grand
+                                                                        Total</td>
+                                                                    <td colspan="2">
+                                                                        <input type="text" id="grand_total"
+                                                                            class="form-control fw-bold" readonly
+                                                                            value="0">
+                                                                    </td>
+                                                                </tr>
+                                                            </tfoot>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    @endif
-                </div>
 
-            </div>
+                                <hr />
 
-            <div class="row">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Rincian Kegiatan</div>
-                        {{-- <div class="card-category">Card Category</div> --}}
-                    </div>
-                    <div class="card-body">
-                        <table class=" table table-responsive">
-                            <tbody>
-                                <tr>
-                                    <td width="40%">
-                                        <p>Nama</p>
-                                    </td>
-                                    <td>
-                                        <p>: {{ $kegiatan->nama }} </p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <p>Penanggung Jawab Kegiatan</p>
-                                    </td>
-                                    <td>
-                                        <p>: {{ $kegiatan->pjk->nama }} </p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <p>Tanggal Pelaksanaan</p>
-                                    </td>
-                                    <td>
-                                        <p>: {{ Carbon\Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d M Y') }}
-                                            -
-                                            {{ Carbon\Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d M Y') }}
-                                        </p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <p>Honor <strong>Pengawasan</strong></p>
-                                    </td>
-                                    <td>
-                                        <p>: Rp {{ number_format($kegiatan->honor_pengawasan, 0, ',', '.') }} per
-                                            {{ $kegiatan->satuan_honor_pengawasan }}</p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <p>Honor <strong>Pencacahan / Pengolahan</strong></p>
-                                    </td>
-                                    <td>
-                                        <p>: Rp {{ number_format($kegiatan->honor_pencacahan, 0, ',', '.') }} per
-                                            {{ $kegiatan->satuan_honor_pencacahan }}</p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <p>Progress</p>
-                                    </td>
-                                    <td>
-                                        <p>: {{ $kegiatan->progress }} %</p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2">
-                                        <a href="{{ route('kegiatan.export-mitra-dan-honor', $kegiatan->id) }}"
-                                            class="btn btn-primary btn-sm" rel="noopener noreferrer">
-                                            <i class="fa fa-download"></i> Export Honor untuk BOS
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-primary " data-bs-toggle="modal"
-                                            data-bs-target="#exportTranslok">
-                                            <i class="fa fa-download"></i> Export Translok untuk BOS
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <p>Rincian Biaya </p>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover align-middle"
+                                                id="tabel_transport" style="min-width: 1500px;">
+                                                <thead class="table-dark text-center">
+                                                    <tr>
+                                                        <th style="width: 250px;">Nama Pelaksana</th>
+                                                        <th style="width: 150px;">NIP / NIK</th>
+                                                        @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                            <th style="width: 150px;">Kecamatan Tujuan</th>
+                                                            <th style="width: 120px;">Tanggal Pelaksanaan</th>
+                                                            <th style="width: 200px;">Nama PCL yang Diawasi</th>
+                                                            <th style="width: 80px;">Jml Sampel PCL</th>
+                                                            <th style="width: 80px;">Jml Sampel Diawasi</th>
+                                                            <th style="width: 100px;">Jml OK</th>
+                                                            <th style="width: 150px;">Perkiraan Transport</th>
+                                                        @elseif ($jenis_kak == 'pemanggilan-konsultasi')
+                                                            <th style="width: 150px;">Tujuan Perjalanan Dinas</th>
+                                                            <th style="width: 120px">Tanggal Mulai</th>
+                                                            <th style="width: 120px">Tanggal Selesai</th>
+                                                            <th style="width: 150px;">Perkiraan Biaya Per Orang</th>
+                                                        @elseif($jenis_kak == 'honor-inda')
+                                                            <th style="width: 150px;">Honor per OJP</th>
+                                                        @elseif($jenis_kak == 'honor-mitra')
+                                                            <th style="width: 80px;">Tugas (PCL/PML)</th>
+                                                            <th style="width: 150px;">Kecamatan Tujuan</th>
+                                                            <th style="width: 150px;">Nama SLS</th>
+                                                            <th style="width: 80px;">Jml Sampel PCL</th>
+                                                            <th style="width: 200px;">Nama Pengawas</th>
+                                                            <th style="width: 120px">Tanggal Mulai</th>
+                                                            <th style="width: 120px">Tanggal Selesai</th>
+                                                        @endif
+                                                        <th style="width: 50px;">Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="body_transport">
+                                                    @foreach ($kegiatan->kegiatanLampiran as $idx => $t)
+                                                        <tr>
+                                                            <td>
+                                                                @if ($t->tipe_personil == 'pegawai')
+                                                                    <span class="badge bg-info text-dark mb-1">PNS</span>
+                                                                @else
+                                                                    <span
+                                                                        class="badge bg-warning text-dark mb-1">Mitra</span>
+                                                                @endif
 
-            <div class="row">
-                <div class="col-sm-6 col-md-3">
-                    {{-- <div class="card card-stats card-round">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-icon">
-                <div
-                  class="icon-big text-center icon-primary bubble-shadow-small"
-                >
-                  <i class="fas fa-users"></i>
-                </div>
-              </div>
-              <div class="col col-stats ms-3 ms-sm-0">
-                <div class="numbers">
-                  <p class="card-category">Jumlah Kegiatan Tahun Ini</p>
-                  <h4 class="card-title">{{$kegiatanTahunIni}}</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> --}}
-                </div>
-                <div class="col-sm-6 col-md-3">
-                </div>
-                <div class="col-sm-6 col-md-3">
-                </div>
-            </div>
-            <div class="row">
+                                                                <select name="peserta_id[]"
+                                                                    class="form-select select2-server-side input-nama"
+                                                                    id="row_db_{{ $idx }}" disabled required>
+                                                                    @if ($t->tipe_personil == 'pegawai')
+                                                                        @foreach ($pegawais as $p)
+                                                                            <option value="{{ $p->id }}"
+                                                                                data-nip="{{ $p->nip }}"
+                                                                                {{ $t->peserta_id == $p->id ? 'selected' : '' }}>
+                                                                                {{ $p->nama }}
+                                                                            </option>
+                                                                        @endforeach
+                                                                    @else
+                                                                        @foreach ($mitras as $m)
+                                                                            <option value="{{ $m->id }}"
+                                                                                data-nip="{{ $m->nik }}"
+                                                                                {{ $t->peserta_id == $m->id ? 'selected' : '' }}>
+                                                                                {{ $m->nama }}
+                                                                            </option>
+                                                                        @endforeach
+                                                                    @endif
+                                                                </select>
+                                                                <input type="hidden" name="tipe_peserta[]"
+                                                                    value="{{ $t->tipe_peserta }}">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" name="nip[]"
+                                                                    class="form-control form-control-sm text-center input-nip"
+                                                                    readonly value="{{ $t->nip_nik }}">
+                                                            </td>
+                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                                <td>
+                                                                    <select name="kecamatan_tujuan[]"
+                                                                        class="form-select form-select-sm input-kecamatan"
+                                                                        disabled required>
+                                                                        <option value="{{ $t->kec_tujuan }}" selected
+                                                                            data-loaded="true">{{ $t->kec_tujuan }}
+                                                                        </option>
+                                                                    </select>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="date" name="tanggal_pelaksanaan[]"
+                                                                        class="form-control form-control-sm" readonly
+                                                                        value="{{ $t->tgl_pelaksanaan }}">
+                                                                </td>
+                                                                <td>
+                                                                    <select name="pcl_diawasi[]"
+                                                                        class="form-select form-select-sm select2-server-side form-select-mitra"
+                                                                        disabled>
+                                                                        <option value="">-- Pilih --</option>
+                                                                        @foreach ($mitras as $m)
+                                                                            <option value="{{ $m->id }}"
+                                                                                {{ $t->pcl_diawasi == $m->id ? 'selected' : '' }}>
+                                                                                {{ $m->nama }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="number" name="jml_sampel_pcl[]"
+                                                                        class="form-control form-control-sm text-center"
+                                                                        min="0" readonly
+                                                                        value="{{ $t->jml_sampel_pcl }}">
+                                                                </td>
+                                                                <td>
+                                                                    <input type="number" name="jml_sampel_diawasi[]"
+                                                                        class="form-control form-control-sm text-center"
+                                                                        min="0" readonly
+                                                                        value="{{ $t->jml_sampel_diawasi }}">
+                                                                </td>
+                                                                <td>
+                                                                    <input type="number" name="jml_ok[]"
+                                                                        class="form-control form-control-sm text-center"
+                                                                        min="1" readonly
+                                                                        value="{{ $t->jml_ok }}">
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" name="transport_bayar[]"
+                                                                        class="form-control form-control-sm text-end currency"
+                                                                        readonly value="{{ $t->transport_bayar }}">
+                                                                </td>
+                                                            @elseif ($jenis_kak == 'pemanggilan-konsultasi')
+                                                                <td>
+                                                                <td>
+                                                                    <input type="text" name="nama_sls[]"
+                                                                        class="form-control form-control-sm"
+                                                                        value="{{ $t->nama_sls }}" readonly />
+                                                                </td>
+                                                                <td>
+                                                                    <input type="date" name="lampiran_tgl_mulai[]"
+                                                                        class="form-control form-control-sm"
+                                                                        value="{{ $t->lampiran_tgl_mulai }}" readonly />
+                                                                </td>
+                                                                <td>
+                                                                    <input type="date" name="lampiran_tgl_selesai[]"
+                                                                        class="form-control form-control-sm"
+                                                                        value="{{ $t->lampiran_tgl_selesai }}" readonly />
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" name="transport_bayar[]"
+                                                                        class="form-control form-control-sm text-end currency"
+                                                                        value="{{ $t->transport_bayar }}" readonly />
+                                                                </td>
+                                                                </td>
+                                                            @elseif($jenis_kak == 'honor-inda')
+                                                                <td>
+                                                                    <input type="text" name="transport_bayar[]"
+                                                                        class="form-control form-control-sm text-end currency"
+                                                                        value="{{ $t->transport_bayar }}" readonly />
+                                                                </td>
+                                                            @elseif($jenis_kak == 'honor-mitra')
+                                                                <td>
+                                                                    <select name="pcl_or_pml[]"
+                                                                        class="form-select form-select-sm" disabled>
+                                                                        <option value="0"
+                                                                            {{ $t->pcl_or_pml == 0 ? 'selected' : '' }}>
+                                                                            PCL</option>
+                                                                        <option value="1"
+                                                                            {{ $t->pcl_or_pml == 1 ? 'selected' : '' }}>
+                                                                            PML</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td>
+                                                                    <select name="kec_tujuan[]"
+                                                                        class="form-select form-select-sm input-kecamatan"
+                                                                        disabled required>
+                                                                        {{-- Opsi ini akan diisi ulang oleh JS Helper di bawah agar konsisten dengan standar biaya, 
+                                                                     tapi kita set value selected-nya --}}
+                                                                        <option value="{{ $t->kec_tujuan }}" selected
+                                                                            data-loaded="true">{{ $t->kec_tujuan }}
+                                                                        </option>
+                                                                    </select>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" name="nama_sls[]"
+                                                                        class="form-control form-control-sm"
+                                                                        value="{{ $t->nama_sls }}" readonly />
+                                                                </td>
+                                                                <td>
+                                                                    <input type="number" name="jml_sampel_pcl[]"
+                                                                        class="form-control form-control-sm text-center"
+                                                                        min="0" value="{{ $t->jml_sampel_pcl }}"
+                                                                        readonly />
+                                                                </td>
+                                                                <td>
+                                                                    @if ($t->tipe_pengawas == 'organik')
+                                                                        <select name="pengawas_id[]" id="pengawas_id"
+                                                                            disabled>
+                                                                            @foreach ($pegawais as $p)
+                                                                                <option value="{{ $p->id }}"
+                                                                                    {{ $t->pengawas_id == $p->id ? 'selected' : '' }}>
+                                                                                    {{ $p->nama }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    @else
+                                                                        <select name="pengawas_id[]" id="pengawas_id"
+                                                                            disabled>
+                                                                            @foreach ($mitras as $m)
+                                                                                <option value="{{ $m->id }}"
+                                                                                    {{ $t->pengawas_id == $m->id ? 'selected' : '' }}>
+                                                                                    {{ $m->nama }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    <input type="date" name="lampiran_tgl_mulai[]"
+                                                                        class="form-control form-control-sm"
+                                                                        value="{{ $t->lampiran_tgl_mulai }}" readonly />
+                                                                    <small class="text-muted">bulan/tanggal/tahun</small>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="date" name="lampiran_tgl_selesai[]"
+                                                                        class="form-control form-control-sm"
+                                                                        value="{{ $t->lampiran_tgl_selesai }}" readonly />
+                                                                    <small class="text-muted">bulan/tanggal/tahun</small>
+                                                                </td>
+                                                            @endif
 
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title">Daftar Mitra Terlibat</h4>
-                        </div>
-                        <div class="card-body">
+                                                            <td class="text-center align-middle">
+                                                                <button type="button"
+                                                                    class="btn btn-danger btn-sm hapus-baris" disabled>
+                                                                    <i class="fa fa-trash"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                                @if ($jenis_kak != 'honor-mitra')
+                                                    <tfoot class="table-light fw-bold">
+                                                        <tr>
+                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                                <td colspan="8" class="text-end">TOTAL ESTIMASI BIAYA
+                                                                    TRANSPORT:</td>
+                                                            @elseif ($jenis_kak == 'pemanggilan-konsultasi')
+                                                                <td colspan="5" class="text-end">TOTAL ESTIMASI BIAYA
+                                                                    PERJALANAN DINAS:</td>
+                                                            @elseif($jenis_kak == 'honor-inda')
+                                                                <td colspan="2" class="text-end">TOTAL ESTIMASI BIAYA
+                                                                    HONOR INDA:</td>
+                                                            @endif
+                                                            <td>
 
-                            <div class="table-responsive">
-                                <table id="multi-filter-select" class="display table table-striped table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Nama Mitra</th>
-                                            <th>Jumlah Pendataan/Pengolahan</th>
-                                            <th>Estimasi Honor Dari Kegiatan Ini</th>
-                                            {{-- <th>Tanggal Realisasi</th> --}}
-                                            <th>Estimasi Total Honor Yang Didapat Setelah Kegiatan Ini</th>
-                                            {{-- <th style="width: 10%">Aksi</th> --}}
-                                        </tr>
-                                    </thead>
+                                                                <input type="text" id="grand_total_transport"
+                                                                    class="form-control fw-bold text-end" readonly
+                                                                    value="0">
 
-                                    <tbody>
-                                        @foreach ($kegiatan->mitra as $mitra)
-                                            <!-- Modal -->
-                                            {{-- <div class="modal fade" id="{{'exampleModal'.$mitra->id}}" tabindex="-1" aria-labelledby="{{'exampleModalLabel'.$mitra->id}}" aria-hidden="true">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="{{'exampleModalLabel'.$mitra->id}}">Yakin Menghapus Mitra?</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                            Mitra <strong>{{$mitra->nama}}</strong> akan dihapus dari kegiatan ini!
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batalkan</button>
-                            <form action="{{url('kegiatan/destroy/'.$mitra->id)}}">
-                            <button type="submit" class="btn btn-danger hapus-kegiatan">Hapus</button>
-                            </form>
-                          </div>
-                        </div>
-                      </div>
-                    </div> --}}
-                                            <tr>
-                                                <th scope="row">{{ $mitra->pivot->is_pml == 1 ? 'PML' : 'PPL' }} -
-                                                    {{ $mitra->nama }}</th>
-                                                <td>{{ $mitra->pivot->jumlah }}</td>
-                                                <td>Rp {{ number_format($mitra->pivot->estimasi_honor, 0, ',', '.') }}</td>
-                                                {{-- <td> {{Carbon\Carbon::parse($mitra->pivot->tgl_realisasi)->locale('id')->translatedFormat('d M Y') }} </td> --}}
-                                                <td>Rp {{ number_format($mitra->pivot->estimasi_honor, 0, ',', '.') }}</td>
-                                                {{-- <td>
-                             <div class="form-button-action">
-                                <button
-                                    type="button"
-                                    title="Hapus"
-                                    class="btn btn-link btn-danger"
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="{{'#exampleModal'.$mitra->id}}"
-                                    data-original-title="Hapus"
-                                >
-                                    <i class="fa fa-trash-alt"></i>
-                                </button>
-                            </div> 
-                        </td> --}}
-                                            </tr>
+                                                            </td>
+                                                            <td></td>
+                                                        </tr>
+                                                    </tfoot>
+                                                @endif
+                                            </table>
+
+                                            <div class="mt-2">
+                                                <button type="button" class="btn btn-info btn-sm"
+                                                    id="btn_tambah_pegawai" disabled>
+                                                    <i class="fa fa-user-plus"></i> Tambah Pegawai
+                                                </button>
+                                                <button type="button" class="btn btn-warning btn-sm"
+                                                    id="btn_tambah_mitra" disabled>
+                                                    <i class="fa fa-users"></i> Tambah Mitra
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Template Opsi (Hidden) --}}
+                                <div class="d-none">
+                                    <select id="template_opsi_pegawai">
+                                        <option value="">-- Pilih Pegawai --</option>
+                                        @foreach ($pegawais as $p)
+                                            <option value="{{ $p->id }}" data-nip="{{ $p->nip ?? '-' }}">
+                                                {{ $p->nama }}</option>
                                         @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title">Daftar Pegawai Terlibat</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table id="basic-datatables" class="display table table-striped table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Nama Pegawai</th>
-                                            {{-- <th style="width: 10%">Aksi</th> --}}
-                                        </tr>
-                                    </thead>
-                                    <tfoot>
-                                        <tr>
-                                            <th>Nama Pegawai</th>
-                                            {{-- <th>Aksi</th> --}}
-                                        </tr>
-                                    </tfoot>
-                                    <tbody>
-                                        @foreach ($kegiatan->pegawai as $pegawai)
-                                            <!-- Modal -->
-                                            {{-- <div class="modal fade" id="{{'exampleModal'.$pegawai->id}}" tabindex="-1" aria-labelledby="{{'exampleModalLabel'.$pegawai->id}}" aria-hidden="true"> 
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="{{'exampleModalLabel'.$pegawai->id}}">Yakin Menghapus Kegiatan?</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                            Kegiatan <strong>{{$pegawai->nama}}</strong> akan ditandai sebagai kegiatan tidak aktif!
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batalkan</button>
-                            <form action="{{url('kegiatan/destroy/'.$pegawai->id)}}">
-                              <button type="submit" class="btn btn-danger hapus-kegiatan" >Hapus Kegiatan</button>
-                            </form>
-                          </div>
-                        </div>
-                      </div>
-                    </div> --}}
-                                            <tr>
-                                                <th scope="row">{{ $pegawai->nama }}</th>
-                                                {{-- <td>
-                         <div class="form-button-action">
-
-                          <button
-                            type="button"
-                            title="Hapus"
-                            class="btn btn-link btn-danger"
-                            data-bs-toggle="modal" 
-                            data-bs-target="{{'#exampleModal'.$pegawai->id}}"
-                            data-original-title="Hapus"
-                          >
-                            <i class="fa fa-trash-alt"></i>
-                          </button>
-                        </div> 
-                      </td> --}}
-
-                                            </tr>
+                                    </select>
+                                    <select id="template_opsi_mitra">
+                                        <option value="">-- Pilih Mitra --</option>
+                                        @foreach ($mitras as $m)
+                                            <option value="{{ $m->id }}" data-nip="{{ $m->nik ?? '-' }}">
+                                                {{ $m->nama }}</option>
                                         @endforeach
-                                    </tbody>
-                                </table>
+                                    </select>
+                                </div>
+
+                                <hr />
+
+                                <div class="row">
+                                    @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="kak6_pembiayaan">Pembiayaan digunakan untuk transport
+                                                    ...</label>
+                                                <input type="text" class="form-control" name="kak6_pembiayaan"
+                                                    id="kak6_pembiayaan" readonly
+                                                    value="{{ old('kak6_pembiayaan', $kegiatan->kak6_pembiayaan) }}" />
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="kak8_pengaju">Yang mengajukan </label>
+                                            <input type="text" class="form-control" name="kak8_pengaju"
+                                                id="kak8_pengaju" readonly
+                                                value="{{ old('kak8_pengaju', $kegiatan->kak8_pengaju) }}" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="kak8_tgl">Tanggal Pengajuan KAK</label>
+                                            <input type="date" class="form-control" name="kak8_tgl" id="kak8_tgl"
+                                                readonly value="{{ old('kak8_tgl', $kegiatan->kak8_tgl) }}" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="id_pjk">Nama Pegawai Penanggung Jawab Kegiatan</label>
+                                            <select class="form-select" id="id_pjk" name="id_pjk" disabled>
+                                                <option value="">(Pilih salah satu)</option>
+                                                @foreach ($pegawais as $item)
+                                                    <option value="{{ $item->id }}"
+                                                        {{ old('id_pjk', $kegiatan->id_pjk) == $item->id ? 'selected' : '' }}>
+                                                        {{ $item->nama }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <p>JUDUL KERANGKA ACUAN KERJA (KAK)</p>
+                                            <input type="text" name="judul_kak" id="judul_kak" class="form-control"
+                                                readonly value="{{ old('judul_kak', $kegiatan->nama) }}" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+                            </div>
+                            <div class="card-action">
+                                <a href="{{ route('kegiatan.index') }}" class="btn btn-danger"><i
+                                        class="fas fa-arrow-left"></i> Kembali</a>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
-
             </div>
         </div>
     </div>
+@endsection
+
+@section('script')
+    <script src="{{ asset('select2/js/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            // Init Select2
+            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                $('#kak2_tujuan').select2({
+                    theme: "bootstrap-5",
+                    width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ?
+                        '100%' : 'style',
+                    placeholder: $(this).data('placeholder'),
+                    closeOnSelect: true,
+                });
+            @endif
+            $('#filter_sbks, #kak6_program, #kak6_aktivitas, #kak6_kro, #kak6_ro, #kak6_komponen, #kak6_sub_komponen, #kak6_akun, #kak2_maksud, #id_pjk')
+                .select2({
+                    theme: "bootstrap-5",
+                    width: '100%',
+                    placeholder: $(this).data('placeholder'),
+                    closeOnSelect: true,
+                });
+
+            $('.select2-server-side').select2({
+                theme: "bootstrap-5",
+                width: '100%',
+                dropdownParent: $('#tabel_transport')
+            });
+
+            hitungGrandTotal();
+            hitungTotalTransport();
+        });
+
+        var rowIndex = {{ isset($kegiatan) ? $kegiatan->kegiatanLampiran->count() : 0 }};
+
+        function hitungGrandTotal() {
+            var grandTotal = 0;
+            $('.input-subtotal').each(function() {
+                grandTotal += parseFloat($(this).val()) || 0;
+            });
+            $('#grand_total').val(grandTotal);
+        }
+
+        function hitungTotalTransport() {
+            var total = 0;
+            $('.input-transport').each(function() {
+                total += parseFloat($(this).val()) || 0;
+            });
+            $('#grand_total_transport').val(total);
+        }
+    </script>
+    <script>
+        function formatRupiah(angka) {
+            return angka
+                .toString()
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function unformatRupiah(angka) {
+            return angka.replace(/\./g, '');
+        }
+
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('currency')) {
+                let value = unformatRupiah(e.target.value);
+                if (value !== '') {
+                    e.target.value = formatRupiah(value);
+                }
+            }
+        });
+    </script>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function() {
+            document.querySelectorAll('.currency').forEach(function(el) {
+                el.value = el.value.replace(/\./g, '');
+            });
+        });
+    </script>
 @endsection
