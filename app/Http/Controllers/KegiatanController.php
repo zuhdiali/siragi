@@ -206,6 +206,7 @@ class KegiatanController extends Controller
             'kak8_pengaju' => $request->kak8_pengaju,
             'kak8_tgl' => $request->kak8_tgl,
             'id_pjk' => $request->id_pjk,
+            'tim' => $request->kak4_pjk,
             'honor_pengawasan' => $request->honor_pengawasan,
             'honor_pencacahan' => $request->honor_pencacahan,
         ]);
@@ -364,6 +365,7 @@ class KegiatanController extends Controller
             'kak6_sub_komponen' => $request->kak6_sub_komponen,
             'kak6_pembiayaan' => $request->kak6_pembiayaan,
             // 'kak6_total' => dihitung ulang di bawah
+            'tim' => $request->kak4_pjk,
             'kak8_pengaju' => $request->kak8_pengaju,
             'kak8_tgl' => $request->kak8_tgl,
             'id_pjk' => $request->id_pjk,
