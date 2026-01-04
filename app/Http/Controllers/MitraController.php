@@ -13,6 +13,8 @@ class MitraController extends Controller
     public function index()
     {
         $mitraAktif = Mitra::where('flag', null)->count();
+        $mitraAktif--; // mengurangi 1 karena ada mitra bayangan
+
         $mitras = Mitra::orderBy('nama', 'asc')->get();
         foreach ($mitras as $mitra) {
             $kec_asal = $mitra->kec_asal;
