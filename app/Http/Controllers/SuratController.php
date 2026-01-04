@@ -11,6 +11,7 @@ use App\Models\Kegiatan;
 use App\Models\KegiatanMitra;
 use Illuminate\Support\Facades\Auth;
 use App\Models\FotoSuratMasuk;
+use App\Models\KegiatanLampiran;
 use App\Models\KegiatanPegawai;
 // use PhpOffice\PhpWord\Phpword;
 use Carbon\Carbon;
@@ -94,7 +95,7 @@ class SuratController extends Controller
         return view('surat.spk', ['surats' => $surats]);
     }
 
-    public function create($jenis)
+    public function createLama($jenis)
     {
         $kegiatans = Kegiatan::where('tim', Auth::user()->tim)->orWhere('id_pjk', Auth::user()->id)->get();
         $kegiatan_pegawais = KegiatanPegawai::where('pegawai_id', Auth::user()->id)->get();
@@ -119,7 +120,36 @@ class SuratController extends Controller
         }
     }
 
-    public function store(Request $request, $jenis)
+    public function create($jenis)
+    {
+        $kegiatans = Kegiatan::where('tim', Auth::user()->tim)->orWhere('id_pjk', Auth::user()->id)->get();
+        $kegiatan_lampirans = KegiatanLampiran::where('peserta_id', Auth::user()->id)->where('tipe_personil', "pegawai")->get();
+
+        // $kegiatan_pegawais = KegiatanPegawai::where('pegawai_id', Auth::user()->id)->get();
+        foreach ($kegiatan_lampirans as $kegiatan_lampiran) {
+            $kegiatan = Kegiatan::find($kegiatan_lampiran->kegiatan_id);
+            if ($kegiatans->contains($kegiatan)) {
+                continue;
+            } else {
+                $kegiatans->push($kegiatan);
+            }
+        }
+
+
+        $noTerakhir = $this->getNoSuratTerakhir($jenis);
+        $opsiSuratAwal = KamusSurat::where('tim', '11012')->get();
+        $kamusSuratUmum = KamusSurat::where('tim', '11011')->get();
+        $kamusSuratTeknis = KamusSurat::where('tim', '11012')->orderBy('kode_surat_gabungan', 'desc')->get();
+        if ($jenis != 'spk') {
+            $pegawais = Pegawai::where('flag', null)->get();
+            return view('surat.create', compact('jenis', 'noTerakhir', 'kamusSuratUmum', 'kamusSuratTeknis', 'kegiatans', 'opsiSuratAwal', 'pegawais'));
+        } else {
+            $mitras = Mitra::where('flag', null)->where('nama', 'not like', '%bayangan%')->get();
+            return view('surat.create', compact('jenis', 'noTerakhir', 'kamusSuratUmum', 'kamusSuratTeknis', 'kegiatans', 'opsiSuratAwal', 'mitras'));
+        }
+    }
+
+    public function storeLama(Request $request, $jenis)
     {
         if ($jenis != 'masuk') { //jika jenis surat selain masuk
             if ($jenis != 'spk') { //jika bukan mau generate SPK
@@ -257,6 +287,130 @@ class SuratController extends Controller
             //         $i++;
             //     }
             // }
+            if ($request->has('file')) {
+                $file = $request->file('file');
+                $extension = $file->getClientOriginalExtension();
+                $filename = date('Y-m-d') . '_' . time() . '.' . $extension;
+                $path = 'uploads/surat/';
+                $file->move($path, $filename);
+                $surat->file = $filename;
+                $surat->save();
+            }
+        }
+
+        return redirect()->route('surat.' . $jenis)->with('success', 'Surat berhasil dibuat.');
+    }
+
+    public function store(Request $request, $jenis)
+    {
+        if ($jenis != 'masuk') { //jika jenis surat selain masuk
+            if ($jenis != 'spk') { //jika bukan mau generate SPK
+                $request->validate([
+                    'tim' => 'required',
+                    'kode' => 'required',
+                    'perihal' => 'required',
+                ]);
+                if ($jenis != 'keluar') {
+                    $request->validate([
+                        'id_kegiatan' => 'required',
+                    ]);
+                    $kegiatan = Kegiatan::find($request->id_kegiatan);
+                    $mitraMelebihiHonor = KegiatanController::validasiHonorMitra($kegiatan->mitra, $kegiatan->tgl_mulai);
+                    if (count($mitraMelebihiHonor) > 0) {
+                        return redirect()->back()->with('error', 'Mitra (' . implode(",", $mitraMelebihiHonor) . ') melebihi batas honor yang diperbolehkan.');
+                    }
+                }
+                if ($jenis == 'tugas') {
+                    $request->validate([
+                        'tgl_surat' => 'required',
+                    ]);
+                }
+            } else {  //jika mau generate SPK
+                $request->validate([
+                    'mitra_spk' => 'required',
+                    'bulan_spk' => 'required',
+                    'tahun_spk' => 'required',
+                ]);
+            }
+        } else {  //jika jenis surat masuk
+            $request->validate([
+                'dinas_surat_masuk' => 'required',
+                'no_surat_masuk' => 'required',
+                'file' => 'required|mimes:pdf',
+                'perihal' => 'required',
+                'tgl_surat' => 'required',
+            ]);
+            // $totalFoto = count($request->file('files'));
+            // for ($i = 0; $i < $totalFoto; $i++) {
+            //     $request->validate([
+            //         'file.' . $i => 'mimes:png,jpg,jpeg,webp,svg',
+            //     ]);
+            // }
+        }
+
+        if ($jenis == 'spd') {
+            $request->validate([
+                'tgl_awal_kegiatan' => 'required|date',
+                'tgl_akhir_kegiatan' => 'required|date',
+                'pegawai_yang_bertugas' => 'required',
+            ]);
+        }
+
+        $surat = new Surat();
+        $surat->jenis_surat = $jenis;
+        $surat->perihal = $request->perihal;
+
+        if ($jenis == 'spd') {
+            $surat->tgl_awal_kegiatan = $request->tgl_awal_kegiatan;
+            $surat->tgl_akhir_kegiatan = $request->tgl_akhir_kegiatan;
+            $surat->pegawai_yang_bertugas = $request->pegawai_yang_bertugas;
+        }
+
+
+        $surat->id_pembuat_surat = Auth::user()->id;
+
+        if ($jenis != 'masuk') {
+            if ($jenis != 'spk') {
+                $noTerakhir = $this->getNoSuratTerakhir($jenis);
+                $surat->no_terakhir = $noTerakhir + 1;
+                if ($jenis != 'keluar') {
+                    $surat->nomor_surat = $this->generateNomorSurat($request->tim, $request->kode, $jenis, $noTerakhir);
+                    $surat->id_kegiatan = $request->id_kegiatan;
+                } else {
+                    $surat->nomor_surat = $this->generateNomorSurat("11010", $request->kode, $jenis, $noTerakhir);
+                }
+                $surat->tim = $request->tim;
+                if ($jenis == 'tugas') {
+                    $surat->tgl_surat = $request->tgl_surat;
+                }
+            } else {  //jika jenis surat spk
+                $cekSurat = Surat::where('jenis_surat', 'spk')
+                    ->where('mitra_spk', $request->mitra_spk)
+                    ->where('bulan_spk', $request->bulan_spk)
+                    ->where('tahun_spk', $request->tahun_spk)
+                    ->first();
+                if ($cekSurat) {
+                    $mitra = Mitra::find($request->mitra_spk);
+                    return redirect()->back()->with('error', 'SPK untuk mitra ' . $mitra->nama . ' pada bulan ' . $request->bulan_spk . ' dan tahun ' . $request->tahun_spk . ' sudah ada.');
+                }
+                $noSPK_terakhir = Surat::where('jenis_surat', 'spk')->where('tahun_spk', $request->tahun_spk)->orderBy('no_terakhir', 'desc')->first();
+                if ($noSPK_terakhir == null) {
+                    $noTerakhir = 0;
+                } else {
+                    $noTerakhir = $noSPK_terakhir->no_terakhir;
+                }
+                $surat->no_terakhir = $noTerakhir + 1;
+                $surat->mitra_spk = $request->mitra_spk;
+                $surat->bulan_spk = $request->bulan_spk;
+                $surat->tahun_spk = $request->tahun_spk;
+                $surat->file = $this->generateSPK($request->mitra_spk, $request->bulan_spk, $request->tahun_spk);
+            }
+            $surat->save();
+        } else { //jika jenis surat masuk
+            $surat->dinas_surat_masuk = $request->dinas_surat_masuk;
+            $surat->no_surat_masuk = $request->no_surat_masuk;
+            $surat->tgl_surat = $request->tgl_surat;
+            $surat->save();
             if ($request->has('file')) {
                 $file = $request->file('file');
                 $extension = $file->getClientOriginalExtension();
@@ -421,9 +575,11 @@ class SuratController extends Controller
         } else {
             $kegiatans = Kegiatan::where('tim', $request->tim)->where('id_pjk', $request->id_pegawai)->get();
         }
-        $kegiatan_pegawais = KegiatanPegawai::where('pegawai_id', $request->id_pegawai)->get();
-        foreach ($kegiatan_pegawais as $kegiatan_pegawai) {
-            $kegiatan = Kegiatan::find($kegiatan_pegawai->kegiatan_id);
+        $kegiatan_lampirans = KegiatanLampiran::where('peserta_id', Auth::user()->id)->where('tipe_personil', "pegawai")->get();
+
+        // $kegiatan_pegawais = KegiatanPegawai::where('pegawai_id', Auth::user()->id)->get();
+        foreach ($kegiatan_lampirans as $kegiatan_lampiran) {
+            $kegiatan = Kegiatan::find($kegiatan_lampiran->kegiatan_id);
             if ($kegiatans->contains($kegiatan)) {
                 continue;
             } else {
@@ -431,6 +587,10 @@ class SuratController extends Controller
                     $kegiatans->push($kegiatan);
                 }
             }
+        }
+        foreach ($kegiatans as $kegiatan) {
+            $nama_awal = $kegiatan->nama;
+            $kegiatan->nama = $kegiatan->singkatan_resmi . " - " . $nama_awal;
         }
         return response()->json($kegiatans);
     }

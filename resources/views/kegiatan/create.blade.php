@@ -440,8 +440,7 @@
                                                                         Total</td>
                                                                     <td colspan="2">
                                                                         <input type="text" id="grand_total"
-                                                                            class="form-control fw-bold" readonly
-                                                                            value="0">
+                                                                            class="currency form-control fw-bold" readonly>
                                                                     </td>
                                                                 </tr>
                                                             </tfoot>
@@ -568,8 +567,8 @@
 
                                                             <td>
                                                                 <input type="text" id="grand_total_transport"
-                                                                    class="form-control fw-bold text-end" readonly
-                                                                    value="0">
+                                                                    class="currency form-control fw-bold text-end"
+                                                                    readonly>
                                                             </td>
                                                             <td></td>
                                                         </tr>
@@ -1144,7 +1143,7 @@
                             <input type="number" name="rincian_harga[]" class="form-control form-control-sm hitung-total input-harga" min="0" value="0" required>
                         </td>
                         <td>
-                            <input type="number" name="rincian_total[]" class="form-control form-control-sm input-subtotal" readonly value="0">
+                            <input type="text" name="rincian_total[]" class="form-control form-control-sm input-subtotal" readonly value="0">
                         </td>
                         <td class="text-center">
                             <button type="button" class="btn btn-danger btn-sm hapus-baris">
@@ -1163,6 +1162,16 @@
                 hitungGrandTotal(); // Hitung ulang total
             });
 
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            function toNumber(value) {
+                return parseFloat(value.toString().replace(/\./g, '')) || 0;
+            }
+
+
+
             // --- 5. LOGIC: Hitung Otomatis (Volume x Harga) ---
             $(document).on('keyup change', '.hitung-total', function() {
                 var baris = $(this).closest('tr');
@@ -1170,16 +1179,16 @@
                 var hrg = parseFloat(baris.find('.input-harga').val()) || 0;
                 var subtotal = vol * hrg;
 
-                baris.find('.input-subtotal').val(subtotal);
+                baris.find('.input-subtotal').val(formatNumber(subtotal));
                 hitungGrandTotal();
             });
 
             function hitungGrandTotal() {
                 var grandTotal = 0;
                 $('.input-subtotal').each(function() {
-                    grandTotal += parseFloat($(this).val()) || 0;
+                    grandTotal += toNumber($(this).val());
                 });
-                $('#grand_total').val(grandTotal); // Anda bisa format currency di sini jika perlu
+                $('#grand_total').val(formatNumber(grandTotal)); // Anda bisa format currency di sini jika perlu
             }
 
             function generateJudulKAK() {
@@ -1622,6 +1631,13 @@
 
             // Panggil fungsi hitung total agar Grand Total langsung update
             hitungTotalTransport();
+        });
+    </script>
+    <script>
+        document.querySelector("form").addEventListener("submit", function() {
+            document.querySelectorAll(".currency").forEach(el => {
+                el.value = toNumber(el.value);
+            });
         });
     </script>
 @endsection

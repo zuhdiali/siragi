@@ -211,6 +211,12 @@ class KegiatanController extends Controller
         ]);
         $jumlah = 0;
         foreach ($request->akun_kode as $index => $akun_kode) {
+            $rincian_total = 0;
+            if (str_contains($request->rincian_total[$index], '.')) {
+                $rincian_total = str_replace('.', '', $request->rincian_total[$index]);
+            } else {
+                $rincian_total = $request->rincian_total[$index];
+            }
             $kegiatan->kegiatanRincian()->create([
                 'kegiatan_id' => $kegiatan->id,
                 'pok_id' => $request->akun_kode[$index],
@@ -218,9 +224,9 @@ class KegiatanController extends Controller
                 'vol' => $request->rincian_volume[$index],
                 'satuan' => $request->rincian_satuan[$index],
                 'harga_satuan' => $request->rincian_harga[$index],
-                'jumlah' => $request->rincian_total[$index],
+                'jumlah' => $rincian_total,
             ]);
-            $jumlah += $request->rincian_total[$index];
+            $jumlah += $rincian_total;
         }
         $kegiatan->kak6_total = $jumlah;
         $kegiatan->save();
