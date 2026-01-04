@@ -122,7 +122,7 @@ class SuratController extends Controller
 
     public function create($jenis)
     {
-        $kegiatans = Kegiatan::where('tim', Auth::user()->tim)->orWhere('id_pjk', Auth::user()->id)->get();
+        $kegiatans = Kegiatan::where('tim', Auth::user()->tim)->orWhere('id_pjk', Auth::user()->id)->where('is_approved', 1)->get();
         $kegiatan_lampirans = KegiatanLampiran::where('peserta_id', Auth::user()->id)->where('tipe_personil', "pegawai")->get();
 
         // $kegiatan_pegawais = KegiatanPegawai::where('pegawai_id', Auth::user()->id)->get();
@@ -131,7 +131,9 @@ class SuratController extends Controller
             if ($kegiatans->contains($kegiatan)) {
                 continue;
             } else {
-                $kegiatans->push($kegiatan);
+                if ($kegiatan->is_approved == 1) {
+                    $kegiatans->push($kegiatan);
+                }
             }
         }
 
@@ -571,9 +573,9 @@ class SuratController extends Controller
         ]);
         $kegiatans = null;
         if (Auth::user()->role == 'Ketua Tim') {
-            $kegiatans = Kegiatan::where('tim', $request->tim)->get();
+            $kegiatans = Kegiatan::where('tim', $request->tim)->where('is_approved', 1)->get();
         } else {
-            $kegiatans = Kegiatan::where('tim', $request->tim)->where('id_pjk', $request->id_pegawai)->get();
+            $kegiatans = Kegiatan::where('tim', $request->tim)->where('id_pjk', $request->id_pegawai)->where('is_approved', 1)->get();
         }
         $kegiatan_lampirans = KegiatanLampiran::where('peserta_id', Auth::user()->id)->where('tipe_personil', "pegawai")->get();
 
@@ -583,7 +585,7 @@ class SuratController extends Controller
             if ($kegiatans->contains($kegiatan)) {
                 continue;
             } else {
-                if ($kegiatan->tim == $request->tim) {
+                if ($kegiatan->tim == $request->tim && $kegiatan->is_approved == 1) {
                     $kegiatans->push($kegiatan);
                 }
             }
