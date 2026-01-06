@@ -305,16 +305,22 @@ class SuratController extends Controller
 
     public function store(Request $request, $jenis)
     {
+
         if ($jenis != 'masuk') { //jika jenis surat selain masuk
+
             if ($jenis != 'spk') { //jika bukan mau generate SPK
-                $request->validate([
-                    'tim' => 'required',
-                    'kode' => 'required',
-                    'perihal' => 'required',
-                ]);
-                if ($jenis != 'keluar') {
+                if ($jenis != 'sk') {
+                    $request->validate([
+                        'tim' => 'required',
+                        'kode' => 'required',
+                        'perihal' => 'required',
+                    ]);
+                }
+
+                if ($jenis != 'keluar' && $jenis != 'sk') {  //jika surat form permintaan atau tugas atau spd
                     $request->validate([
                         'id_kegiatan' => 'required',
+                        'tgl_surat' => 'required',
                     ]);
                     $kegiatan = Kegiatan::find($request->id_kegiatan);
                     $mitraMelebihiHonor = KegiatanController::validasiHonorMitra($kegiatan->mitra, $kegiatan->tgl_mulai);
@@ -322,6 +328,7 @@ class SuratController extends Controller
                         return redirect()->back()->with('error', 'Mitra (' . implode(",", $mitraMelebihiHonor) . ') melebihi batas honor yang diperbolehkan.');
                     }
                 }
+
                 if ($jenis == 'tugas') {
                     $request->validate([
                         'tgl_surat' => 'required',
@@ -356,6 +363,10 @@ class SuratController extends Controller
                 'tgl_akhir_kegiatan' => 'required|date',
                 'pegawai_yang_bertugas' => 'required',
             ]);
+        } else if ($jenis == 'sk') {
+            $request->validate([
+                'perihal' => 'required',
+            ]);
         }
 
         $surat = new Surat();
@@ -375,11 +386,18 @@ class SuratController extends Controller
             if ($jenis != 'spk') {
                 $noTerakhir = $this->getNoSuratTerakhir($jenis);
                 $surat->no_terakhir = $noTerakhir + 1;
-                if ($jenis != 'keluar') {
+                if ($jenis != 'keluar' && $jenis != 'sk') {
                     $surat->nomor_surat = $this->generateNomorSurat($request->tim, $request->kode, $jenis, $noTerakhir);
                     $surat->id_kegiatan = $request->id_kegiatan;
-                } else {
-                    $surat->nomor_surat = $this->generateNomorSurat("11010", $request->kode, $jenis, $noTerakhir);
+                } else { // jika jenis surat keluar atau sk
+                    if ($jenis == 'sk') {
+                        $surat->tim = $request->tim;
+                        $surat->no_terakhir = $noTerakhir + 1;
+                        $surat->tgl_surat = $request->tgl_surat;
+                        $surat->save();
+                    } else {
+                        $surat->nomor_surat = $this->generateNomorSurat("11010", $request->kode, $jenis, $noTerakhir);
+                    }
                 }
                 $surat->tim = $request->tim;
                 if ($jenis == 'tugas') {
@@ -432,7 +450,11 @@ class SuratController extends Controller
         $surat = Surat::find($id);
 
         if ($jenis == 'masuk') {
-
+            return view('surat.edit', [
+                'surat' => $surat,
+                'jenis' => $jenis,
+            ]);
+        } else if ($jenis == 'sk') {
             return view('surat.edit', [
                 'surat' => $surat,
                 'jenis' => $jenis,
@@ -503,10 +525,12 @@ class SuratController extends Controller
                 $surat->file = $filename;
             }
         } else {  //jika jenis surat selain masuk
-            $request->validate([
-                'kode' => 'required',
-                'perihal' => 'required',
-            ]);
+            if ($jenis != 'sk') {
+                $request->validate([
+                    'kode' => 'required',
+                    'perihal' => 'required',
+                ]);
+            }
             if ($jenis == 'spd') {
                 $request->validate([
                     'tgl_awal_kegiatan' => 'required|date',
@@ -521,18 +545,19 @@ class SuratController extends Controller
                 $surat->id_kegiatan = $request->id_kegiatan;
             }
             $noTerakhir = $surat->no_terakhir;
-            if ($jenis != 'keluar') {
+            if ($jenis != 'keluar' && $jenis != 'sk') {
                 if ($surat->tim) {
                     $surat->nomor_surat = $this->generateNomorSurat($surat->tim, $request->kode, $jenis, $noTerakhir - 1);
                 } else {
                     $kegiatan = Kegiatan::find($surat->id_kegiatan);
                     $surat->nomor_surat = $this->generateNomorSurat($kegiatan->tim, $request->kode, $jenis, $noTerakhir - 1);
                 }
-            } else { //jika bukan surat keluar
+            }
+            if ($jenis == 'keluar') { //jika surat keluar
                 $surat->nomor_surat = $this->generateNomorSurat("11010", $request->kode, $jenis, $noTerakhir - 1);
             }
 
-            if ($jenis == 'tugas') {
+            if ($jenis == 'tugas' || $jenis == 'sk') {
                 $request->validate([
                     'tgl_surat' => 'required',
                 ]);

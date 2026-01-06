@@ -44,6 +44,7 @@ class KegiatanController extends Controller
             'mitras' => Mitra::where('flag', null)->orderBy('nama', 'asc')->get(),
             'pok_awals' => POK::where('kode_aktivitas', null)->get(),
             'sbks' => SBKS::select(['nama_kegiatan', 'singkatan_resmi'])->where('ada_di_simeulue', 1)->distinct('nama_kegiatan')->orderBy('nama_kegiatan', 'asc')->get(),
+            'skSurats' => Surat::where('jenis_surat', 'sk')->orderBy('nomor_surat', 'asc')->get(),
         ];
         foreach ($data['sbks'] as $item) {
             if ($item->singkatan_resmi) {
@@ -150,6 +151,7 @@ class KegiatanController extends Controller
         $mitras = Mitra::where('flag', null)->orderBy('nama', 'asc')->get();
         $pegawais = Pegawai::where('flag', null)->orderBy('nama', 'asc')->get();
         $sbks = SBKS::select(['nama_kegiatan', 'singkatan_resmi'])->where('ada_di_simeulue', 1)->distinct('nama_kegiatan')->orderBy('nama_kegiatan', 'asc')->get();
+        $semuaSK = Surat::where('jenis_surat', 'sk')->orderBy('nomor_surat', 'asc')->get();
         foreach ($sbks as $item) {
             if ($item->singkatan_resmi) {
                 $item->nama_kegiatan_dan_singkatan = $item->nama_kegiatan . ' (' . $item->singkatan_resmi . ')';
@@ -159,7 +161,7 @@ class KegiatanController extends Controller
         }
         // dd($sbks);
         // return view('kegiatan.create', ['kegiatans' => $kegiatans, 'mitras' => $mitras]);
-        return view('kegiatan.create', ['pegawais' => $pegawais, 'mitras' => $mitras, 'sbks' => $sbks]);
+        return view('kegiatan.create', ['pegawais' => $pegawais, 'mitras' => $mitras, 'sbks' => $sbks, 'skSurats' => $semuaSK]);
     }
 
     public function store(Request $request)
@@ -194,6 +196,7 @@ class KegiatanController extends Controller
             'kak3_target' => $request->kak3_target,
             'tgl_mulai' => $request->tgl_mulai,
             'tgl_selesai' => $request->tgl_selesai,
+            'kak5_sk' => $request->kak5_sk,
             'kak4_pjk' => $request->kak4_pjk,
             'kak6_program' => $request->kak6_program,
             'kak6_aktivitas' => $request->kak6_aktivitas,
@@ -326,7 +329,8 @@ class KegiatanController extends Controller
         $kegiatan = Kegiatan::find($id);
         $mitras = Mitra::where('flag', null)->orderBy('nama', 'asc')->get();
         $pegawais = Pegawai::where('flag', null)->orderBy('nama', 'asc')->get();
-        return view('kegiatan.edit', ['kegiatan' => $kegiatan, 'pegawais' => $pegawais, 'mitras' => $mitras]);
+        $skSurats = Surat::where('jenis_surat', 'sk')->orderBy('nomor_surat', 'asc')->get();
+        return view('kegiatan.edit', ['kegiatan' => $kegiatan, 'pegawais' => $pegawais, 'mitras' => $mitras, 'skSurats' => $skSurats]);
     }
 
     public function update(Request $request, $id)
@@ -357,6 +361,7 @@ class KegiatanController extends Controller
             'tgl_mulai' => $request->tgl_mulai,
             'tgl_selesai' => $request->tgl_selesai,
             'kak4_pjk' => $request->kak4_pjk,
+            'kak5_sk' => $request->kak5_sk,
             'kak6_program' => $request->kak6_program,
             'kak6_aktivitas' => $request->kak6_aktivitas,
             'kak6_kro' => $request->kak6_kro,

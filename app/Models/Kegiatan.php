@@ -24,6 +24,7 @@ class Kegiatan extends Model
         'kak4_pjk',
         'tgl_mulai',
         'tgl_selesai',
+        'kak5_sk',
         'kak6_pengadaan',
         'kak6_program',
         'kak6_aktivitas',

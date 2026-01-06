@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('surats', function (Blueprint $table) {
-            $table->unsignedInteger('mitra_spk')->nullable()->after('flag');
-            $table->unsignedTinyInteger('bulan_spk')->nullable()->after('flag');
+        Schema::table('kegiatans', function (Blueprint $table) {
+            $table->unsignedBigInteger('kak5_sk')->nullable()->after('tgl_selesai');
         });
     }
 
@@ -22,9 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('surats', function (Blueprint $table) {
-            $table->dropColumn('mitra_spk');
-            $table->dropColumn('bulan_spk');
+        Schema::table('kegiatans', function (Blueprint $table) {
+            $table->dropColumn('kak5_sk');
         });
     }
 };

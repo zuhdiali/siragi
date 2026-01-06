@@ -309,21 +309,36 @@
                                     <div class="col">
                                         <div class="form-group">
                                             <p>5. SPESIFIKASI PENGADAAN BARANG/JASA</p>
-                                            <p>
-                                                @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                                    Transport lokal sesuai SK Kepala BPS Kabupaten Simeulue nomor XX Tahun
+
+                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                <p>Transport lokal sesuai SK Kepala BPS Kabupaten Simeulue nomor XX Tahun
                                                     2025
                                                     tanggal DD-MM-YYYY tentang Penetapan Rate Biaya Transport dari Kabupaten
-                                                    Simeulue Ke Kecamatan Tahun 2026
-                                                @elseif ($jenis_kak == 'pemanggilan-konsultasi')
-                                                    Perjalanan dinas ini sesuai dengan PMK Nomor 32 Tahun 2025 tanggal 14
+                                                    Simeulue Ke Kecamatan Tahun 2026</p>
+                                            @elseif ($jenis_kak == 'pemanggilan-konsultasi')
+                                                <p>Perjalanan dinas ini sesuai dengan PMK Nomor 32 Tahun 2025 tanggal 14
                                                     Mei
-                                                    2025 tetang Standar biaya Masukan (SBM) Tahun Anggaran 2026
-                                                @elseif($jenis_kak == 'honor-inda')
-                                                    Pembayaran sesuai dengan SK Kepala BPS Kabupaten Simeulue Tanggal 5
-                                                    November 2025 nomor XX Tahun 2025 tentang xxxxxxxxxxx
+                                                    2025 tetang Standar biaya Masukan (SBM) Tahun Anggaran 2026</p>
+                                            @else
+                                                <label for="kak5_sk">Nomor SK</label>
+                                                <select name="kak5_sk" id="kak5_sk" class="form-control form-select">
+                                                    <option value="">(Pilih salah satu)</option>
+                                                    @foreach ($skSurats as $item)
+                                                        <option value="{{ $item->id }}">
+                                                            {{ $item->no_terakhir }} -
+                                                            {{ $item->perihal }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @if ($errors->has('kak5_sk'))
+                                                    <small
+                                                        class="form-text text-muted">{{ $errors->first('kak5_sk') }}</small>
+                                                @else
+                                                    <small class="form-text text-muted">
+                                                        Pilih SK yang sesuai dengan kegiatan ini
+                                                    </small>
                                                 @endif
-                                            </p>
+                                            @endif
+
                                         </div>
                                     </div>
                                 </div>
@@ -805,7 +820,7 @@
                     closeOnSelect: true,
                 });
             @endif
-            $('#filter_sbks,#kak6_program, #kak6_aktivitas, #kak6_kro, #kak6_ro, #kak6_komponen, #kak6_sub_komponen, #kak6_akun, #kak2_maksud')
+            $('#filter_sbks,#kak6_program, #kak6_aktivitas, #kak6_kro, #kak6_ro, #kak6_komponen, #kak6_sub_komponen, #kak6_akun, #kak2_maksud, #kak5_sk')
                 .select2({
                     theme: "bootstrap-5",
                     width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ?
