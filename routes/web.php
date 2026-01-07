@@ -172,6 +172,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/generate-spk', [SuratController::class, 'generateSPK'])->name('generate-spk');
         Route::get('/download-spk/{id}', [SuratController::class, 'downloadSPK'])->name('download-spk');
+
+        Route::get('/generate-surat-tugas/{id_kegiatan}/{id_form_permintaan}', [SuratController::class, 'generateSuratTugas'])->name('generate-surat-tugas');
+        Route::get('/generate-spd/{id_kegiatan}/{id_form_permintaan}', [SuratController::class, 'generateSPD'])->name('generate-spd');
     });
 
     Route::prefix('sbks')->name('sbks.')->group(function () {

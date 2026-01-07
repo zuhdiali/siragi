@@ -39,6 +39,16 @@ class SuratController extends Controller
     {
         $surats = Surat::where('jenis_surat', 'permintaan')->where('flag', null)->orderBy('created_at', 'desc')->get();
         $surats = $this->tambahInformasiSurat($surats);
+        foreach ($surats as $surat) {
+            if ($surat->surat_tugas_id) {
+                $st = Surat::find($surat->surat_tugas_id);
+                $surat->nomor_surat_tugas = $st->nomor_surat;
+            }
+            if ($surat->spd_id) {
+                $spd = Surat::find($surat->spd_id);
+                $surat->nomor_surat_spd = $spd->nomor_surat;
+            }
+        }
         return view('surat.permintaan', ['surats' => $surats]);
     }
 
@@ -303,9 +313,8 @@ class SuratController extends Controller
         return redirect()->route('surat.' . $jenis)->with('success', 'Surat berhasil dibuat.');
     }
 
-    public function store(Request $request, $jenis)
+    public function storeAndValidate(Request $request, $jenis)
     {
-
         if ($jenis != 'masuk') { //jika jenis surat selain masuk
 
             if ($jenis != 'spk') { //jika bukan mau generate SPK
@@ -442,6 +451,12 @@ class SuratController extends Controller
             }
         }
 
+        return $surat;
+    }
+
+    public function store(Request $request, $jenis)
+    {
+        $surat = $this->storeAndValidate($request, $jenis);
         return redirect()->route('surat.' . $jenis)->with('success', 'Surat berhasil dibuat.');
     }
 
@@ -586,6 +601,20 @@ class SuratController extends Controller
         } else if ($surat->jenis_surat == 'sk') {
             $surat->delete();
         } else {
+            if ($surat->jenis_surat == 'tugas') {
+                $formPermintaan = Surat::where('surat_tugas_id', $surat->id)->first();
+                if ($formPermintaan) {
+                    $formPermintaan->surat_tugas_id = null;
+                    $formPermintaan->save();
+                }
+            }
+            if ($surat->jenis_surat == 'spd') {
+                $formPermintaan = Surat::where('spd_id', $surat->id)->first();
+                if ($formPermintaan) {
+                    $formPermintaan->spd_id = null;
+                    $formPermintaan->save();
+                }
+            }
             $surat->flag = 'Dihapus';
             $surat->save();
         }
@@ -624,6 +653,92 @@ class SuratController extends Controller
         return response()->json($kegiatans);
     }
 
+    public function generateSuratTugas($id_kegiatan, $id_form_permintaan)
+    {
+        $kegiatan = Kegiatan::find($id_kegiatan);
+        $perihal = null;
+        if ($kegiatan->jenis_kak == 'translok-biasa' || $kegiatan->jenis_kak == 'translok-8jam') {
+            $perihal = $kegiatan->kak2_maksud . ' ' . $kegiatan->singkatan_resmi;
+        } else if ($kegiatan->jenis_kak == 'pemanggilan-konsultasi') {
+            $perihal = $kegiatan->kak2_maksud . ' ' . $kegiatan->singkatan_resmi;
+        } else if ($kegiatan->jenis_kak == 'pelatihan') {
+            $perihal = 'Pelatihan ' . $kegiatan->singkatan_resmi;
+        } else if ($kegiatan->jenis_kak == 'honor-inda') {
+            $perihal = 'Instruktur Daerah ' . $kegiatan->singkatan_resmi;
+        } else {
+            $perihal = 'Pemutakhiran/Pendataan ' . $kegiatan->singkatan_resmi;
+        }
+        $form = Surat::find($id_form_permintaan);
+
+        $explode = explode("/", $form->nomor_surat);
+        $kode_surat = $explode[2];
+
+        $request = new Request();
+        $request->merge([
+            'tim' => $kegiatan->tim,
+            'kode' => $kode_surat,
+            'perihal' => $perihal,
+            'id_kegiatan' => $kegiatan->id,
+            'tgl_surat' => date('Y-m-d'),
+        ]);
+        $surat = $this->storeAndValidate($request, 'tugas');
+        $form = Surat::find($id_form_permintaan);
+        $form->surat_tugas_id = $surat->id;
+        $form->save();
+        return redirect()->back()->with('success', 'Surat Tugas berhasil dibuat.');
+    }
+
+    public function generateSPD($id_kegiatan, $id_form_permintaan)
+    {
+        $kegiatan = Kegiatan::find($id_kegiatan);
+        $perihal = null;
+        if ($kegiatan->jenis_kak == 'translok-biasa' || $kegiatan->jenis_kak == 'translok-8jam') {
+            $perihal = $kegiatan->kak2_maksud . ' ' . $kegiatan->singkatan_resmi;
+        } else if ($kegiatan->jenis_kak == 'pemanggilan-konsultasi') {
+            $perihal = $kegiatan->kak2_maksud . ' ' . $kegiatan->singkatan_resmi;
+        } else if ($kegiatan->jenis_kak == 'pelatihan') {
+            $perihal = 'Pelatihan ' . $kegiatan->singkatan_resmi;
+        } else if ($kegiatan->jenis_kak == 'honor-inda') {
+            $perihal = 'Instruktur Daerah ' . $kegiatan->singkatan_resmi;
+        } else {
+            $perihal = 'Pemutakhiran/Pendataan ' . $kegiatan->singkatan_resmi;
+        }
+
+        // cari form permintaan
+        $form = Surat::find($id_form_permintaan);
+
+        // copy kode surat dari form permintaan
+        $explode = explode("/", $form->nomor_surat);
+        $kode_surat = $explode[2];
+
+        // cari pegawai yang bertugas dari kegiatan
+        $pegawai_yang_bertugas = null;
+        foreach ($kegiatan->kegiatanLampiran as $lampiran) {
+            if ($lampiran->tipe_personil == "pegawai") {
+                $pegawai_yang_bertugas = $lampiran->peserta_id;
+                break;
+            }
+        }
+
+        $request = new Request();
+        $request->merge([
+            'tim' => $kegiatan->tim,
+            'kode' => $kode_surat,
+            'perihal' => $perihal,
+            'id_kegiatan' => $kegiatan->id,
+            'tgl_surat' => date('Y-m-d'),
+            'tgl_awal_kegiatan' => $kegiatan->tgl_mulai,
+            'tgl_akhir_kegiatan' => $kegiatan->tgl_selesai,
+            'pegawai_yang_bertugas' => $pegawai_yang_bertugas ?? Auth::user()->pegawai->id,
+        ]);
+        // simpan surat spd
+        $surat = $this->storeAndValidate($request, 'spd');
+
+        // linking surat spd ke form permintaan
+        $form->spd_id = $surat->id;
+        $form->save();
+        return redirect()->back()->with('success', 'Surat Perintah Dinas berhasil dibuat.');
+    }
 
     public function getKodeSurat($tim)
     {
