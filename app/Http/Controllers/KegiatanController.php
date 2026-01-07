@@ -163,11 +163,60 @@ class KegiatanController extends Controller
     public function unduhKAK($id)
     {
         $kegiatan = Kegiatan::find($id);
-        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("honor-mitra.docx");
-        $phpWord->setValue('nama', $kegiatan->nama);
+
         switch ($kegiatan->jenis_kak) {
             case 'translok-biasa':
-                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis translok biasa belum tersedia.');
+                $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-translok-biasa.docx");
+                $phpWord->setValue('nama', $kegiatan->nama);
+                $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
+                $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
+                $phpWord->setValue('kak2_maksud', $kegiatan->kak2_maksud);
+                $phpWord->setValue('kak2_tujuan', $kegiatan->kak2_tujuan);
+                $phpWord->setValue('kak3_target', $kegiatan->kak3_target);
+                $kak4_tgl_mulai = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F Y');
+                $kak4_tgl_selesai = Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F Y');
+                $phpWord->setValue('kak4_tgl_mulai', $kak4_tgl_mulai);
+                $phpWord->setValue('kak4_tgl_selesai', $kak4_tgl_selesai);
+                $phpWord->setValue('pj', $this->konversiTim($kegiatan->tim));
+                $phpWord = $this->findDetailRincianPOK($phpWord, $kegiatan->id);
+                $phpWord->setValue('kak6_pembiayaan', $kegiatan->kak6_pembiayaan);
+                $phpWord->setValue('tgl_kak', Carbon::parse($kegiatan->kak8_tgl)->locale('id')->translatedFormat('d F Y'));
+                $phpWord->setValue('kak8_pengaju', $kegiatan->kak8_pengaju);
+                $pengaju = Pegawai::find($kegiatan->id_pjk);
+                if ($pengaju) {
+                    $phpWord->setValue('nama_pengaju', $pengaju->nama);
+                    $phpWord->setValue('nip_pengaju', $pengaju->nip);
+                } else {
+                    $phpWord->setValue('nama_pengaju', '-');
+                    $phpWord->setValue('nip_pengaju', '-');
+                }
+                $values = [];
+                $no = 1;
+                foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
+                    $petugas = null;
+                    if ($lampiran->tipe_personil == 'mitra') {
+                        $petugas = Mitra::find($lampiran->peserta_id);
+                    } else {
+                        $petugas = Pegawai::find($lampiran->peserta_id);
+                    }
+                    $pcl_diawasi = Mitra::find($lampiran->pcl_diawasi);
+                    array_push($values, [
+                        'lamp_no' => $no++,
+                        'lamp_nama' => $petugas ? $petugas->nama : '-',
+                        'lamp_nip_nik' => $petugas->nip ? $petugas->nip : $petugas->nik,
+                        'lamp_tujuan' => $this->konversiKodeKec($lampiran->kec_tujuan),
+                        'lamp_tgl_pelaksanaan' => Carbon::parse($lampiran->tgl_pelaksanaan)->locale('id')->translatedFormat('d F Y'),
+                        'lamp_pcl' => $pcl_diawasi ? $pcl_diawasi->nama : '-',
+                        'lamp_jml_sampel' => $lampiran->jml_sampel_pcl,
+                        'lamp_sampel_diawasi' => $lampiran->jml_sampel_diawasi,
+                        'lamp_vol' => $lampiran->jml_ok,
+                        'lamp_transport_bayar' => number_format($lampiran->transport_bayar, 0, ',', '.'),
+                    ]);
+                }
+                $phpWord->cloneRowAndSetValues('lamp_no', $values);
+                $filePath = 'KAK/KAK_Translok_Biasa_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
+                $phpWord->saveAs($filePath);
+                return response()->download($filePath);
                 break;
             case 'translok-8jam':
                 return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis translok > 8 jam belum tersedia.');
@@ -179,7 +228,8 @@ class KegiatanController extends Controller
                 return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis pemanggilan dan konsultasi belum tersedia.');
                 break;
             case 'honor-mitra':
-
+                $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-honor-mitra.docx");
+                $phpWord->setValue('nama', $kegiatan->nama);
                 $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
                 $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
                 $kak4_tgl_mulai = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F Y');
@@ -231,7 +281,7 @@ class KegiatanController extends Controller
                     ]);
                 }
                 $phpWord->cloneRowAndSetValues('lamp_nama', $values);
-                $filePath = 'KAK/KAK_Honor_Mitra_' . $kegiatan->singkatan_resmi . '_' . time() . '.docx';
+                $filePath = 'KAK/KAK_Honor_Mitra_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
                 $phpWord->saveAs($filePath);
                 return response()->download($filePath);
                 break;
