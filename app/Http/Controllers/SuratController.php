@@ -583,6 +583,8 @@ class SuratController extends Controller
             $filePath = $surat->file;
             unlink($filePath);
             $surat->delete();
+        } else if ($surat->jenis_surat == 'sk') {
+            $surat->delete();
         } else {
             $surat->flag = 'Dihapus';
             $surat->save();
