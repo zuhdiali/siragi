@@ -163,6 +163,8 @@ class KegiatanController extends Controller
     public function unduhKAK($id)
     {
         $kegiatan = Kegiatan::find($id);
+        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("honor-mitra.docx");
+        $phpWord->setValue('nama', $kegiatan->nama);
         switch ($kegiatan->jenis_kak) {
             case 'translok-biasa':
                 return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis translok biasa belum tersedia.');
@@ -177,7 +179,61 @@ class KegiatanController extends Controller
                 return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis pemanggilan dan konsultasi belum tersedia.');
                 break;
             case 'honor-mitra':
-                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis honor mitra belum tersedia.');
+
+                $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
+                $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
+                $kak4_tgl_mulai = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F Y');
+                $kak4_tgl_selesai = Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F Y');
+                $phpWord->setValue('kak4_tgl_mulai', $kak4_tgl_mulai);
+                $phpWord->setValue('kak4_tgl_selesai', $kak4_tgl_selesai);
+                $phpWord->setValue('pj', $this->konversiTim($kegiatan->tim));
+                $sk = Surat::find($kegiatan->kak5_sk);
+                if ($sk) {
+                    $phpWord->setValue('no_sk', $sk->no_terakhir);
+                    $phpWord->setValue('tgl_sk', Carbon::parse($sk->tgl_surat)->locale('id')->translatedFormat('d F Y'));
+                    $phpWord->setValue('perihal_sk', $sk->perihal);
+                } else {
+                    $phpWord->setValue('no_sk', '-');
+                    $phpWord->setValue('tgl_sk', '-');
+                    $phpWord->setValue('perihal_sk', '-');
+                }
+                $phpWord = $this->findDetailRincianPOK($phpWord, $kegiatan->id);
+                $phpWord->setValue('tgl_kak', Carbon::parse($kegiatan->kak8_tgl)->locale('id')->translatedFormat('d F Y'));
+                $phpWord->setValue('kak8_pengaju', $kegiatan->kak8_pengaju);
+                $pengaju = Pegawai::find($kegiatan->id_pjk);
+                if ($pengaju) {
+                    $phpWord->setValue('nama_pengaju', $pengaju->nama);
+                    $phpWord->setValue('nip_pengaju', $pengaju->nip);
+                } else {
+                    $phpWord->setValue('nama_pengaju', '-');
+                    $phpWord->setValue('nip_pengaju', '-');
+                }
+                $values = [];
+                foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
+                    $petugas = Mitra::find($lampiran->peserta_id);
+                    $pengawas = null;
+                    if ($lampiran->tipe_pengawas == 'organik') {
+                        $pengawas = Pegawai::find($lampiran->pengawas_id);
+                    } else if ($lampiran->tipe_pengawas == 'non-organik') {
+                        $pengawas = Mitra::find($lampiran->pengawas_id);
+                    }
+                    array_push($values, [
+                        'lamp_nama' => $petugas ? $petugas->nama : '-',
+                        'lamp_nip_nik' => $petugas ? $petugas->nik : '-',
+                        'lamp_tugas' => $lampiran->pcl_or_pml == 1 ? 'PML' : 'PCL',
+                        'lamp_tujuan' => $this->konversiKodeKec($lampiran->kec_tujuan),
+                        'lamp_sls' => $lampiran->nama_sls,
+                        'lamp_sampel' => $lampiran->jml_sampel_pcl,
+                        'lamp_pengawas' => $pengawas ? $pengawas->nama : '-',
+                        'lamp_tgl_mulai' => Carbon::parse($lampiran->lampiran_tgl_mulai)->locale('id')->translatedFormat('d F Y'),
+                        'lamp_tgl_selesai' => Carbon::parse($lampiran->lampiran_tgl_selesai)->locale('id')->translatedFormat('d F Y'),
+                        'lamp_honor' => $lampiran->pcl_or_pml == 1 ? number_format($kegiatan->honor_pengawasan, 0, ',', '.') : number_format($kegiatan->honor_pencacahan, 0, ',', '.'),
+                    ]);
+                }
+                $phpWord->cloneRowAndSetValues('lamp_nama', $values);
+                $filePath = 'KAK/KAK_Honor_Mitra_' . $kegiatan->singkatan_resmi . '_' . time() . '.docx';
+                $phpWord->saveAs($filePath);
+                return response()->download($filePath);
                 break;
             case 'honor-inda':
                 return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis honor inda belum tersedia.');
@@ -185,83 +241,74 @@ class KegiatanController extends Controller
             default:
                 return redirect()->back()->with('error', 'Jenis KAK tidak dikenali.');
                 break;
-                $mitra = Mitra::find($id_mitra);
-                $kegiatan_mitra = KegiatanMitra::where('mitra_id', $id_mitra)->get();
-
-                $namaBulan = $this->convertDigitBulan($bulan);
-                $tglAwal = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
-                $tglAkhir = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
-                $namaHariAwal = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth()->locale('id')->translatedFormat('l');
-
-                $suratTerakhir = Surat::where('jenis_surat', 'spk')->where('tahun_spk', $tahun)->orderBy('no_terakhir', 'desc')->first();
-                // dd($suratTerakhir);
-                if ($suratTerakhir == null) {
-                    $noTerakhir = 0;
-                } else {
-                    $noTerakhir = $suratTerakhir->no_terakhir;
-                }
-
-                $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("SPK.docx");
-                $phpWord->setValue('nomor', $noTerakhir + 1);
-                $phpWord->setValue('hari', $namaHariAwal);
-                $phpWord->setValue('tanggal', 1);
-                $phpWord->setValue('bulan', strtolower($namaBulan));
-                $phpWord->setValue('Bulan', $namaBulan);
-                $phpWord->setValue('BULAN', strtoupper($namaBulan));
-                $phpWord->setValue('nama_mitra', $mitra->nama);
-                $phpWord->setValue('kec_asal', $this->konversiKodeKec($mitra->kec_asal));
-                $phpWord->setValue('tgl_awal', $tglAwal->locale('id')->translatedFormat('d F'));
-                $phpWord->setValue('tgl_akhir', $tglAkhir->locale('id')->translatedFormat('d F'));
-                $jumlah_honor = 0;
-                $count = 1;
-                $values = [];
-                foreach ($kegiatan_mitra as $km) {
-                    $beban_anggaran = "{#beban_anggaran#}";
-                    $kegiatan = Kegiatan::find($km->kegiatan_id);
-
-                    $satuan_honor = ($km->is_pml == 1 ? $kegiatan->honor_pengawasan : $kegiatan->honor_pencacahan);
-                    // Jika satuan honor kurang dari 10 artinya kegiatan dummy
-                    if ($satuan_honor < 10 || Carbon::parse($kegiatan->tgl_mulai)->format('m') != $bulan || $satuan_honor == null || $km->jumlah == null || Carbon::parse($kegiatan->tgl_mulai)->format('Y') != $tahun) {
-                        continue;
-                    }
-                    $jkw = '';
-                    if (Carbon::parse($kegiatan->tgl_mulai)->format('m') == Carbon::parse($kegiatan->tgl_selesai)->format('m')) {
-                        $jkw = Carbon::parse($kegiatan->tgl_mulai)->format('d') . ' s.d. ' . Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F Y');
-                    } else {
-                        $jkw = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F') . ' s.d. ' . Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F');
-                    }
-                    if ($kegiatan->beban_anggaran) {
-                        $beban_anggaran = $kegiatan->beban_anggaran;
-                    }
-                    $jumlah_honor += $km->estimasi_honor;
-                    array_push($values, [
-                        'no_keg' => $count,
-                        'nama_keg' => $kegiatan->nama,
-                        'jkw' => $jkw,
-                        'vol_keg' => $km->jumlah,
-                        'sat_keg' => ($km->is_pml == 1 ? $kegiatan->satuan_honor_pengawasan : $kegiatan->satuan_honor_pencacahan),
-                        'harga_sat' => $satuan_honor,
-                        'honor' => $km->estimasi_honor,
-                        'beban_ang' => $beban_anggaran,
-                    ]);
-                    $count++;
-                }
-                // $values = [
-                //     ['no_keg' => 1, 'nama_keg' => 'SUSENAS Maret 2025', 'jkw' => '01 s.d. 28 Februari 2025', 'vol_keg' => 20, 'sat_keg' => 'Dokumen', 'harga_sat' => '37.000', 'honor' => '740.000'],
-                //     ['no_keg' => 2, 'nama_keg' => 'SUSENAS April 2025', 'jkw' => '01 s.d. 30 April 2025', 'vol_keg' => 20, 'sat_keg' => 'Dokumen', 'harga_sat' => '37.000', 'honor' => '740.000'],
-                // ];
-                $honorTerbilang = $this->terbilang($jumlah_honor);
-                $phpWord->cloneRowAndSetValues('no_keg', $values);
-                $phpWord->setValue('total_honor', $jumlah_honor);
-                $phpWord->setValue('total_honor_terbilang',  $honorTerbilang . " Rupiah");
-                $phpWord->setValue('total_honor_terbilang_kecil',  strtolower($honorTerbilang) . " rupiah");
-
-                $filePath = 'SPK/' . $mitra->nama . '_' . $bulan . '_' . $tahun . '.docx';
-                $phpWord->saveAs($filePath);
-                return response()->download($filePath);
         }
     }
 
+    public function findDetailRincianPOK($phpWord, $id)
+    {
+        $kegiatan = Kegiatan::find($id);
+        if ($kegiatan) {
+            $pok_program = POK::find($kegiatan->kak6_program);
+            $pok_aktivitas = POK::find($kegiatan->kak6_aktivitas);
+            $pok_kro = POK::find($kegiatan->kak6_kro);
+            $pok_ro = POK::find($kegiatan->kak6_ro);
+            $pok_komponen = POK::find($kegiatan->kak6_komponen);
+            $pok_sub_komponen = POK::find($kegiatan->kak6_sub_komponen);
+
+            if ($pok_program) {
+                $phpWord->setValue('program', $pok_program->uraian . ' (' . $pok_program->kode_program . ')');
+            } else {
+                $phpWord->setValue('program', '-');
+            }
+            if ($pok_aktivitas) {
+                $phpWord->setValue('aktivitas', $pok_aktivitas->uraian . ' (' . $pok_aktivitas->kode_aktivitas . ')');
+            } else {
+                $phpWord->setValue('aktivitas', '-');
+            }
+
+            if ($pok_kro) {
+                $phpWord->setValue('kro', $pok_kro->uraian . ' (' . $pok_kro->kode_klasifikasi_rincian_output . ')');
+            } else {
+                $phpWord->setValue('kro', '-');
+            }
+
+            if ($pok_ro) {
+                $phpWord->setValue('ro', $pok_ro->uraian . ' (' . $pok_ro->kode_rincian_output . ')');
+            } else {
+                $phpWord->setValue('ro', '-');
+            }
+
+            if ($pok_komponen) {
+                $phpWord->setValue('komponen', $pok_komponen->uraian . ' (' . $pok_komponen->kode_komponen . ')');
+            } else {
+                $phpWord->setValue('komponen', '-');
+            }
+
+            if ($pok_sub_komponen) {
+                $phpWord->setValue('sub_komponen', $pok_sub_komponen->uraian . ' (' . $pok_sub_komponen->kode_sub_komponen . ')');
+            } else {
+                $phpWord->setValue('sub_komponen', '-');
+            }
+            $values = [];
+            $total_biaya = 0;
+            foreach ($kegiatan->kegiatanRincian as $index => $rincian) {
+                $pok_akun = POK::find($rincian->pok_id);
+                array_push($values, [
+                    'akun' => $pok_akun ?  $pok_akun->kode_akun : '-',
+                    'rincian_akun' => $rincian->rincian,
+                    'vol' => $rincian->vol,
+                    'satuan' => $rincian->satuan,
+                    'harga' => number_format($rincian->harga_satuan, 0, ',', '.'),
+                    'jml' => number_format($rincian->jumlah, 0, ',', '.'),
+                ]);
+                $total_biaya += $rincian->jumlah;
+            }
+            $phpWord->setValue('total_biaya', number_format($total_biaya, 0, ',', '.'));
+            $phpWord->setValue('total_biaya_terbilang', $this->terbilang($total_biaya));
+            $phpWord->cloneRowAndSetValues('akun', $values);
+        }
+        return $phpWord;
+    }
     public function create()
     {
         $mitras = Mitra::where('flag', null)->orderBy('nama', 'asc')->get();
@@ -489,6 +536,8 @@ class KegiatanController extends Controller
             'tim' => $request->kak4_pjk,
             'kak8_pengaju' => $request->kak8_pengaju,
             'kak8_tgl' => $request->kak8_tgl,
+            'honor_pengawasan' => $request->honor_pengawasan,
+            'honor_pencacahan' => $request->honor_pencacahan,
             'id_pjk' => $request->id_pjk,
         ]);
 
@@ -965,25 +1014,25 @@ class KegiatanController extends Controller
                 $tim = "Umum";
                 break;
             case '11012':
-                $tim = "Sosial";
+                $tim = "Statistik Sosial";
                 break;
             case '11013':
-                $tim = "Produksi";
+                $tim = "Statistik Ekonomi Produksi";
                 break;
             case '11014':
-                $tim = "Distribusi";
+                $tim = "Statistik Ekonomi Distribusi";
                 break;
             case '11015':
-                $tim = "Neraca";
+                $tim = "Neraca dan Analisis Statistik";
                 break;
             case '11016':
                 $tim = "TI dan Pengolahan";
                 break;
             case '11017':
-                $tim = 'Diseminasi';
+                $tim = 'Diseminasi, Publisitas, dan Humas';
                 break;
             case '11018':
-                $tim = 'PSS';
+                $tim = 'Pembinaan Statistik Sektoral';
                 break;
             default:
                 # code...
@@ -1054,5 +1103,66 @@ class KegiatanController extends Controller
             ->first();
         // dd($honorMitra);
         return $honorMitra;
+    }
+    private function konversiKodeKec($id)
+    {
+        $kec = "";
+        switch ($id) {
+            case '010':
+                $kec = "Teupah Selatan";
+                break;
+            case '020':
+                $kec = "Simeulue Timur";
+                break;
+            case '021':
+                $kec = "Teupah Barat";
+                break;
+            case '022':
+                $kec = "Teupah Tengah";
+                break;
+            case '030':
+                $kec = "Simeulue Tengah";
+                break;
+            case '031':
+                $kec = "Teluk Dalam";
+                break;
+            case '032':
+                $kec = "Simeulue Cut";
+                break;
+            case '040':
+                $kec = "Salang";
+                break;
+            case '050':
+                $kec = "Simeulue Barat";
+                break;
+            case '051':
+                $kec = "Alafan";
+                break;
+            default:
+                $kec = "";
+                break;
+        }
+        return $kec;
+    }
+    private function terbilang($x)
+    {
+        $angka = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+
+        if ($x < 12)
+            return " " . $angka[$x];
+        elseif ($x < 20)
+            return $this->terbilang($x - 10) . " Belas";
+        elseif ($x < 100)
+            return $this->terbilang($x / 10) . " Puluh" . $this->terbilang($x % 10);
+        elseif ($x < 200)
+            return " Seratus" . $this->terbilang($x - 100);
+        elseif ($x < 1000)
+            return $this->terbilang($x / 100) . " Ratus" . $this->terbilang($x % 100);
+        elseif ($x < 2000)
+            return " Seribu" . $this->terbilang($x - 1000);
+        elseif ($x < 1000000)
+            return $this->terbilang($x / 1000) . " Ribu" . $this->terbilang($x % 1000);
+        elseif ($x < 1000000000)
+            return $this->terbilang($x / 1000000) . " Juta" . $this->terbilang($x % 1000000);
     }
 }

@@ -186,17 +186,21 @@
                                                                 class="btn btn-link btn-primary px-2"
                                                                 data-original-title="Detil Kegiatan">
                                                                 <i class="fa fa-eye"></i>
+                                                            </button>
                                                         </form>
                                                         @if (
                                                             $kegiatan->is_approved == 1 &&
                                                                 (Auth::user()->role == 'Admin' ||
                                                                     (Auth::user()->role == 'Ketua Tim' && Auth::user()->tim == $kegiatan->kak4_pjk)))
-                                                            <form action="#" style="display: inline">
-                                                                <button type="button"
+                                                            <form
+                                                                action="{{ route('kegiatan.unduh-kak', $kegiatan->id) }}"
+                                                                style="display: inline">
+                                                                <button type="submit"
                                                                     class="btn btn-link btn-success px-2"
                                                                     data-bs-toggle="tooltip" title="Unduh KAK"
                                                                     data-original-title="Unduh KAK">
                                                                     <i class="fa fa-download"></i>
+                                                                </button>
                                                             </form>
                                                         @endif
                                                         @if (Auth::user()->role == 'Admin' ||

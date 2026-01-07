@@ -470,6 +470,50 @@
 
                                 <div class="row">
                                     <div class="col-12">
+                                        @if ($jenis_kak == 'honor-mitra')
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div
+                                                        class="form-group {{ $errors->has('honor_pengawasan') ? 'has-error has-feedback' : '' }}">
+                                                        <label for="honor_pengawasan">Honor
+                                                            <strong>Pengawasan</strong></label>
+                                                        <input type="number" class="form-control" id="honor_pengawasan"
+                                                            name="honor_pengawasan"
+                                                            placeholder="Masukkan honor per satuan"
+                                                            value="{{ old('honor_pengawasan') ? old('honor_pengawasan') : $kegiatan->honor_pengawasan }}"
+                                                            readonly />
+                                                        @if ($errors->has('honor_pengawasan'))
+                                                            <small
+                                                                class="form-text text-muted">{{ $errors->first('honor_pengawasan') }}</small>
+                                                        @else
+                                                            <small class="form-text text-muted">
+                                                                {{-- (isian honor dapat dikosongkan jika satuan honor belum dipilih) --}}
+                                                            </small>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div
+                                                        class="form-group {{ $errors->has('honor_pencacahan') ? 'has-error has-feedback' : '' }}">
+                                                        <label for="honor_pencacahan">Honor <strong>Pencacahan /
+                                                                Pengolahan</strong></label>
+                                                        <input type="number" class="form-control" id="honor_pencacahan"
+                                                            name="honor_pencacahan"
+                                                            placeholder="Masukkan honor per satuan"
+                                                            value="{{ old('honor_pencacahan') ? old('honor_pencacahan') : $kegiatan->honor_pencacahan }}"
+                                                            readonly />
+                                                        @if ($errors->has('honor_pencacahan'))
+                                                            <small
+                                                                class="form-text text-muted">{{ $errors->first('honor_pencacahan') }}</small>
+                                                        @else
+                                                            <small class="form-text text-muted">
+                                                                {{-- (isian honor dapat dikosongkan jika satuan honor belum dipilih) --}}
+                                                            </small>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
                                         <p>Rincian Biaya </p>
                                         <div class="table-responsive">
                                             <table class="table table-bordered table-hover align-middle"
@@ -688,7 +732,8 @@
                                                                 <td>
                                                                     <input type="date" name="lampiran_tgl_selesai[]"
                                                                         class="form-control form-control-sm"
-                                                                        value="{{ $t->lampiran_tgl_selesai }}" readonly />
+                                                                        value="{{ $t->lampiran_tgl_selesai }}"
+                                                                        readonly />
                                                                     <small class="text-muted">bulan/tanggal/tahun</small>
                                                                 </td>
                                                             @endif
