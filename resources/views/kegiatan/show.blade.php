@@ -547,7 +547,7 @@
                                                             </td>
                                                             @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
                                                                 <td>
-                                                                    <select name="kecamatan_tujuan[]"
+                                                                    <select name="kec_tujuan[]"
                                                                         class="form-select form-select-sm input-kecamatan"
                                                                         disabled required>
                                                                         <option value="{{ $t->kec_tujuan }}" selected

@@ -19,6 +19,8 @@
                                         class="btn btn-primary btn-round mb-1">Translok Biasa</a>
                                     <a href="{{ route('kegiatan.translok-8jam.create') }}"
                                         class="btn btn-primary btn-round mb-1">Translok > 8 Jam</a>
+                                    <a href="{{ route('kegiatan.pelatihan.create') }}"
+                                        class="btn btn-primary btn-round mb-1">Translok Pelatihan</a>
                                 </div>
                             </div>
                             <div class="row">
@@ -48,7 +50,6 @@
                     <button type="button" class="btn  btn-primary " data-bs-toggle="modal" data-bs-target="#pilihKAK">
                         <i class="fa fa-plus"></i> Tambah KAK
                     </button>
-                    {{-- <a href="{{ route('kegiatan.create') }}" class="btn btn-primary btn-round">Tambah kegiatan</a> --}}
                 </div>
             </div>
             <div class="row">

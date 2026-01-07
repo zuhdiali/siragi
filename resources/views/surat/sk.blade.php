@@ -8,9 +8,11 @@
                     <h3 class="fw-bold mb-3">SK</h3>
                     <h6 class="op-7 mb-2">Daftar sk </h6>
                 </div>
-                <div class="ms-md-auto py-2 py-md-0">
-                    <a href="{{ url('surat/create/sk') }}" class="btn btn-primary btn-round">Tambah surat</a>
-                </div>
+                @if (Auth::user()->role == 'Admin')
+                    <div class="ms-md-auto py-2 py-md-0">
+                        <a href="{{ url('surat/create/sk') }}" class="btn btn-primary btn-round">Tambah surat</a>
+                    </div>
+                @endif
             </div>
             <div class="row">
                 <div class="col-sm-6 col-md-3">

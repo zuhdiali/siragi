@@ -164,19 +164,19 @@
 
 
 
-                                    @if (Auth::user()->role == 'Admin')
-                                        <li class="{{ str_contains(Request::path(), 'spk') ? 'active' : '' }}">
-                                            <a href="{{ route('surat.spk') }}">
-                                                <span class="sub-item">SPK</span>
-                                            </a>
-                                        </li>
 
-                                        <li class="{{ str_contains(Request::path(), 'sk') ? 'active' : '' }}">
-                                            <a href="{{ route('surat.sk') }}">
-                                                <span class="sub-item">SK</span>
-                                            </a>
-                                        </li>
-                                    @endif
+                                    <li class="{{ str_contains(Request::path(), 'spk') ? 'active' : '' }}">
+                                        <a href="{{ route('surat.spk') }}">
+                                            <span class="sub-item">SPK</span>
+                                        </a>
+                                    </li>
+
+                                    <li class="{{ str_contains(Request::path(), 'sk') ? 'active' : '' }}">
+                                        <a href="{{ route('surat.sk') }}">
+                                            <span class="sub-item">SK</span>
+                                        </a>
+                                    </li>
+
                                 </ul>
                             </div>
                         </li>

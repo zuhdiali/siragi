@@ -643,7 +643,7 @@
 
                                                             @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
                                                                 <td>
-                                                                    <select name="kecamatan_tujuan[]"
+                                                                    <select name="kec_tujuan[]"
                                                                         class="form-select form-select-sm input-kecamatan"
                                                                         required>
                                                                         {{-- Opsi ini akan diisi ulang oleh JS Helper di bawah agar konsisten dengan standar biaya, 
@@ -1425,7 +1425,7 @@
                         <input type="hidden" name="tipe_peserta[]" value="${tipe}">
                     </td>
                     <td><input type="text" name="nip[]" class="form-control form-control-sm text-center input-nip" readonly placeholder="-"></td>
-                    <td><select name="kecamatan_tujuan[]" class="form-select form-select-sm input-kecamatan" required>${optionsKecamatan}</select></td>
+                    <td><select name="kec_tujuan[]" class="form-select form-select-sm input-kecamatan" required>${optionsKecamatan}</select></td>
                     <td><input type="date" name="tanggal_pelaksanaan[]" class="form-control form-control-sm"></td>
                     <td><select name="pcl_diawasi[]" class="form-select form-select-sm select2-dinamis form-select-mitra">${templateOpsiMitra}</select></td>
                     <td><input type="number" name="jml_sampel_pcl[]" class="form-control form-control-sm text-center" min="0" value="0"></td>
@@ -1528,7 +1528,7 @@
                             </select>
                         </td>
                         <td>
-                            <select name="kecamatan_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
+                            <select name="kec_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
                                 ${optionsKecamatan}
                             </select>
                         </td>
@@ -1584,7 +1584,7 @@
                             </select>
                         </td>
                         <td>
-                            <select name="kecamatan_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
+                            <select name="kec_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
                                 ${optionsKecamatan}
                             </select>
                         </td>

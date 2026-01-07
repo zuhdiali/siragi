@@ -35,6 +35,16 @@
                                                     {{ old('filter_sbks') == 'LAINNYA' ? 'selected' : '' }}>
                                                     Lainnya</option>
                                             </select>
+                                            @if ($errors->has('filter_sbks'))
+                                                <small
+                                                    class="form-text text-muted">{{ $errors->first('filter_sbks') }}</small>
+                                            @else
+                                                <small class="form-text text-muted">
+                                                    Pilih SBKS yang sesuai dengan kegiatan ini. Jika tidak ada di
+                                                    daftar,
+                                                    pilih "Lainnya"
+                                                </small>
+                                            @endif
                                         </div>
                                     </div>
 
@@ -142,17 +152,18 @@
                                                 <div class="col">
                                                     @if ($jenis_kak != 'honor-inda' && $jenis_kak != 'honor-mitra')
                                                         <label for="kak2_maksud">Maksud dari pengadaan ini adalah
-                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || ($jenis_kak = 'pelatihan'))
                                                                 untuk pembayaran transport lokal
                                                             @endif
                                                         </label>
 
                                                         <select name="kak2_maksud" id="kak2_maksud" class="form-control">
                                                             <option value="">( Pilih salah satu )</option>
-                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || ($jenis_kak = 'pelatihan'))
                                                                 <option value="pengawasan">Pengawasan</option>
                                                                 <option value="supervisi">Supervisi</option>
                                                                 <option value="pendataan">Pendataan</option>
+                                                                {{ $jenis_kak == 'pelatihan' ? '<option value="pelatihan">Pelatihan</option>' : '' }}
                                                             @elseif ($jenis_kak == 'pemanggilan-konsultasi')
                                                                 <option value="pemanggilan">Pemanggilan</option>
                                                                 <option value="konsultasi">Konsultasi</option>
@@ -165,7 +176,7 @@
                                                     @endif
                                                 </div>
                                                 <div class="col">
-                                                    @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                    @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || ($jenis_kak = 'pelatihan'))
                                                         <label for="kak2_tujuan">Tujuan pengadaan ini adalah untuk
                                                             pembayaran
                                                             transport lokal
@@ -201,7 +212,7 @@
                                             <div class="row" id="kak3_target_wrap">
                                                 <div class="col">
                                                     <label for="kak3_target" id="label_kak3_target">
-                                                        @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                        @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || ($jenis_kak = 'pelatihan'))
                                                             Mitra yang diawasi
                                                             ada sejumlah
                                                         @elseif ($jenis_kak == 'pemanggilan-konsultasi')
@@ -310,7 +321,7 @@
                                         <div class="form-group">
                                             <p>5. SPESIFIKASI PENGADAAN BARANG/JASA</p>
 
-                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || ($jenis_kak = 'pelatihan'))
                                                 <p>Transport lokal sesuai SK Kepala BPS Kabupaten Simeulue nomor XX Tahun
                                                     2025
                                                     tanggal DD-MM-YYYY tentang Penetapan Rate Biaya Transport dari Kabupaten
@@ -536,7 +547,7 @@
                                                     <tr>
                                                         <th style="width: 250px;">Nama Pelaksana</th>
                                                         <th style="width: 150px;">NIP / NIK</th>
-                                                        @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                        @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || $jenis_kak == 'pelatihan')
                                                             <th style="width: 150px;">Kecamatan Tujuan</th>
                                                             <th style="width: 120px;">Tanggal Pelaksanaan</th>
                                                             <th style="width: 200px;">Nama PCL yang Diawasi</th>
@@ -569,7 +580,7 @@
                                                 @if ($jenis_kak != 'honor-mitra')
                                                     <tfoot class="table-light fw-bold">
                                                         <tr>
-                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || ($jenis_kak = 'pelatihan'))
                                                                 <td colspan="8" class="text-end">TOTAL ESTIMASI BIAYA
                                                                     TRANSPORT:</td>
                                                             @elseif ($jenis_kak == 'pemanggilan-konsultasi')
@@ -596,7 +607,7 @@
                                                     id="btn_tambah_pegawai">
                                                     <i class="fa fa-user-plus"></i> Tambah Pegawai
                                                 </button>
-                                                @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || ($jenis_kak = 'pelatihan'))
                                                     <button type="button" class="btn btn-warning btn-sm"
                                                         id="btn_tambah_mitra">
                                                         <i class="fa fa-users"></i> Tambah Mitra
@@ -640,7 +651,7 @@
                                 <hr />
 
                                 <div class="row">
-                                    @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                    @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || ($jenis_kak = 'pelatihan'))
                                         <div class="col-md-4">
                                             <div
                                                 class="form-group  {{ $errors->has('kak6_pembiayaan') ? 'has-error has-feedback' : '' }}">
@@ -743,7 +754,7 @@
                                                                 [UPDATING/PENDATAAN] [nama_kegiatan] TAHUN 2026 BPS
                                                                 KABUPATEN
                                                                 SIMEULUE TAHUN ANGGARAN 2026
-                                                            @elseif ($jenis_kak == 'translok-8jam')
+                                                            @elseif ($jenis_kak == 'translok-8jam' || $jenis_kak == 'pelatihan')
                                                                 petunjuk pengisian: TRANSPORT LOKAL DI ATAS 8 JAM
                                                                 [ORGANIK/MITRA] [SUPERVISI/PENGAWASAN/PENDATAAN]
                                                                 [UPDATING/PENDATAAN] [nama_kegiatan] TAHUN 2026 BPS
@@ -811,7 +822,7 @@
                 closeOnSelect: false,
             });
 
-            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+            @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || $jenis_kak == 'pelatihan')
                 $('#kak2_tujuan').select2({
                     theme: "bootstrap-5",
                     width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ?
@@ -832,7 +843,7 @@
             $('#kak2_maksud').on('change',
                 function() {
                     var kode_maksud = $('#kak2_maksud').val();
-                    @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                    @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || $jenis_kak == 'pelatihan')
                         if (kode_maksud == 'pengawasan' || kode_maksud == 'supervisi') {
                             $('#label_kak3_target').html('Mitra yang diawasi ada sejumlah');
                         } else {
@@ -1213,9 +1224,13 @@
                 var tujuan = $('#kak2_tujuan').val();
                 var singkatan_resmi = $('#singkatan_resmi').val();
 
-                @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || $jenis_kak == 'pemanggilan-konsultasi')
+                @if (
+                    $jenis_kak == 'translok-biasa' ||
+                        $jenis_kak == 'translok-8jam' ||
+                        $jenis_kak == 'pemanggilan-konsultasi' ||
+                        $jenis_kak == 'pelatihan')
                     if (jenis_kegiatan && nama_kegiatan && maksud && tujuan) {
-                        @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                        @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam' || $jenis_kak == 'pelatihan')
 
                             if (maksud == 'pendataan') {
                                 return 'TRANSPORT LOKAL DI BAWAH 8 JAM ' + tujuan.toUpperCase() + ' ' +
@@ -1349,7 +1364,7 @@
 
             // Ambil opsi kecamatan
             var optionsKecamatan = getOptionsKecamatan();
-            @if ($jenis_kak == 'translok-8jam' || $jenis_kak == 'translok-biasa')
+            @if ($jenis_kak == 'translok-8jam' || $jenis_kak == 'translok-biasa' || $jenis_kak == 'pelatihan')
                 var tr = `
                     <tr>
                         <td>
@@ -1365,7 +1380,7 @@
                             <input type="text" name="nip[]" class="form-control form-control-sm text-center input-nip" readonly placeholder="-">
                         </td>
                         <td>
-                            <select name="kecamatan_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
+                            <select name="kec_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
                                 ${optionsKecamatan}
                             </select>
                         </td>
@@ -1489,7 +1504,7 @@
                             </select>
                         </td>
                         <td>
-                            <select name="kecamatan_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
+                            <select name="kec_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
                                 ${optionsKecamatan}
                             </select>
                         </td>
@@ -1545,7 +1560,7 @@
                             </select>
                         </td>
                         <td>
-                            <select name="kecamatan_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
+                            <select name="kec_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
                                 ${optionsKecamatan}
                             </select>
                         </td>

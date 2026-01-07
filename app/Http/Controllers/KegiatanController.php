@@ -67,7 +67,6 @@ class KegiatanController extends Controller
             ])->find($id);
         }
         $data['jenis_kak'] = $jenis_kak;
-        // dd($data['kegiatan']);
         return view($viewPath, $data);
     }
 
@@ -99,6 +98,21 @@ class KegiatanController extends Controller
     public function translok8JamShow($id)
     {
         return $this->loadCreateEditView('kegiatan.show', 'translok-8jam', $id);
+    }
+
+    public function pelatihanCreate()
+    {
+        return $this->loadCreateEditView('kegiatan.create', 'pelatihan');
+    }
+
+    public function pelatihanEdit($id)
+    {
+        return $this->loadCreateEditView('kegiatan.edit', 'pelatihan', $id);
+    }
+
+    public function pelatihanShow($id)
+    {
+        return $this->loadCreateEditView('kegiatan.show', 'pelatihan', $id);
     }
 
     public function pemanggilanKonsultasiCreate()
@@ -144,6 +158,107 @@ class KegiatanController extends Controller
     public function honorIndaShow($id)
     {
         return $this->loadCreateEditView('kegiatan.show', 'honor-inda', $id);
+    }
+
+    public function unduhKAK($id)
+    {
+        $kegiatan = Kegiatan::find($id);
+        switch ($kegiatan->jenis_kak) {
+            case 'translok-biasa':
+                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis translok biasa belum tersedia.');
+                break;
+            case 'translok-8jam':
+                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis translok > 8 jam belum tersedia.');
+                break;
+            case 'pelatihan':
+                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis translok pelatihan belum tersedia.');
+                break;
+            case 'pemanggilan-konsultasi':
+                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis pemanggilan dan konsultasi belum tersedia.');
+                break;
+            case 'honor-mitra':
+                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis honor mitra belum tersedia.');
+                break;
+            case 'honor-inda':
+                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis honor inda belum tersedia.');
+                break;
+            default:
+                return redirect()->back()->with('error', 'Jenis KAK tidak dikenali.');
+                break;
+        $mitra = Mitra::find($id_mitra);
+        $kegiatan_mitra = KegiatanMitra::where('mitra_id', $id_mitra)->get();
+
+        $namaBulan = $this->convertDigitBulan($bulan);
+        $tglAwal = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
+        $tglAkhir = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+        $namaHariAwal = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth()->locale('id')->translatedFormat('l');
+
+        $suratTerakhir = Surat::where('jenis_surat', 'spk')->where('tahun_spk', $tahun)->orderBy('no_terakhir', 'desc')->first();
+        // dd($suratTerakhir);
+        if ($suratTerakhir == null) {
+            $noTerakhir = 0;
+        } else {
+            $noTerakhir = $suratTerakhir->no_terakhir;
+        }
+
+        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("SPK.docx");
+        $phpWord->setValue('nomor', $noTerakhir + 1);
+        $phpWord->setValue('hari', $namaHariAwal);
+        $phpWord->setValue('tanggal', 1);
+        $phpWord->setValue('bulan', strtolower($namaBulan));
+        $phpWord->setValue('Bulan', $namaBulan);
+        $phpWord->setValue('BULAN', strtoupper($namaBulan));
+        $phpWord->setValue('nama_mitra', $mitra->nama);
+        $phpWord->setValue('kec_asal', $this->konversiKodeKec($mitra->kec_asal));
+        $phpWord->setValue('tgl_awal', $tglAwal->locale('id')->translatedFormat('d F'));
+        $phpWord->setValue('tgl_akhir', $tglAkhir->locale('id')->translatedFormat('d F'));
+        $jumlah_honor = 0;
+        $count = 1;
+        $values = [];
+        foreach ($kegiatan_mitra as $km) {
+            $beban_anggaran = "{#beban_anggaran#}";
+            $kegiatan = Kegiatan::find($km->kegiatan_id);
+
+            $satuan_honor = ($km->is_pml == 1 ? $kegiatan->honor_pengawasan : $kegiatan->honor_pencacahan);
+            // Jika satuan honor kurang dari 10 artinya kegiatan dummy
+            if ($satuan_honor < 10 || Carbon::parse($kegiatan->tgl_mulai)->format('m') != $bulan || $satuan_honor == null || $km->jumlah == null || Carbon::parse($kegiatan->tgl_mulai)->format('Y') != $tahun) {
+                continue;
+            }
+            $jkw = '';
+            if (Carbon::parse($kegiatan->tgl_mulai)->format('m') == Carbon::parse($kegiatan->tgl_selesai)->format('m')) {
+                $jkw = Carbon::parse($kegiatan->tgl_mulai)->format('d') . ' s.d. ' . Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F Y');
+            } else {
+                $jkw = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F') . ' s.d. ' . Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F');
+            }
+            if ($kegiatan->beban_anggaran) {
+                $beban_anggaran = $kegiatan->beban_anggaran;
+            }
+            $jumlah_honor += $km->estimasi_honor;
+            array_push($values, [
+                'no_keg' => $count,
+                'nama_keg' => $kegiatan->nama,
+                'jkw' => $jkw,
+                'vol_keg' => $km->jumlah,
+                'sat_keg' => ($km->is_pml == 1 ? $kegiatan->satuan_honor_pengawasan : $kegiatan->satuan_honor_pencacahan),
+                'harga_sat' => $satuan_honor,
+                'honor' => $km->estimasi_honor,
+                'beban_ang' => $beban_anggaran,
+            ]);
+            $count++;
+        }
+        // $values = [
+        //     ['no_keg' => 1, 'nama_keg' => 'SUSENAS Maret 2025', 'jkw' => '01 s.d. 28 Februari 2025', 'vol_keg' => 20, 'sat_keg' => 'Dokumen', 'harga_sat' => '37.000', 'honor' => '740.000'],
+        //     ['no_keg' => 2, 'nama_keg' => 'SUSENAS April 2025', 'jkw' => '01 s.d. 30 April 2025', 'vol_keg' => 20, 'sat_keg' => 'Dokumen', 'harga_sat' => '37.000', 'honor' => '740.000'],
+        // ];
+        $honorTerbilang = $this->terbilang($jumlah_honor);
+        $phpWord->cloneRowAndSetValues('no_keg', $values);
+        $phpWord->setValue('total_honor', $jumlah_honor);
+        $phpWord->setValue('total_honor_terbilang',  $honorTerbilang . " Rupiah");
+        $phpWord->setValue('total_honor_terbilang_kecil',  strtolower($honorTerbilang) . " rupiah");
+
+        $filePath = 'SPK/' . $mitra->nama . '_' . $bulan . '_' . $tahun . '.docx';
+        $phpWord->saveAs($filePath);
+        return response()->download($filePath);
     }
 
     public function create()
@@ -241,7 +356,7 @@ class KegiatanController extends Controller
                     'peserta_id' => $request->peserta_id[$index],
                     'tipe_personil' => $request->tipe_peserta[$index],
                     'nip_nik' => $request->nip[$index],
-                    'kec_tujuan' => $request->kecamatan_tujuan[$index],
+                    'kec_tujuan' => $request->kec_tujuan[$index],
                     'tgl_pelaksanaan' => $request->tanggal_pelaksanaan[$index],
                     'pcl_diawasi' => $request->pcl_diawasi[$index],
                     'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
@@ -278,7 +393,7 @@ class KegiatanController extends Controller
                     'tipe_personil' => $request->tipe_peserta[$index],
                     'nip_nik' => $request->nip[$index],
                     'pcl_or_pml' => $request->pcl_or_pml[$index],
-                    'kec_tujuan' => $request->kecamatan_tujuan[$index],
+                    'kec_tujuan' => $request->kec_tujuan[$index],
                     'nama_sls' => $request->nama_sls[$index],
                     'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
                     'tipe_pengawas' => $request->tipe_pengawas[$index],
@@ -412,7 +527,7 @@ class KegiatanController extends Controller
                         'peserta_id' => $request->peserta_id[$index],
                         'tipe_personil' => $request->tipe_peserta[$index],
                         'nip_nik' => $request->nip[$index],
-                        'kec_tujuan' => $request->kecamatan_tujuan[$index],
+                        'kec_tujuan' => $request->kec_tujuan[$index],
                         'tgl_pelaksanaan' => $request->tanggal_pelaksanaan[$index],
                         'pcl_diawasi' => $request->pcl_diawasi[$index],
                         'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
@@ -450,7 +565,7 @@ class KegiatanController extends Controller
                         'tipe_personil' => $request->tipe_peserta[$index],
                         'nip_nik' => $request->nip[$index],
                         'pcl_or_pml' => $request->pcl_or_pml[$index],
-                        'kec_tujuan' => $request->kecamatan_tujuan[$index],
+                        'kec_tujuan' => $request->kec_tujuan[$index],
                         'nama_sls' => $request->nama_sls[$index],
                         'jml_sampel_pcl' => $request->jml_sampel_pcl[$index],
                         'tipe_pengawas' => $request->tipe_pengawas[$index],

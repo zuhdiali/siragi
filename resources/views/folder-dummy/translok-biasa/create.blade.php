@@ -1141,7 +1141,7 @@
                             <input type="text" name="nip[]" class="form-control form-control-sm text-center input-nip" readonly placeholder="-">
                         </td>
                         <td>
-                            <select name="kecamatan_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
+                            <select name="kec_tujuan[]" class="form-select form-select-sm input-kecamatan" required>
                                 ${optionsKecamatan}
                             </select>
                         </td>
