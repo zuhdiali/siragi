@@ -321,9 +321,9 @@
                                         <div class="form-group">
                                             <p>5. SPESIFIKASI PENGADAAN BARANG/JASA</p>
                                             @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                                <p>Transport lokal sesuai SK Kepala BPS Kabupaten Simeulue nomor XX Tahun
-                                                    2025
-                                                    tanggal DD-MM-YYYY tentang Penetapan Rate Biaya Transport dari Kabupaten
+                                                <p>Transport lokal sesuai SK Kepala BPS Kabupaten Simeulue nomor 01 Tahun
+                                                    2026
+                                                    tanggal 05-01-2025 tentang Penetapan Rate Biaya Transport dari Kabupaten
                                                     Simeulue Ke Kecamatan Tahun 2026</p>
                                             @elseif ($jenis_kak == 'pemanggilan-konsultasi')
                                                 <p>Perjalanan dinas ini sesuai dengan PMK Nomor 32 Tahun 2025 tanggal 14

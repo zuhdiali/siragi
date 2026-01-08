@@ -67,6 +67,7 @@ class KegiatanController extends Controller
             ])->find($id);
         }
         $data['jenis_kak'] = $jenis_kak;
+        // dd($data);
         return view($viewPath, $data);
     }
 
