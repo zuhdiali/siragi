@@ -188,10 +188,7 @@
                                                                 <i class="fa fa-eye"></i>
                                                             </button>
                                                         </form>
-                                                        @if (
-                                                            $kegiatan->is_approved == 1 &&
-                                                                (Auth::user()->role == 'Admin' ||
-                                                                    (Auth::user()->role == 'Ketua Tim' && Auth::user()->tim == $kegiatan->kak4_pjk)))
+                                                        @if ($kegiatan->is_approved == 1)
                                                             <form
                                                                 action="{{ route('kegiatan.unduh-kak', $kegiatan->id) }}"
                                                                 style="display: inline">
