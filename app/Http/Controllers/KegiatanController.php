@@ -32,7 +32,7 @@ class KegiatanController extends Controller
                 $kegiatan->honor_pengolahan = 0;
             }
             $kegiatan->pjk = Pegawai::find($kegiatan->id_pjk);
-            $kegiatan->namaTim = $this->konversiTim($kegiatan->tim);
+            $kegiatan->namaTim = $this->konversiTim($kegiatan->kak4_pjk);
         }
         return view('kegiatan.index', ['kegiatans' => $kegiatans, 'kegiatanTahunIni' => $kegiatanTahunIni]);
     }
@@ -101,19 +101,19 @@ class KegiatanController extends Controller
         return $this->loadCreateEditView('kegiatan.show', 'translok-8jam', $id);
     }
 
-    public function pelatihanCreate()
+    public function lainnyaCreate()
     {
-        return $this->loadCreateEditView('kegiatan.create', 'pelatihan');
+        return $this->loadCreateEditView('kegiatan.create', 'lainnya');
     }
 
-    public function pelatihanEdit($id)
+    public function lainnyaEdit($id)
     {
-        return $this->loadCreateEditView('kegiatan.edit', 'pelatihan', $id);
+        return $this->loadCreateEditView('kegiatan.edit', 'lainnya', $id);
     }
 
-    public function pelatihanShow($id)
+    public function lainnyaShow($id)
     {
-        return $this->loadCreateEditView('kegiatan.show', 'pelatihan', $id);
+        return $this->loadCreateEditView('kegiatan.show', 'lainnya', $id);
     }
 
     public function pemanggilanKonsultasiCreate()
@@ -215,18 +215,125 @@ class KegiatanController extends Controller
                     ]);
                 }
                 $phpWord->cloneRowAndSetValues('lamp_no', $values);
-                $filePath = 'KAK/KAK_Translok_Biasa_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
-                $phpWord->saveAs($filePath);
-                return response()->download($filePath);
+                // 1. Tentukan nama file yang akan dilihat user saat download
+                $fileNameUser = 'KAK_Translok_Biasa_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
+
+                // 2. Buat file temporary (sementara) di sistem server
+                $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
+                $phpWord->saveAs($tempFile);
+                // Parameter 1: Path file sementara
+                // Parameter 2: Nama file yang akan didownload user
+                return response()->download($tempFile, $fileNameUser)->deleteFileAfterSend(true);
                 break;
             case 'translok-8jam':
-                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis translok > 8 jam belum tersedia.');
-                break;
-            case 'pelatihan':
-                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis translok pelatihan belum tersedia.');
+                $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-translok-8JAM.docx");
+                $phpWord->setValue('nama', $kegiatan->nama);
+                $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
+                $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
+                $phpWord->setValue('kak2_maksud', $kegiatan->kak2_maksud);
+                $phpWord->setValue('kak2_tujuan', $kegiatan->kak2_tujuan);
+                $phpWord->setValue('kak3_target', $kegiatan->kak3_target);
+                $kak4_tgl_mulai = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F Y');
+                $kak4_tgl_selesai = Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F Y');
+                $phpWord->setValue('kak4_tgl_mulai', $kak4_tgl_mulai);
+                $phpWord->setValue('kak4_tgl_selesai', $kak4_tgl_selesai);
+                $phpWord->setValue('pj', $this->konversiTim($kegiatan->tim));
+                $phpWord = $this->findDetailRincianPOK($phpWord, $kegiatan->id);
+                $phpWord->setValue('kak6_pembiayaan', $kegiatan->kak6_pembiayaan);
+                $phpWord->setValue('tgl_kak', Carbon::parse($kegiatan->kak8_tgl)->locale('id')->translatedFormat('d F Y'));
+                $phpWord->setValue('kak8_pengaju', $kegiatan->kak8_pengaju);
+                $pengaju = Pegawai::find($kegiatan->id_pjk);
+                if ($pengaju) {
+                    $phpWord->setValue('nama_pengaju', $pengaju->nama);
+                    $phpWord->setValue('nip_pengaju', $pengaju->nip);
+                } else {
+                    $phpWord->setValue('nama_pengaju', '-');
+                    $phpWord->setValue('nip_pengaju', '-');
+                }
+                $values = [];
+                $no = 1;
+                foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
+                    $petugas = null;
+                    if ($lampiran->tipe_personil == 'mitra') {
+                        $petugas = Mitra::find($lampiran->peserta_id);
+                    } else {
+                        $petugas = Pegawai::find($lampiran->peserta_id);
+                    }
+                    $pcl_diawasi = Mitra::find($lampiran->pcl_diawasi);
+                    array_push($values, [
+                        'lamp_no' => $no++,
+                        'lamp_nama' => $petugas ? $petugas->nama : '-',
+                        'lamp_nip_nik' => $petugas->nip ? $petugas->nip : $petugas->nik,
+                        'lamp_tujuan' => $this->konversiKodeKec($lampiran->kec_tujuan),
+                        'lamp_tgl_pelaksanaan' => Carbon::parse($lampiran->tgl_pelaksanaan)->locale('id')->translatedFormat('d F Y'),
+                        'lamp_pcl' => $pcl_diawasi ? $pcl_diawasi->nama : '-',
+                        'lamp_jml_sampel' => $lampiran->jml_sampel_pcl,
+                        'lamp_sampel_diawasi' => $lampiran->jml_sampel_diawasi,
+                        'lamp_vol' => $lampiran->jml_ok,
+                        'lamp_transport_bayar' => number_format($lampiran->transport_bayar, 0, ',', '.'),
+                    ]);
+                }
+                $phpWord->cloneRowAndSetValues('lamp_no', $values);
+                // 1. Tentukan nama file yang akan dilihat user saat download
+                $fileNameUser = 'KAK_Translok_DI_ATAS_8_JAM_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
+
+                // 2. Buat file temporary (sementara) di sistem server
+                $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
+                $phpWord->saveAs($tempFile);
+                // Parameter 1: Path file sementara
+                // Parameter 2: Nama file yang akan didownload user
+                return response()->download($tempFile, $fileNameUser)->deleteFileAfterSend(true);
                 break;
             case 'pemanggilan-konsultasi':
-                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis pemanggilan dan konsultasi belum tersedia.');
+                $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-pemanggilan-konsultasi.docx");
+                $phpWord->setValue('nama', $kegiatan->nama);
+                $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
+                $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
+                $phpWord->setValue('kak2_maksud', $kegiatan->kak2_maksud);
+                $phpWord->setValue('kak2_tujuan', $kegiatan->kak2_tujuan);
+                $phpWord->setValue('kak3_target', $kegiatan->kak3_target);
+                $kak4_tgl_mulai = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F Y');
+                $kak4_tgl_selesai = Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F Y');
+                $phpWord->setValue('kak4_tgl_mulai', $kak4_tgl_mulai);
+                $phpWord->setValue('kak4_tgl_selesai', $kak4_tgl_selesai);
+                $phpWord->setValue('pj', $this->konversiTim($kegiatan->tim));
+                $phpWord = $this->findDetailRincianPOK($phpWord, $kegiatan->id);
+                $phpWord->setValue('tgl_kak', Carbon::parse($kegiatan->kak8_tgl)->locale('id')->translatedFormat('d F Y'));
+                $phpWord->setValue('kak8_pengaju', $kegiatan->kak8_pengaju);
+                $pengaju = Pegawai::find($kegiatan->id_pjk);
+                if ($pengaju) {
+                    $phpWord->setValue('nama_pengaju', $pengaju->nama);
+                    $phpWord->setValue('nip_pengaju', $pengaju->nip);
+                } else {
+                    $phpWord->setValue('nama_pengaju', '-');
+                    $phpWord->setValue('nip_pengaju', '-');
+                }
+                $values = [];
+                $no = 1;
+                foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
+                    $peserta = Pegawai::find($lampiran->peserta_id);
+                    array_push($values, [
+                        'lamp_no' => $no++,
+                        'lamp_nama' => $peserta ? $peserta->nama : '-',
+                        'lamp_nip' => $peserta ? $peserta->nip : '-',
+                        'lamp_tujuan' => $kegiatan->kak2_tujuan,
+                        'lamp_tgl_mulai' => Carbon::parse($lampiran->tgl_mulai)->locale('id')->translatedFormat('d F Y'),
+                        'lamp_tgl_selesai' => Carbon::parse($lampiran->tgl_selesai)->locale('id')->translatedFormat('d F Y'),
+                        'lamp_biaya' => number_format($lampiran->transport_bayar, 0, ',', '.'),
+                    ]);
+                }
+                $phpWord->cloneRowAndSetValues('lamp_no', $values);
+
+                // 1. Tentukan nama file yang akan dilihat user saat download
+                $fileNameUser = 'KAK_Pemanggilan_Konsul_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
+
+                // 2. Buat file temporary (sementara) di sistem server
+                $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
+                $phpWord->saveAs($tempFile);
+
+                // Parameter 1: Path file sementara
+                // Parameter 2: Nama file yang akan didownload user
+                return response()->download($tempFile, $fileNameUser)->deleteFileAfterSend(true);
                 break;
             case 'honor-mitra':
                 $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-honor-mitra.docx");
@@ -260,6 +367,7 @@ class KegiatanController extends Controller
                     $phpWord->setValue('nip_pengaju', '-');
                 }
                 $values = [];
+                $no = 1;
                 foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
                     $petugas = Mitra::find($lampiran->peserta_id);
                     $pengawas = null;
@@ -269,6 +377,7 @@ class KegiatanController extends Controller
                         $pengawas = Mitra::find($lampiran->pengawas_id);
                     }
                     array_push($values, [
+                        'lamp_no' => $no++,
                         'lamp_nama' => $petugas ? $petugas->nama : '-',
                         'lamp_nip_nik' => $petugas ? $petugas->nik : '-',
                         'lamp_tugas' => $lampiran->pcl_or_pml == 1 ? 'PML' : 'PCL',
@@ -281,13 +390,73 @@ class KegiatanController extends Controller
                         'lamp_honor' => $lampiran->pcl_or_pml == 1 ? number_format($kegiatan->honor_pengawasan, 0, ',', '.') : number_format($kegiatan->honor_pencacahan, 0, ',', '.'),
                     ]);
                 }
-                $phpWord->cloneRowAndSetValues('lamp_nama', $values);
-                $filePath = 'KAK/KAK_Honor_Mitra_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
-                $phpWord->saveAs($filePath);
-                return response()->download($filePath);
+                $phpWord->cloneRowAndSetValues('lamp_no', $values);
+
+                // 1. Tentukan nama file yang akan dilihat user saat download
+                $fileNameUser = 'KAK_Honor_Mitra_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
+
+                // 2. Buat file temporary (sementara) di sistem server
+                $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
+                $phpWord->saveAs($tempFile);
+
+                // Parameter 1: Path file sementara
+                // Parameter 2: Nama file yang akan didownload user
+                return response()->download($tempFile, $fileNameUser)->deleteFileAfterSend(true);
                 break;
             case 'honor-inda':
-                return redirect()->back()->with('error', 'Fitur unduh KAK untuk jenis honor inda belum tersedia.');
+                $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-honor-inda.docx");
+                $phpWord->setValue('nama', $kegiatan->nama);
+                $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
+                $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
+                $kak4_tgl_mulai = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F Y');
+                $kak4_tgl_selesai = Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F Y');
+                $phpWord->setValue('kak4_tgl_mulai', $kak4_tgl_mulai);
+                $phpWord->setValue('kak4_tgl_selesai', $kak4_tgl_selesai);
+                $phpWord->setValue('pj', $this->konversiTim($kegiatan->tim));
+                $sk = Surat::find($kegiatan->kak5_sk);
+                if ($sk) {
+                    $phpWord->setValue('no_sk', $sk->no_terakhir);
+                    $phpWord->setValue('tgl_sk', Carbon::parse($sk->tgl_surat)->locale('id')->translatedFormat('d F Y'));
+                    $phpWord->setValue('perihal_sk', $sk->perihal);
+                } else {
+                    $phpWord->setValue('no_sk', '-');
+                    $phpWord->setValue('tgl_sk', '-');
+                    $phpWord->setValue('perihal_sk', '-');
+                }
+                $phpWord = $this->findDetailRincianPOK($phpWord, $kegiatan->id);
+                $phpWord->setValue('tgl_kak', Carbon::parse($kegiatan->kak8_tgl)->locale('id')->translatedFormat('d F Y'));
+                $phpWord->setValue('kak8_pengaju', $kegiatan->kak8_pengaju);
+                $pengaju = Pegawai::find($kegiatan->id_pjk);
+                if ($pengaju) {
+                    $phpWord->setValue('nama_pengaju', $pengaju->nama);
+                    $phpWord->setValue('nip_pengaju', $pengaju->nip);
+                } else {
+                    $phpWord->setValue('nama_pengaju', '-');
+                    $phpWord->setValue('nip_pengaju', '-');
+                }
+                $values = [];
+                $no = 1;
+                foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
+                    $inda = Pegawai::find($lampiran->peserta_id);
+                    array_push($values, [
+                        'lamp_no' => $no++,
+                        'lamp_nama' => $inda ? $inda->nama : '-',
+                        'lamp_nik' => $inda ? $inda->nip : '-',
+                        'lamp_honor' => number_format($lampiran->transport_bayar, 0, ',', '.'),
+                    ]);
+                }
+                $phpWord->cloneRowAndSetValues('lamp_no', $values);
+
+                // 1. Tentukan nama file yang akan dilihat user saat download
+                $fileNameUser = 'KAK_Honor_Inda_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
+
+                // 2. Buat file temporary (sementara) di sistem server
+                $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
+                $phpWord->saveAs($tempFile);
+
+                // Parameter 1: Path file sementara
+                // Parameter 2: Nama file yang akan didownload user
+                return response()->download($tempFile, $fileNameUser)->deleteFileAfterSend(true);
                 break;
             default:
                 return redirect()->back()->with('error', 'Jenis KAK tidak dikenali.');
@@ -428,25 +597,31 @@ class KegiatanController extends Controller
             'honor_pencacahan' => $request->honor_pencacahan,
         ]);
         $jumlah = 0;
-        foreach ($request->akun_kode as $index => $akun_kode) {
-            $rincian_total = 0;
-            if (str_contains($request->rincian_total[$index], '.')) {
-                $rincian_total = str_replace('.', '', $request->rincian_total[$index]);
-            } else {
-                $rincian_total = $request->rincian_total[$index];
+        if ($request->has('akun_kode')) {
+            foreach ($request->akun_kode as $index => $akun_kode) {
+                $rincian_total = 0;
+                if (str_contains($request->rincian_total[$index], '.')) {
+                    $rincian_total = str_replace('.', '', $request->rincian_total[$index]);
+                } else {
+                    $rincian_total = $request->rincian_total[$index];
+                }
+                $kegiatan->kegiatanRincian()->create([
+                    'kegiatan_id' => $kegiatan->id,
+                    'pok_id' => $request->akun_kode[$index],
+                    'rincian' => $request->rincian_detail[$index],
+                    'vol' => $request->rincian_volume[$index],
+                    'satuan' => $request->rincian_satuan[$index],
+                    'harga_satuan' => $request->rincian_harga[$index],
+                    'jumlah' => $rincian_total,
+                ]);
+                $jumlah += $rincian_total;
             }
-            $kegiatan->kegiatanRincian()->create([
-                'kegiatan_id' => $kegiatan->id,
-                'pok_id' => $request->akun_kode[$index],
-                'rincian' => $request->rincian_detail[$index],
-                'vol' => $request->rincian_volume[$index],
-                'satuan' => $request->rincian_satuan[$index],
-                'harga_satuan' => $request->rincian_harga[$index],
-                'jumlah' => $rincian_total,
-            ]);
-            $jumlah += $rincian_total;
+            $kegiatan->kak6_total = $jumlah;
         }
-        $kegiatan->kak6_total = $jumlah;
+        if ($request->jenis_kak == 'lainnya' && !$request->has('tim')) {
+            $kegiatan->kak4_pjk = '11011';
+            $kegiatan->tim = '11011';
+        }
         $kegiatan->save();
 
         if ($request->jenis_kak == 'translok-biasa' || $request->jenis_kak == 'translok-8jam') {
@@ -610,10 +785,10 @@ class KegiatanController extends Controller
                 ]);
                 $jumlah_total += $request->rincian_total[$index];
             }
+            // Simpan total baru ke tabel utama
+            $kegiatan->kak6_total = $jumlah_total;
         }
 
-        // Simpan total baru ke tabel utama
-        $kegiatan->kak6_total = $jumlah_total;
         $kegiatan->save();
 
         // 6. Update Lampiran/Personil (Hapus Lama -> Buat Baru)
@@ -1015,6 +1190,7 @@ class KegiatanController extends Controller
         $kegiatanBaru->nama = '(Duplikat) ' . $kegiatanLama->nama;
         $kegiatanBaru->created_at = now();
         $kegiatanBaru->updated_at = now();
+        $kegiatanBaru->is_approved = 0; // Set ulang approval
         $kegiatanBaru->save(); // Simpan dulu agar dapat ID baru
 
         // 4. Duplikat Data Anak: Rincian Akun (kegiatanRincian)

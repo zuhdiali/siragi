@@ -114,10 +114,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/show/{id}', [KegiatanController::class, 'translokBiasaShow'])->name('show');
         });
 
-        Route::prefix('pelatihan')->name('pelatihan.')->group(function () {
-            Route::get('/create', [KegiatanController::class, 'pelatihanCreate'])->name('create');
-            Route::get('/edit/{id}', [KegiatanController::class, 'pelatihanEdit'])->name('edit');
-            Route::get('/show/{id}', [KegiatanController::class, 'pelatihanShow'])->name('show');
+        Route::prefix('lainnya')->name('lainnya.')->group(function () {
+            Route::get('/create', [KegiatanController::class, 'lainnyaCreate'])->name('create');
+            Route::get('/edit/{id}', [KegiatanController::class, 'lainnyaEdit'])->name('edit');
+            Route::get('/show/{id}', [KegiatanController::class, 'lainnyaShow'])->name('show');
         });
 
         Route::prefix('translok-8jam')->name('translok-8jam.')->group(function () {

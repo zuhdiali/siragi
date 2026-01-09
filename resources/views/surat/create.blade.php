@@ -285,6 +285,23 @@
 
                                         <div class="col-md-6">
                                             <div
+                                                class="form-group {{ $errors->has('tgl_diterima') ? 'has-error has-feedback' : '' }}">
+                                                <label for="tgl_diterima">Tanggal Diterima</label>
+                                                <input type="date" class="form-control" id="tgl_diterima"
+                                                    name="tgl_diterima"
+                                                    value="{{ old('tgl_diterima') ? old('tgl_diterima') : date('Y-m-d') }}" />
+                                                @if ($errors->has('tgl_diterima'))
+                                                    <small
+                                                        class="form-text text-muted">{{ $errors->first('tgl_diterima') }}</small>
+                                                @else
+                                                    <small class="form-text text-muted">
+                                                    </small>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div
                                                 class="form-group {{ $errors->has('file') ? 'has-error has-feedback' : '' }}">
                                                 <label for="file">File PDF Surat Masuk</label>
                                                 <br>
@@ -536,7 +553,8 @@
                     $('#single-select-field').empty();
                     $.each(msg, function(key, value) {
                         $('#single-select-field').append('<option value="' + value.id + '">' + value
-                            .nama + '</option>');
+                            .singkatan_resmi + ' - ' + value.nama + '</option>');
+
                     });
 
                 },

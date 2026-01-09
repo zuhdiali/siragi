@@ -132,21 +132,27 @@ class SuratController extends Controller
 
     public function create($jenis)
     {
-        $kegiatans = Kegiatan::where('tim', Auth::user()->tim)->orWhere('id_pjk', Auth::user()->id)->where('is_approved', 1)->get();
-        $kegiatan_lampirans = KegiatanLampiran::where('peserta_id', Auth::user()->id)->where('tipe_personil', "pegawai")->get();
-
-        // $kegiatan_pegawais = KegiatanPegawai::where('pegawai_id', Auth::user()->id)->get();
-        foreach ($kegiatan_lampirans as $kegiatan_lampiran) {
-            $kegiatan = Kegiatan::find($kegiatan_lampiran->kegiatan_id);
-            if ($kegiatans->contains($kegiatan)) {
-                continue;
-            } else {
-                if ($kegiatan->is_approved == 1) {
-                    $kegiatans->push($kegiatan);
+        $kegiatans = collect();
+        if (Auth::user()->role == 'Admin') {
+            $kegiatans = Kegiatan::where('is_approved', 1)->get();
+        } else {
+            $kegiatans = Kegiatan::where('tim', Auth::user()->tim)->orWhere('id_pjk', Auth::user()->id)->where('is_approved', 1)->get();
+            $kegiatan_lampirans = KegiatanLampiran::where('peserta_id', Auth::user()->id)->where('tipe_personil', "pegawai")->get();
+            // $kegiatan_pegawais = KegiatanPegawai::where('pegawai_id', Auth::user()->id)->get();
+            foreach ($kegiatan_lampirans as $kegiatan_lampiran) {
+                $kegiatan = Kegiatan::find($kegiatan_lampiran->kegiatan_id);
+                if (!$kegiatan) {
+                    continue;
+                }
+                if ($kegiatans->contains($kegiatan)) {
+                    continue;
+                } else {
+                    if ($kegiatan->is_approved == 1) {
+                        $kegiatans->push($kegiatan);
+                    }
                 }
             }
         }
-
 
         $noTerakhir = $this->getNoSuratTerakhir($jenis);
         $opsiSuratAwal = KamusSurat::where('tim', '11012')->get();
@@ -357,6 +363,7 @@ class SuratController extends Controller
                 'file' => 'required|mimes:pdf',
                 'perihal' => 'required',
                 'tgl_surat' => 'required',
+                'tgl_diterima' => 'required',
             ]);
             // $totalFoto = count($request->file('files'));
             // for ($i = 0; $i < $totalFoto; $i++) {
@@ -439,6 +446,7 @@ class SuratController extends Controller
             $surat->dinas_surat_masuk = $request->dinas_surat_masuk;
             $surat->no_surat_masuk = $request->no_surat_masuk;
             $surat->tgl_surat = $request->tgl_surat;
+            $surat->tgl_diterima = $request->tgl_diterima;
             $surat->save();
             if ($request->has('file')) {
                 $file = $request->file('file');
@@ -524,9 +532,11 @@ class SuratController extends Controller
                 'file' => 'nullable|mimes:pdf',
                 'perihal' => 'required',
                 'tgl_surat' => 'required',
+                'tgl_diterima' => 'required',
             ]);
             $surat->dinas_surat_masuk = $request->dinas_surat_masuk;
             $surat->tgl_surat = $request->tgl_surat;
+            $surat->tgl_diterima = $request->tgl_diterima;
             $surat->no_surat_masuk = $request->no_surat_masuk;
             if ($request->has('file')) {
 
@@ -607,8 +617,7 @@ class SuratController extends Controller
                     $formPermintaan->surat_tugas_id = null;
                     $formPermintaan->save();
                 }
-            }
-            if ($surat->jenis_surat == 'spd') {
+            } else if ($surat->jenis_surat == 'spd') {
                 $formPermintaan = Surat::where('spd_id', $surat->id)->first();
                 if ($formPermintaan) {
                     $formPermintaan->spd_id = null;
@@ -628,21 +637,33 @@ class SuratController extends Controller
             'id_pegawai' => 'required',
         ]);
         $kegiatans = null;
-        if (Auth::user()->role == 'Ketua Tim') {
-            $kegiatans = Kegiatan::where('tim', $request->tim)->where('is_approved', 1)->get();
+        if (Auth::user()->role == 'Admin') {
+            $kegiatans = Kegiatan::where('is_approved', 1)->where('tim', $request->tim)->get();
         } else {
-            $kegiatans = Kegiatan::where('tim', $request->tim)->where('id_pjk', $request->id_pegawai)->where('is_approved', 1)->get();
-        }
-        $kegiatan_lampirans = KegiatanLampiran::where('peserta_id', Auth::user()->id)->where('tipe_personil', "pegawai")->get();
-
-        // $kegiatan_pegawais = KegiatanPegawai::where('pegawai_id', Auth::user()->id)->get();
-        foreach ($kegiatan_lampirans as $kegiatan_lampiran) {
-            $kegiatan = Kegiatan::find($kegiatan_lampiran->kegiatan_id);
-            if ($kegiatans->contains($kegiatan)) {
-                continue;
+            if (Auth::user()->role == 'Ketua Tim') {
+                $kegiatans = Kegiatan::where('tim', $request->tim)->where('is_approved', 1)->get();
             } else {
-                if ($kegiatan->tim == $request->tim && $kegiatan->is_approved == 1) {
-                    $kegiatans->push($kegiatan);
+                $kegiatans = Kegiatan::where('tim', $request->tim)->where('id_pjk', $request->id_pegawai)->where('is_approved', 1)->get();
+            }
+            $kegiatan_lampirans = KegiatanLampiran::where('peserta_id', Auth::user()->id)->where('tipe_personil', "pegawai")->get();
+
+            // $kegiatan_pegawais = KegiatanPegawai::where('pegawai_id', Auth::user()->id)->get();
+            foreach ($kegiatan_lampirans as $kegiatan_lampiran) {
+                $kegiatan = Kegiatan::find($kegiatan_lampiran->kegiatan_id);
+                if (!$kegiatan) {
+                    continue;
+                } else if ($kegiatans->contains($kegiatan)) {
+                    continue;
+                } else {
+                    if ($kegiatan->tim) {
+                        if ($kegiatan->tim == $request->tim && $kegiatan->is_approved == 1) {
+                            $kegiatans->push($kegiatan);
+                        }
+                    } else {
+                        if ($kegiatan->id_pjk == $request->id_pegawai && $kegiatan->is_approved == 1) {
+                            $kegiatans->push($kegiatan);
+                        }
+                    }
                 }
             }
         }

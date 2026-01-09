@@ -19,8 +19,7 @@
                                         class="btn btn-primary btn-round mb-1">Translok Biasa</a>
                                     <a href="{{ route('kegiatan.translok-8jam.create') }}"
                                         class="btn btn-primary btn-round mb-1">Translok > 8 Jam</a>
-                                    <a href="{{ route('kegiatan.pelatihan.create') }}"
-                                        class="btn btn-primary btn-round mb-1">Translok Pelatihan</a>
+
                                 </div>
                             </div>
                             <div class="row">
@@ -35,6 +34,12 @@
                                         class="btn btn-primary btn-round mb-1">Honor Mitra</a>
                                     <a href="{{ route('kegiatan.honor-inda.create') }}"
                                         class="btn btn-primary btn-round mb-1">Honor Inda</a>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <a href="{{ route('kegiatan.lainnya.create') }}"
+                                        class="btn btn-primary btn-round mb-1">Lainnya</a>
                                 </div>
                             </div>
                         </div>
@@ -89,10 +94,12 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 10%">Aksi</th>
+                                            <th>ID</th>
                                             <th>Nama Singkatan Resmi</th>
                                             <th>Jenis KAK</th>
                                             <th>Nama KAK</th>
                                             <th>PJK</th>
+                                            <th>Tim</th>
                                             <th>Tanggal Pelaksanaan</th>
                                             <th>Progress</th>
                                         </tr>
@@ -100,9 +107,11 @@
                                     <tfoot>
                                         <tr>
                                             <th>Nama Singkatan Resmi</th>
+                                            <th>ID</th>
                                             <th>Jenis KAK</th>
                                             <th>Nama KAK</th>
                                             <th>PJK</th>
+                                            <th>Tim</th>
                                             <th>Tanggal Pelaksanaan</th>
                                             <th>Progress</th>
                                         </tr>
@@ -236,21 +245,27 @@
 
                                                     </div>
                                                 </td>
+                                                <td>{{ $kegiatan->id ?? '-' }}</td>
                                                 <th scope="row">
-                                                    {{ $kegiatan->singkatan_resmi }}
+                                                    {{ $kegiatan->singkatan_resmi ?? '-' }}
                                                 </th>
-                                                <td>{{ $kegiatan->jenis_kak }}</td>
-                                                <td>{{ strlen($kegiatan->nama) > 90 ? substr($kegiatan->nama, 0, 90) . '...' : $kegiatan->nama }}
+                                                <td>{{ $kegiatan->jenis_kak ?? '-' }}</td>
+                                                <td>{{ $kegiatan->nama ? (strlen($kegiatan->nama) > 90 ? substr($kegiatan->nama, 0, 90) . '...' : $kegiatan->nama) : '-' }}
                                                 </td>
-                                                <td>{{ $kegiatan->pjk->nama }}</td>
+                                                <td>{{ $kegiatan->pjk->nama ?? '-' }}</td>
+                                                <td>{{ $kegiatan->namaTim ?? '-' }}</td>
                                                 <td>
-                                                    <p>{{ Carbon\Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d M Y') }}
-                                                    </p>
-                                                    <p>s/d</p>
-                                                    <p>{{ Carbon\Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d M Y') }}
-                                                    </p>
+                                                    @if ($kegiatan->tgl_mulai && $kegiatan->tgl_selesai)
+                                                        <p>{{ Carbon\Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d M Y') }}
+                                                        </p>
+                                                        <p>s/d</p>
+                                                        <p>{{ Carbon\Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d M Y') }}
+                                                        </p>
+                                                    @else
+                                                        -
+                                                    @endif
                                                 </td>
-                                                <td>{{ $kegiatan->progress }} %</td>
+                                                <td>{{ $kegiatan->progress ?? '-' }} %</td>
                                                 {{-- <td>
                         @if ($kegiatan->flag == null)
                         <span class="badge bg-success">Aktif</span>
