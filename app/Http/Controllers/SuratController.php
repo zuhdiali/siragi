@@ -321,10 +321,12 @@ class SuratController extends Controller
 
     public function storeAndValidate(Request $request, $jenis)
     {
+
         if ($jenis != 'masuk') { //jika jenis surat selain masuk
 
             if ($jenis != 'spk') { //jika bukan mau generate SPK
                 if ($jenis != 'sk') {
+
                     $request->validate([
                         'tim' => 'required',
                         'kode' => 'required',
@@ -332,10 +334,15 @@ class SuratController extends Controller
                     ]);
                 }
 
-                if ($jenis != 'keluar' && $jenis != 'sk') {  //jika surat form permintaan atau tugas atau spd
+                if ($jenis != 'keluar') {  //jika surat form permintaan atau tugas atau spd
+                    if ($jenis == 'sk') {
+                        $request->validate([
+                            'tgl_surat' => 'required',
+                        ]);
+                    }
+
                     $request->validate([
                         'id_kegiatan' => 'required',
-                        'tgl_surat' => 'required',
                     ]);
                     $kegiatan = Kegiatan::find($request->id_kegiatan);
                     $mitraMelebihiHonor = KegiatanController::validasiHonorMitra($kegiatan->mitra, $kegiatan->tgl_mulai);
@@ -396,6 +403,7 @@ class SuratController extends Controller
         }
 
 
+
         $surat->id_pembuat_surat = Auth::user()->id;
 
         if ($jenis != 'masuk') {
@@ -416,6 +424,7 @@ class SuratController extends Controller
                     }
                 }
                 $surat->tim = $request->tim;
+
                 if ($jenis == 'tugas') {
                     $surat->tgl_surat = $request->tgl_surat;
                 }
@@ -441,7 +450,9 @@ class SuratController extends Controller
                 $surat->tahun_spk = $request->tahun_spk;
                 $surat->file = $this->generateSPK($request->mitra_spk, $request->bulan_spk, $request->tahun_spk);
             }
+
             $surat->save();
+            // dd($request->all(), $surat, $jenis);
         } else { //jika jenis surat masuk
             $surat->dinas_surat_masuk = $request->dinas_surat_masuk;
             $surat->no_surat_masuk = $request->no_surat_masuk;
@@ -465,6 +476,7 @@ class SuratController extends Controller
     public function store(Request $request, $jenis)
     {
         $surat = $this->storeAndValidate($request, $jenis);
+        // dd($surat);
         return redirect()->route('surat.' . $jenis)->with('success', 'Surat berhasil dibuat.');
     }
 
@@ -750,11 +762,11 @@ class SuratController extends Controller
             'tgl_surat' => date('Y-m-d'),
             'tgl_awal_kegiatan' => $kegiatan->tgl_mulai,
             'tgl_akhir_kegiatan' => $kegiatan->tgl_selesai,
-            'pegawai_yang_bertugas' => $pegawai_yang_bertugas ?? Auth::user()->pegawai->id,
+            'pegawai_yang_bertugas' => $pegawai_yang_bertugas ?? Auth::user()->id,
         ]);
         // simpan surat spd
         $surat = $this->storeAndValidate($request, 'spd');
-
+        // dd($surat);
         // linking surat spd ke form permintaan
         $form->spd_id = $surat->id;
         $form->save();
