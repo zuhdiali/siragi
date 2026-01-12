@@ -323,10 +323,8 @@ class SuratController extends Controller
     {
 
         if ($jenis != 'masuk') { //jika jenis surat selain masuk
-
             if ($jenis != 'spk') { //jika bukan mau generate SPK
                 if ($jenis != 'sk') {
-
                     $request->validate([
                         'tim' => 'required',
                         'kode' => 'required',
@@ -339,15 +337,15 @@ class SuratController extends Controller
                         $request->validate([
                             'tgl_surat' => 'required',
                         ]);
-                    }
-
-                    $request->validate([
-                        'id_kegiatan' => 'required',
-                    ]);
-                    $kegiatan = Kegiatan::find($request->id_kegiatan);
-                    $mitraMelebihiHonor = KegiatanController::validasiHonorMitra($kegiatan->mitra, $kegiatan->tgl_mulai);
-                    if (count($mitraMelebihiHonor) > 0) {
-                        return redirect()->back()->with('error', 'Mitra (' . implode(",", $mitraMelebihiHonor) . ') melebihi batas honor yang diperbolehkan.');
+                    } else {
+                        $request->validate([
+                            'id_kegiatan' => 'required',
+                        ]);
+                        $kegiatan = Kegiatan::find($request->id_kegiatan);
+                        $mitraMelebihiHonor = KegiatanController::validasiHonorMitra($kegiatan->mitra, $kegiatan->tgl_mulai);
+                        if (count($mitraMelebihiHonor) > 0) {
+                            return redirect()->back()->with('error', 'Mitra (' . implode(",", $mitraMelebihiHonor) . ') melebihi batas honor yang diperbolehkan.');
+                        }
                     }
                 }
 
@@ -475,7 +473,9 @@ class SuratController extends Controller
 
     public function store(Request $request, $jenis)
     {
+
         $surat = $this->storeAndValidate($request, $jenis);
+        // dd($request->all(), $jenis, $surat);
         // dd($surat);
         return redirect()->route('surat.' . $jenis)->with('success', 'Surat berhasil dibuat.');
     }
