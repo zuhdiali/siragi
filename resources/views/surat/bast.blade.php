@@ -36,7 +36,7 @@
                             data-bs-target="#tambahBAST">
                             <i class="fa fa-plus"></i> Tambah BAST
                         </button>
-                        <a href="{{ url('surat/create/bast') }}" class="btn btn-primary btn-round">Tambah surat</a>
+
                     </div>
                 @endif
             </div>
