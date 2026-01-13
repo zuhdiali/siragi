@@ -226,7 +226,7 @@ class KegiatanController extends Controller
                 return response()->download($tempFile, $fileNameUser)->deleteFileAfterSend(true);
                 break;
             case 'translok-8jam':
-                $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-translok-8JAM.docx");
+                $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-translok-8jam.docx");
                 $phpWord->setValue('nama', $kegiatan->nama);
                 $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
                 $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
