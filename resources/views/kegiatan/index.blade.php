@@ -106,8 +106,9 @@
                                     </thead>
                                     <tfoot>
                                         <tr>
-                                            <th>Nama Singkatan Resmi</th>
+                                            <th>Aksi</th>
                                             <th>ID</th>
+                                            <th>Nama Singkatan Resmi</th>
                                             <th>Jenis KAK</th>
                                             <th>Nama KAK</th>
                                             <th>PJK</th>

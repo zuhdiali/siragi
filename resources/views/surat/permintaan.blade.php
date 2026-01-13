@@ -192,7 +192,11 @@
                                                 </td>
                                                 <td>{{ $surat->pembuat_surat->nama }}</td>
                                                 <td>{{ $surat->kegiatan->nama }}</td>
-                                                <td>{{ $surat->perihal }}</td>
+                                                <td>{{ $surat->perihal }}<button type="button" data-bs-toggle="tooltip"
+                                                        title="Copy Perihal" class="btn btn-link btn-primary px-2"
+                                                        onclick="copyText('{{ $surat->perihal }}')">
+                                                        <i class="fa fa-copy"></i>
+                                                    </button></td>
                                                 {{-- <td>
                         @if ($surat->flag == null)
                         <span class="badge bg-success">Aktif</span>

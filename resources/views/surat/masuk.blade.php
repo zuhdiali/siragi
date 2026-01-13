@@ -134,7 +134,12 @@
                                                         @endif
                                                     </div>
                                                 </td>
-                                                <th scope="row">{{ $surat->no_surat_masuk }}</th>
+                                                <th scope="row">{{ $surat->no_surat_masuk }} <button type="button"
+                                                        data-bs-toggle="tooltip" title="Copy Nomor Surat"
+                                                        class="btn btn-link btn-primary px-2"
+                                                        onclick="copyText('{{ $surat->no_surat_masuk }}')">
+                                                        <i class="fa fa-copy"></i>
+                                                    </button></th>
                                                 <td>{{ $surat->perihal }}</td>
                                                 <td>{{ \Carbon\Carbon::parse($surat->tgl_surat)->translatedFormat('d F Y') }}
                                                 <td>{{ $surat->tgl_diterima ? \Carbon\Carbon::parse($surat->tgl_diterima)->translatedFormat('d F Y') : '-' }}

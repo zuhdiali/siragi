@@ -160,7 +160,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/keluar', [SuratController::class, 'keluar'])->name('keluar');
         Route::get('/sk', [SuratController::class, 'sk'])->name('sk');
         Route::get('/spk', [SuratController::class, 'spk'])->name('spk');
+        Route::get('/bast', [SuratController::class, 'bast'])->name('bast');
         Route::get('/create/{jenis}', [SuratController::class, 'create'])->name('create');
+        Route::get('/create/{jenis}/{tipe_bast}', [SuratController::class, 'create'])->name('create');
+        Route::post('/store', [SuratController::class, 'store'])->name('store');
         Route::post('/store/{jenis}', [SuratController::class, 'store'])->name('store');
         Route::post('/get-kode-surat/{tim}', [SuratController::class, 'getKodeSurat'])->name('get-kode-surat');
         Route::get('/show/{id}', [SuratController::class, 'show'])->name('show');
@@ -169,10 +172,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/edit-terlibat/{id}', [SuratController::class, 'editTerlibat'])->name('edit.terlibat');
         Route::post('/update-terlibat/{id}', [SuratController::class, 'updateTerlibat'])->name('update.terlibat');
         Route::get('/destroy/{id}', [SuratController::class, 'destroy'])->name('destroy');
-
         Route::get('/generate-spk', [SuratController::class, 'generateSPK'])->name('generate-spk');
         Route::get('/download-spk/{id}', [SuratController::class, 'downloadSPK'])->name('download-spk');
-
         Route::get('/generate-surat-tugas/{id_kegiatan}/{id_form_permintaan}', [SuratController::class, 'generateSuratTugas'])->name('generate-surat-tugas');
         Route::get('/generate-spd/{id_kegiatan}/{id_form_permintaan}', [SuratController::class, 'generateSPD'])->name('generate-spd');
     });
@@ -184,7 +185,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/edit/{id}', [SBKSController::class, 'edit'])->name('edit');
         Route::post('/update/{id}', [SBKSController::class, 'update'])->name('update');
         Route::get('/destroy/{id}', [SBKSController::class, 'destroy'])->name('destroy');
-
         Route::post('/get-honor', [SBKSController::class, 'getHonor'])->name('get-honor');
     });
 });

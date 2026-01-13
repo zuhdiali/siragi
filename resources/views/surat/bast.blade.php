@@ -3,14 +3,42 @@
 @section('content')
     <div class="container">
         <div class="page-inner">
+            <!-- Modal Pilih KAK -->
+            <div class="modal fade" id="tambahBAST" tabindex="-1" aria-labelledby="tambahBASTLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="tambahBASTLabel">Pilih KAK</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col">
+                                    <a href="{{ url('/surat/create/bast') }}" class="btn btn-primary btn-round mb-1">BAST
+                                        PCL ke PPK / PJK ke PPK</a>
+                                    <a href="{{ url('/surat/create/bast/lainnya') }}"
+                                        class="btn btn-primary btn-round mb-1">BAST Lainnya</a>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
                 <div>
-                    <h3 class="fw-bold mb-3">Surat Tugas</h3>
-                    <h6 class="op-7 mb-2">Daftar surat tugas </h6>
+                    <h3 class="fw-bold mb-3">BAST</h3>
+                    <h6 class="op-7 mb-2">Daftar BAST </h6>
                 </div>
-                <div class="ms-md-auto py-2 py-md-0">
-                    <a href="{{ url('surat/create/tugas') }}" class="btn btn-primary btn-round">Tambah surat</a>
-                </div>
+                @if (Auth::user()->role == 'Admin')
+                    <div class="ms-md-auto py-2 py-md-0">
+                        <button type="button" class="btn  btn-primary " data-bs-toggle="modal"
+                            data-bs-target="#tambahBAST">
+                            <i class="fa fa-plus"></i> Tambah BAST
+                        </button>
+                        <a href="{{ url('surat/create/bast') }}" class="btn btn-primary btn-round">Tambah surat</a>
+                    </div>
+                @endif
             </div>
             <div class="row">
                 <div class="col-sm-6 col-md-3">
@@ -41,7 +69,7 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">Daftar Riwayat Nomor Surat Tugas</h4>
+                            <h4 class="card-title">Daftar Riwayat Nomor BAST</h4>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -49,62 +77,55 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 10%">Aksi</th>
-                                            <th>Nomor Surat Tugas</th>
-                                            <th>Tanggal Surat Tugas</th>
-                                            <th>Pembuat Surat</th>
-                                            <th>Kegiatan</th>
+                                            <th style="width: 10%">Nomor BAST</th>
+                                            <th style="width: 10%">Tanggal Surat</th>
                                             <th>Perihal</th>
+                                            <th>Kegiatan</th>
+                                            <th>No. SPK</th>
                                         </tr>
                                     </thead>
                                     <tfoot>
                                         <tr>
                                             <th>Aksi</th>
-                                            <th>Nomor Surat Tugas</th>
-                                            <th>Tanggal Surat Tugas</th>
-                                            <th>Pembuat Surat</th>
-                                            <th>Kegiatan</th>
+                                            <th>Nomor BAST</th>
+                                            <th>Tanggal Surat</th>
                                             <th>Perihal</th>
+                                            <th>Kegiatan</th>
+                                            <th>No. SPK</th>
                                         </tr>
                                     </tfoot>
                                     <tbody>
                                         @foreach ($surats as $surat)
                                             <!-- Modal -->
-                                            @if (Auth::user()->role == 'Admin' ||
-                                                    $surat->id_pembuat_surat == Auth::user()->id ||
-                                                    (Auth::user()->role == 'Ketua Tim' && $surat->tim == Auth::user()->tim))
-                                                <div class="modal fade" id="{{ 'exampleModal' . $surat->id }}" tabindex="-1"
-                                                    aria-labelledby="{{ 'exampleModalLabel' . $surat->id }}"
-                                                    aria-hidden="true">
-                                                    <div class="modal-dialog">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h1 class="modal-title fs-5"
-                                                                    id="{{ 'exampleModalLabel' . $surat->id }}">Yakin
-                                                                    Menghapus Nomor Surat?</h1>
-                                                                <button type="button" class="btn-close"
-                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                Nomor surat <strong>{{ $surat->nomor_surat }}</strong> akan
-                                                                dihapus.
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary"
-                                                                    data-bs-dismiss="modal">Batalkan</button>
-                                                                <form action="{{ url('surat/destroy/' . $surat->id) }}">
-                                                                    <button type="submit" class="btn btn-danger">Hapus
-                                                                        Surat</button>
-                                                                </form>
-                                                            </div>
+                                            <div class="modal fade" id="{{ 'exampleModal' . $surat->id }}" tabindex="-1"
+                                                aria-labelledby="{{ 'exampleModalLabel' . $surat->id }}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h1 class="modal-title fs-5"
+                                                                id="{{ 'exampleModalLabel' . $surat->id }}">Yakin Menghapus
+                                                                Nomor Surat?</h1>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                                aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Nomor surat <strong>{{ $surat->nomor_surat }}</strong> akan
+                                                            dihapus.
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary"
+                                                                data-bs-dismiss="modal">Batalkan</button>
+                                                            <form action="{{ url('surat/destroy/' . $surat->id) }}">
+                                                                <button type="submit" class="btn btn-danger">Hapus
+                                                                    Surat</button>
+                                                            </form>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            @endif
+                                            </div>
                                             <tr>
                                                 <td>
-                                                    @if (Auth::user()->role == 'Admin' ||
-                                                            $surat->id_pembuat_surat == Auth::user()->id ||
-                                                            (Auth::user()->role == 'Ketua Tim' && $surat->tim == Auth::user()->tim))
+                                                    @if (Auth::user()->role == 'Admin')
                                                         <div class="form-button-action">
                                                             <form
                                                                 action="{{ url('surat/edit/' . $surat->jenis_surat . '/' . $surat->id) }}">
@@ -124,7 +145,7 @@
                                                         </div>
                                                     @endif
                                                 </td>
-                                                <th scope="row">{{ $surat->nomor_surat }} <button type="button"
+                                                <th scope="row">{{ $surat->nomor_surat }}<button type="button"
                                                         data-bs-toggle="tooltip" title="Copy Nomor Surat"
                                                         class="btn btn-link btn-primary px-2"
                                                         onclick="copyText('{{ $surat->nomor_surat }}')">
@@ -132,9 +153,22 @@
                                                     </button></th>
                                                 <td>{{ \Carbon\Carbon::parse($surat->tgl_surat)->translatedFormat('d F Y') }}
                                                 </td>
-                                                <td>{{ $surat->pembuat_surat->nama }}</td>
-                                                <td>{{ $surat->kegiatan->nama }}</td>
                                                 <td>{{ $surat->perihal }}</td>
+                                                <td>
+                                                    @if ($surat->kegiatan)
+                                                        {{ $surat->kegiatan->nama }}
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($surat->spk)
+                                                        No. {{ $surat->spk->no_terakhir }}, bulan
+                                                        {{ $surat->spk->bulan_spk }} - {{ $surat->mitra->nama }}
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
                                                 {{-- <td>
                         @if ($surat->flag == null)
                         <span class="badge bg-success">Aktif</span>

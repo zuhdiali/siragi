@@ -79,11 +79,11 @@
                                                 </div>
                                             @endif
 
-                                            @if ($jenis == 'tugas' || $jenis == 'sk')
+                                            @if ($jenis == 'tugas' || $jenis == 'sk' || $jenis == 'bast')
                                                 <div
                                                     class="form-group {{ $errors->has('tgl_surat') ? 'has-error has-feedback' : '' }}">
                                                     <label for="tgl_surat">Tanggal
-                                                        {{ $jenis == 'tugas' ? 'Surat Tugas' : 'SK' }}</label>
+                                                        {{ $jenis == 'tugas' ? 'Surat Tugas' : ($jenis == 'sk' ? 'SK' : 'BAST') }}</label>
                                                     <input type="date" class="form-control" id="tgl_surat"
                                                         name="tgl_surat"
                                                         value="{{ old('tgl_surat') ? old('tgl_surat') : $surat->tgl_surat }}" />
@@ -99,7 +99,7 @@
                                         </div>
 
                                         <div class="col-md-6">
-                                            @if ($jenis != 'keluar' && $jenis != 'sk')
+                                            @if ($jenis != 'keluar' && $jenis != 'sk' && ($jenis == 'bast' && $surat->tipe_bast == null))
                                                 <div
                                                     class="form-group  {{ $errors->has('id_kegiatan') ? 'has-error has-feedback' : '' }}">
                                                     <label for="id_kegiatan">Kegiatan</label>
@@ -115,6 +115,29 @@
                                                     @if ($errors->has('id_kegiatan'))
                                                         <small
                                                             class="form-text text-muted">{{ $errors->first('id_kegiatan') }}</small>
+                                                    @endif
+                                                </div>
+                                            @endif
+
+                                            @if ($jenis == 'bast' && $surat->tipe_bast == null)
+                                                <div
+                                                    class="form-group  {{ $errors->has('no_spk') ? 'has-error has-feedback' : '' }}">
+                                                    <label for="no_spk">No SPK</label>
+                                                    <select class="form-select" id="no_spk" name="no_spk"
+                                                        data-placeholder="Pilih salah satu">
+                                                        <option value="">(Pilih salah satu)</option>
+
+                                                        @foreach ($spks as $spk)
+                                                            <option value="{{ $spk->id }}"
+                                                                {{ $surat->spk_id == $spk->id ? 'selected' : '' }}>
+                                                                No. {{ $spk->no_terakhir }} Bulan
+                                                                {{ $spk->bulan_spk }} -
+                                                                {{ $spk->mitra->nama }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    @if ($errors->has('no_spk'))
+                                                        <small
+                                                            class="form-text text-muted">{{ $errors->first('no_spk') }}</small>
                                                     @endif
                                                 </div>
                                             @endif
@@ -188,7 +211,8 @@
                                             <div
                                                 class="form-group {{ $errors->has('tgl_surat') ? 'has-error has-feedback' : '' }}">
                                                 <label for="tgl_surat">Tanggal Surat</label>
-                                                <input type="date" class="form-control" id="tgl_surat" name="tgl_surat"
+                                                <input type="date" class="form-control" id="tgl_surat"
+                                                    name="tgl_surat"
                                                     value="{{ old('tgl_surat') ? old('tgl_surat') : $surat->tgl_surat }}" />
                                                 @if ($errors->has('tgl_surat'))
                                                     <small
@@ -312,7 +336,7 @@
                                     </div>
                                 @endif
 
-                                @if ($jenis != 'masuk' && $jenis != 'sk')
+                                @if ($jenis != 'masuk' && $jenis != 'sk' && $jenis != 'bast')
                                     <div class="row">
                                         <div class="col">
                                             <hr />
@@ -553,14 +577,7 @@
                 $('#nomor_surat').val($('.kemungkinan_no_surat').text());
             });
 
-            $('#single-select-field').select2({
-                theme: "bootstrap-5",
-                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' :
-                    'style',
-                placeholder: $(this).data('placeholder'),
-            });
-
-            $('#single-select-field-2').select2({
+            $('#single-select-field, #single-select-field-2, #no_spk').select2({
                 theme: "bootstrap-5",
                 width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' :
                     'style',

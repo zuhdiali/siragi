@@ -24,6 +24,13 @@ class SuratController extends Controller
         foreach ($surats as $surat) {
             $surat->pembuat_surat = Pegawai::find($surat->id_pembuat_surat);
             $surat->kegiatan = Kegiatan::find($surat->id_kegiatan);
+            if ($surat->spk_id) {
+                $surat->spk = Surat::find($surat->spk_id);
+                $surat->mitra = Mitra::find($surat->spk->mitra_spk);
+            }
+            if ($surat->id_kegiatan) {
+                $surat->kegiatan = Kegiatan::find($surat->id_kegiatan);
+            }
         }
         return $surats;
     }
@@ -105,6 +112,13 @@ class SuratController extends Controller
         return view('surat.spk', ['surats' => $surats]);
     }
 
+    public function bast()
+    {
+        $surats = Surat::where('jenis_surat', 'bast')->where('flag', null)->orderBy('created_at', 'desc')->get();
+        $surats = $this->tambahInformasiSurat($surats);
+        return view('surat.bast', ['surats' => $surats]);
+    }
+
     public function createLama($jenis)
     {
         $kegiatans = Kegiatan::where('tim', Auth::user()->tim)->orWhere('id_pjk', Auth::user()->id)->get();
@@ -130,7 +144,7 @@ class SuratController extends Controller
         }
     }
 
-    public function create($jenis)
+    public function create($jenis, $tipe_bast = null)
     {
         $kegiatans = collect();
         if (Auth::user()->role == 'Admin') {
@@ -158,9 +172,14 @@ class SuratController extends Controller
         $opsiSuratAwal = KamusSurat::where('tim', '11012')->get();
         $kamusSuratUmum = KamusSurat::where('tim', '11011')->get();
         $kamusSuratTeknis = KamusSurat::where('tim', '11012')->orderBy('kode_surat_gabungan', 'desc')->get();
+        $spks = Surat::where('jenis_surat', 'spk')->where('flag', null)->orderBy('created_at', 'desc')->get();
+        foreach ($spks as $spk) {
+            $spk->mitra = Mitra::find($spk->mitra_spk);
+        }
+        // dd($spks);
         if ($jenis != 'spk') {
             $pegawais = Pegawai::where('flag', null)->get();
-            return view('surat.create', compact('jenis', 'noTerakhir', 'kamusSuratUmum', 'kamusSuratTeknis', 'kegiatans', 'opsiSuratAwal', 'pegawais'));
+            return view('surat.create', compact('jenis', 'noTerakhir', 'kamusSuratUmum', 'kamusSuratTeknis', 'kegiatans', 'opsiSuratAwal', 'pegawais', 'tipe_bast', 'spks'));
         } else {
             $mitras = Mitra::where('flag', null)->where('nama', 'not like', '%bayangan%')->get();
             return view('surat.create', compact('jenis', 'noTerakhir', 'kamusSuratUmum', 'kamusSuratTeknis', 'kegiatans', 'opsiSuratAwal', 'mitras'));
@@ -319,7 +338,7 @@ class SuratController extends Controller
         return redirect()->route('surat.' . $jenis)->with('success', 'Surat berhasil dibuat.');
     }
 
-    public function storeAndValidate(Request $request, $jenis)
+    public function storeAndValidate(Request $request, $jenis, $tipe_bast = null)
     {
 
         if ($jenis != 'masuk') { //jika jenis surat selain masuk
@@ -333,18 +352,20 @@ class SuratController extends Controller
                 }
 
                 if ($jenis != 'keluar') {  //jika surat form permintaan atau tugas atau spd
-                    if ($jenis == 'sk') {
+                    if ($jenis == 'sk' || $jenis == 'bast') {
                         $request->validate([
                             'tgl_surat' => 'required',
                         ]);
                     } else {
-                        $request->validate([
-                            'id_kegiatan' => 'required',
-                        ]);
-                        $kegiatan = Kegiatan::find($request->id_kegiatan);
-                        $mitraMelebihiHonor = KegiatanController::validasiHonorMitra($kegiatan->mitra, $kegiatan->tgl_mulai);
-                        if (count($mitraMelebihiHonor) > 0) {
-                            return redirect()->back()->with('error', 'Mitra (' . implode(",", $mitraMelebihiHonor) . ') melebihi batas honor yang diperbolehkan.');
+                        if (!$tipe_bast) {
+                            $request->validate([
+                                'id_kegiatan' => 'required',
+                            ]);
+                            $kegiatan = Kegiatan::find($request->id_kegiatan);
+                            $mitraMelebihiHonor = KegiatanController::validasiHonorMitra($kegiatan->mitra, $kegiatan->tgl_mulai);
+                            if (count($mitraMelebihiHonor) > 0) {
+                                return redirect()->back()->with('error', 'Mitra (' . implode(",", $mitraMelebihiHonor) . ') melebihi batas honor yang diperbolehkan.');
+                            }
                         }
                     }
                 }
@@ -400,8 +421,6 @@ class SuratController extends Controller
             $surat->pegawai_yang_bertugas = $request->pegawai_yang_bertugas;
         }
 
-
-
         $surat->id_pembuat_surat = Auth::user()->id;
 
         if ($jenis != 'masuk') {
@@ -410,20 +429,26 @@ class SuratController extends Controller
                 $surat->no_terakhir = $noTerakhir + 1;
                 if ($jenis != 'keluar' && $jenis != 'sk') {
                     $surat->nomor_surat = $this->generateNomorSurat($request->tim, $request->kode, $jenis, $noTerakhir);
-                    $surat->id_kegiatan = $request->id_kegiatan;
+                    if (!$request->tipe_bast) {
+                        $surat->id_kegiatan = $request->id_kegiatan;
+                        if ($jenis == 'bast') {
+                            $surat->spk_id = $request->no_spk;
+                        }
+                    } else {
+                        $surat->tipe_bast = $request->tipe_bast;
+                    }
                 } else { // jika jenis surat keluar atau sk
-                    if ($jenis == 'sk') {
+                    if ($jenis == 'sk' || $jenis == 'bast') {
                         $surat->tim = $request->tim;
                         $surat->no_terakhir = $noTerakhir + 1;
                         $surat->tgl_surat = $request->tgl_surat;
-                        $surat->save();
                     } else {
                         $surat->nomor_surat = $this->generateNomorSurat("11010", $request->kode, $jenis, $noTerakhir);
                     }
                 }
                 $surat->tim = $request->tim;
 
-                if ($jenis == 'tugas') {
+                if ($jenis == 'tugas' || $jenis == 'bast') {
                     $surat->tgl_surat = $request->tgl_surat;
                 }
             } else {  //jika jenis surat spk
@@ -449,8 +474,8 @@ class SuratController extends Controller
                 $surat->file = $this->generateSPK($request->mitra_spk, $request->bulan_spk, $request->tahun_spk);
             }
 
-            $surat->save();
             // dd($request->all(), $surat, $jenis);
+            $surat->save();
         } else { //jika jenis surat masuk
             $surat->dinas_surat_masuk = $request->dinas_surat_masuk;
             $surat->no_surat_masuk = $request->no_surat_masuk;
@@ -471,10 +496,10 @@ class SuratController extends Controller
         return $surat;
     }
 
-    public function store(Request $request, $jenis)
+    public function store(Request $request, $jenis, $tipe_bast = null)
     {
 
-        $surat = $this->storeAndValidate($request, $jenis);
+        $surat = $this->storeAndValidate($request, $jenis, $tipe_bast);
         // dd($request->all(), $jenis, $surat);
         // dd($surat);
         return redirect()->route('surat.' . $jenis)->with('success', 'Surat berhasil dibuat.');
@@ -484,38 +509,38 @@ class SuratController extends Controller
     {
         $surat = Surat::find($id);
 
-        if ($jenis == 'masuk') {
-            return view('surat.edit', [
-                'surat' => $surat,
-                'jenis' => $jenis,
-            ]);
-        } else if ($jenis == 'sk') {
+        if ($jenis == 'masuk' || $jenis == 'sk') {
             return view('surat.edit', [
                 'surat' => $surat,
                 'jenis' => $jenis,
             ]);
         } else {
             $kegiatan = Kegiatan::where('id', $surat->id_kegiatan)->first();
-
+            $spks = $pecahanSurat = null;
             $kamusSuratUmum = KamusSurat::where('tim', '11011')->get();
             $pegawais = Pegawai::where('flag', null)->get();
-
-            $pecahanSurat = explode("/", $surat->nomor_surat);
-            if (!$surat->tim) {
-                $surat->tim = $pecahanSurat[1];
-            }
-            $surat->kode_surat = $pecahanSurat[2];
-            if ($jenis == 'spd') {
-                $id = $surat->pegawai_yang_bertugas;
-                $surat->pegawai_yang_bertugas = Pegawai::find($id);
-            }
-            if (count($pecahanSurat) == 5) {
-                $surat->bulan = [3];
-                $surat->tahun = $pecahanSurat[4];
+            if ($jenis != 'bast') {
+                $pecahanSurat = explode("/", $surat->nomor_surat);
+                if (!$surat->tim) {
+                    $surat->tim = $pecahanSurat[1];
+                }
+                $surat->kode_surat = $pecahanSurat[2];
+                if ($jenis == 'spd') {
+                    $id = $surat->pegawai_yang_bertugas;
+                    $surat->pegawai_yang_bertugas = Pegawai::find($id);
+                }
+                if (count($pecahanSurat) == 5) {
+                    $surat->bulan = [3];
+                    $surat->tahun = $pecahanSurat[4];
+                } else {
+                    $surat->tahun = $pecahanSurat[3];
+                }
             } else {
-                $surat->tahun = $pecahanSurat[3];
+                $spks = Surat::where('jenis_surat', 'spk')->where('flag', null)->orderBy('created_at', 'desc')->get();
+                foreach ($spks as $spk) {
+                    $spk->mitra = Mitra::find($spk->mitra_spk);
+                }
             }
-
             $opsiSuratAwal = KamusSurat::where('tim', $surat->tim)->get();
             $kamusSuratTeknis = KamusSurat::where('tim', '11012')->orderBy('kode_surat_gabungan', 'desc')->get();
             $noTerakhir = $surat->no_terakhir;
@@ -529,6 +554,7 @@ class SuratController extends Controller
                 'opsiSuratAwal' => $opsiSuratAwal,
                 'kegiatan' => $kegiatan,
                 'pegawais' => $pegawais,
+                'spks' => $spks,
             ]);
         }
     }
@@ -594,11 +620,15 @@ class SuratController extends Controller
                 $surat->nomor_surat = $this->generateNomorSurat("11010", $request->kode, $jenis, $noTerakhir - 1);
             }
 
-            if ($jenis == 'tugas' || $jenis == 'sk') {
+            if ($jenis == 'tugas' || $jenis == 'sk' || $jenis == 'bast') {
                 $request->validate([
                     'tgl_surat' => 'required',
                 ]);
                 $surat->tgl_surat = $request->tgl_surat;
+            }
+
+            if ($request->no_spk) {
+                $surat->spk_id = $request->no_spk;
             }
         }
         $surat->perihal = $request->perihal;
@@ -619,8 +649,13 @@ class SuratController extends Controller
         if ($surat->jenis_surat == 'spk') {
             $filePath = $surat->file;
             unlink($filePath);
+            $bast = Surat::where('spk_id', $surat->id)->get();
+            foreach ($bast as $b) {
+                $b->spk_id = null;
+                $b->save();
+            }
             $surat->delete();
-        } else if ($surat->jenis_surat == 'sk') {
+        } else if ($surat->jenis_surat == 'sk' || $surat->jenis_surat == 'bast') {
             $surat->delete();
         } else {
             if ($surat->jenis_surat == 'tugas') {
@@ -800,6 +835,8 @@ class SuratController extends Controller
         $noSurat = "";
         if ($jenis == "spd") {
             $noSurat =  str_pad($noTerakhir + 1, 4, "0", STR_PAD_LEFT) . "/" . $tim . "/" . $kode . "/" . date("Y");
+        } else if ($jenis == "bast") {
+            $noSurat = str_pad($noTerakhir + 1, 4, "0", STR_PAD_LEFT)  . "/" . $kode . "/" . date("Y");
         } else {
             $noSurat = "B-" . str_pad($noTerakhir + 1, 4, "0", STR_PAD_LEFT) . "/" . $tim . "/" . $kode . "/" . date("Y");
         }
@@ -887,10 +924,15 @@ class SuratController extends Controller
         $phpWord->setValue('total_honor_terbilang',  $honorTerbilang . " Rupiah");
         $phpWord->setValue('total_honor_terbilang_kecil',  strtolower($honorTerbilang) . " rupiah");
 
-        $filePath = 'SPK/' . $mitra->nama . '_' . $bulan . '_' . $tahun . '.docx';
-        $phpWord->saveAs($filePath);
-        return $filePath;
-        // return response()->download($filePath);
+        // 1. Tentukan nama file yang akan dilihat user saat download
+        $fileNameUser = 'SPK_' . str_replace(' ', '_', $mitra->nama) . '_' . $bulan . '_' . $tahun . '.docx';
+
+        // 2. Buat file temporary (sementara) di sistem server
+        $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
+        $phpWord->saveAs($tempFile);
+        // Parameter 1: Path file sementara
+        // Parameter 2: Nama file yang akan didownload user
+        return response()->download($tempFile, $fileNameUser)->deleteFileAfterSend(true);
     }
 
     public function convertDigitBulan($digit)
