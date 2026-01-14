@@ -934,7 +934,32 @@
                                     </div>
                                 @endif
                                 <div class="row">
-                                    <div class="col">
+                                    @if ($jenis_kak == 'lainnya')
+                                        <div class="col-12">
+                                            <div
+                                                class="form-group  {{ $errors->has('id_pjk') ? 'has-error has-feedback' : '' }}">
+                                                <label for="id_pjk">Nama Pegawai Penanggung Jawab
+                                                    Kegiatan</strong></label>
+                                                <select class="form-select" id="id_pjk" name="id_pjk">
+                                                    <option value="">(Pilih salah satu)</option>
+                                                    @foreach ($pegawais as $item)
+                                                        <option value="{{ $item->id }}"
+                                                            {{ old('id_pjk') ? (old('id_pjk') == $item->id ? 'selected' : '') : ($kegiatan->id_pjk == $item->id ? 'selected' : '') }}>
+                                                            {{ $item->nama }}</option>
+                                                    @endforeach
+
+                                                </select>
+                                                @if ($errors->has('id_pjk'))
+                                                    <small
+                                                        class="form-text text-muted">{{ $errors->first('id_pjk') }}</small>
+                                                @else
+                                                    <small class="form-text text-muted">
+                                                    </small>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <div class="col-12">
                                         <div class="form-group">
                                             <p>JUDUL KERANGKA ACUAN KERJA (KAK)</p>
                                             <input type="text" name="judul_kak" id="judul_kak" class="form-control"
