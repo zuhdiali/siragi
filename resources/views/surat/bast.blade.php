@@ -80,8 +80,10 @@
                                             <th style="width: 10%">Nomor BAST</th>
                                             <th style="width: 10%">Tanggal Surat</th>
                                             <th>Perihal</th>
-                                            <th>Kegiatan</th>
                                             <th>No. SPK</th>
+                                            <th>Bulan SPK</th>
+                                            <th>Mitra</th>
+                                            <th>Kegiatan</th>
                                         </tr>
                                     </thead>
                                     <tfoot>
@@ -90,8 +92,10 @@
                                             <th>Nomor BAST</th>
                                             <th>Tanggal Surat</th>
                                             <th>Perihal</th>
-                                            <th>Kegiatan</th>
                                             <th>No. SPK</th>
+                                            <th>Bulan SPK</th>
+                                            <th>Mitra</th>
+                                            <th>Kegiatan</th>
                                         </tr>
                                     </tfoot>
                                     <tbody>
@@ -154,6 +158,9 @@
                                                 <td>{{ \Carbon\Carbon::parse($surat->tgl_surat)->translatedFormat('d F Y') }}
                                                 </td>
                                                 <td>{{ $surat->perihal }}</td>
+                                                <td> {{ $surat->spk ? 'No .' . $surat->spk->no_terakhir : '-' }}</td>
+                                                <td>{{ $surat->spk ? $surat->spk->bulan_spk : '-' }}</td>
+                                                <td> {{ $surat->mitra ? $surat->mitra->nama : '-' }}</td>
                                                 <td>
                                                     @if ($surat->kegiatan)
                                                         {{ $surat->kegiatan->nama }}
@@ -161,21 +168,6 @@
                                                         -
                                                     @endif
                                                 </td>
-                                                <td>
-                                                    @if ($surat->spk)
-                                                        No. {{ $surat->spk->no_terakhir }}, bulan
-                                                        {{ $surat->spk->bulan_spk }} - {{ $surat->mitra->nama }}
-                                                    @else
-                                                        -
-                                                    @endif
-                                                </td>
-                                                {{-- <td>
-                        @if ($surat->flag == null)
-                        <span class="badge bg-success">Aktif</span>
-                        @else
-                        <span class="badge bg-danger">Tidak Aktif</span>
-                        @endif
-                      </td> --}}
                                             </tr>
                                         @endforeach
                                     </tbody>

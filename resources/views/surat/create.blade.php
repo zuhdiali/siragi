@@ -206,23 +206,57 @@
 
                                                 @if ($jenis == 'bast' && $tipe_bast == null)
                                                     <div
-                                                        class="form-group  {{ $errors->has('no_spk') ? 'has-error has-feedback' : '' }}">
-                                                        <label for="no_spk">No SPK</label>
-                                                        <select class="form-select" id="no_spk" name="no_spk"
-                                                            data-placeholder="Pilih salah satu">
+                                                        class="form-group {{ $errors->has('bulan_spk') ? 'has-error has-feedback' : '' }}">
+                                                        <label for="bulan_spk">Pilih Bulan</label>
+                                                        <select name="bulan_spk" id="bulan_spk" class="form-select">
                                                             <option value="">(Pilih salah satu)</option>
-
-                                                            @foreach ($spks as $spk)
-                                                                <option value="{{ $spk->id }}"
-                                                                    {{ old('no_spk') == $spk->id ? 'selected' : '' }}>
-                                                                    No. {{ $spk->no_terakhir }} Bulan
-                                                                    {{ $spk->bulan_spk }} -
-                                                                    {{ $spk->mitra->nama }}</option>
-                                                            @endforeach
+                                                            <option value="01"
+                                                                {{ old('bulan_spk') == '01' ? 'selected' : '' }}>01.
+                                                                Januari
+                                                            </option>
+                                                            <option value="02"
+                                                                {{ old('bulan_spk') == '02' ? 'selected' : '' }}>02.
+                                                                Februari
+                                                            </option>
+                                                            <option value="03"
+                                                                {{ old('bulan_spk') == '03' ? 'selected' : '' }}>03. Maret
+                                                            </option>
+                                                            <option value="04"
+                                                                {{ old('bulan_spk') == '04' ? 'selected' : '' }}>04. April
+                                                            </option>
+                                                            <option value="05"
+                                                                {{ old('bulan_spk') == '05' ? 'selected' : '' }}>05. Mei
+                                                            </option>
+                                                            <option value="06"
+                                                                {{ old('bulan_spk') == '06' ? 'selected' : '' }}>06. Juni
+                                                            </option>
+                                                            <option value="07"
+                                                                {{ old('bulan_spk') == '07' ? 'selected' : '' }}>07. Juli
+                                                            </option>
+                                                            <option value="08"
+                                                                {{ old('bulan_spk') == '08' ? 'selected' : '' }}>08.
+                                                                Agustus
+                                                            </option>
+                                                            <option value="09"
+                                                                {{ old('bulan_spk') == '09' ? 'selected' : '' }}>09.
+                                                                September
+                                                            </option>
+                                                            <option value="10"
+                                                                {{ old('bulan_spk') == '10' ? 'selected' : '' }}>10.
+                                                                Oktober
+                                                            </option>
+                                                            <option value="11"
+                                                                {{ old('bulan_spk') == '11' ? 'selected' : '' }}>11.
+                                                                November
+                                                            </option>
+                                                            <option value="12"
+                                                                {{ old('bulan_spk') == '12' ? 'selected' : '' }}>12.
+                                                                Desember
+                                                            </option>
                                                         </select>
-                                                        @if ($errors->has('no_spk'))
+                                                        @if ($errors->has('bulan_spk'))
                                                             <small
-                                                                class="form-text text-muted">{{ $errors->first('no_spk') }}</small>
+                                                                class="form-text text-muted">{{ $errors->first('bulan_spk') }}</small>
                                                         @endif
                                                     </div>
                                                 @endif
