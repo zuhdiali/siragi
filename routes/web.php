@@ -174,6 +174,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/destroy/{id}', [SuratController::class, 'destroy'])->name('destroy');
         Route::get('/generate-spk', [SuratController::class, 'generateSPK'])->name('generate-spk');
         Route::get('/download-spk/{id}', [SuratController::class, 'downloadSPK'])->name('download-spk');
+        Route::get('/download-bast-pcl/{id}', [SuratController::class, 'downloadBASTPCL'])->name('download-bast-pcl');
+        Route::get('/download-bast-pjk/{id}', [SuratController::class, 'downloadBASTPJK'])->name('download-bast-pjk');
         Route::get('/generate-surat-tugas/{id_kegiatan}/{id_form_permintaan}', [SuratController::class, 'generateSuratTugas'])->name('generate-surat-tugas');
         Route::get('/generate-spd/{id_kegiatan}/{id_form_permintaan}', [SuratController::class, 'generateSPD'])->name('generate-spd');
     });

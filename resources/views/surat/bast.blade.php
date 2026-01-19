@@ -146,6 +146,16 @@
                                                                 data-original-title="Hapus">
                                                                 <i class="fa fa-trash-alt"></i>
                                                             </button>
+
+                                                            @if (!$surat->tipe_bast)
+                                                                <a href="{{ url('surat/download-bast-pcl/' . $surat->id) }}"
+                                                                    data-bs-toggle="tooltip"
+                                                                    title="Download BAST PCL ke PPK"
+                                                                    class="btn btn-link btn-success px-2"
+                                                                    data-original-title="Download BAST PCL ke PPK">
+                                                                    <i class="fa fa-download"></i>
+                                                                </a>
+                                                            @endif
                                                         </div>
                                                     @endif
                                                 </td>

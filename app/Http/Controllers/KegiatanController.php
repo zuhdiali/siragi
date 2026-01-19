@@ -168,7 +168,7 @@ class KegiatanController extends Controller
         switch ($kegiatan->jenis_kak) {
             case 'translok-biasa':
                 $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-translok-biasa.docx");
-                $phpWord->setValue('nama', $kegiatan->nama);
+                $phpWord->setValue('nama', strtoupper($kegiatan->nama));
                 $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
                 $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
                 $phpWord->setValue('kak2_maksud', $kegiatan->kak2_maksud);
@@ -227,7 +227,7 @@ class KegiatanController extends Controller
                 break;
             case 'translok-8jam':
                 $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-translok-8jam.docx");
-                $phpWord->setValue('nama', $kegiatan->nama);
+                $phpWord->setValue('nama', strtoupper($kegiatan->nama));
                 $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
                 $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
                 $phpWord->setValue('kak2_maksud', $kegiatan->kak2_maksud);
@@ -286,7 +286,7 @@ class KegiatanController extends Controller
                 break;
             case 'pemanggilan-konsultasi':
                 $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-pemanggilan-konsultasi.docx");
-                $phpWord->setValue('nama', $kegiatan->nama);
+                $phpWord->setValue('nama', strtoupper($kegiatan->nama));
                 $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
                 $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
                 $phpWord->setValue('kak2_maksud', $kegiatan->kak2_maksud);
@@ -337,7 +337,7 @@ class KegiatanController extends Controller
                 break;
             case 'honor-mitra':
                 $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-honor-mitra.docx");
-                $phpWord->setValue('nama', $kegiatan->nama);
+                $phpWord->setValue('nama', strtoupper($kegiatan->nama));
                 $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
                 $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
                 $kak4_tgl_mulai = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F Y');
@@ -405,7 +405,7 @@ class KegiatanController extends Controller
                 break;
             case 'honor-inda':
                 $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("kak-honor-inda.docx");
-                $phpWord->setValue('nama', $kegiatan->nama);
+                $phpWord->setValue('nama', strtoupper($kegiatan->nama));
                 $phpWord->setValue('kak1_latar_belakang', $kegiatan->kak1_latar_belakang);
                 $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
                 $kak4_tgl_mulai = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F Y');
@@ -1314,10 +1314,10 @@ class KegiatanController extends Controller
         // ]);
 
         $honorMitra = DB::table('mitras')
-            ->select('mitras.id as mitra_id', 'mitras.nama as nama', 'mitras.kec_asal as kec_asal', DB::raw("COUNT('kegiatan_mitras.kegiatan_id') as total_kegiatan"), DB::raw("SUM(estimasi_honor) as total_estimasi_honor"), DB::raw("SUM(honor) as total_honor"))
+            ->select('mitras.id as mitra_id', 'mitras.nama as nama', 'mitras.kec_asal as kec_asal', DB::raw("COUNT('kegiatan_lampirans.kegiatan_id') as total_kegiatan"), DB::raw("SUM(transport_bayar) as total_estimasi_honor"))
             ->where('mitras.id', $id_mitra)
-            ->leftJoin('kegiatan_mitras', 'mitras.id', '=', 'kegiatan_mitras.mitra_id')
-            ->leftJoin('kegiatans', 'kegiatan_mitras.kegiatan_id', '=', 'kegiatans.id')
+            ->leftJoin('kegiatan_lampirans', 'mitras.id', '=', 'kegiatan_lampirans.peserta_id')
+            ->leftJoin('kegiatans', 'kegiatan_lampirans.kegiatan_id', '=', 'kegiatans.id')
             ->whereRaw('MONTH(kegiatans.tgl_mulai) = ' . $bulan)
             ->whereRaw('YEAR(kegiatans.tgl_mulai) = ' . $tahun)
             ->when($idKegiatanPengecualian, function ($query) use ($idKegiatanPengecualian) {

@@ -85,6 +85,26 @@
                                                         @if ($errors->has('singkatan_resmi'))
                                                             <small
                                                                 class="form-text text-muted">{{ $errors->first('singkatan_resmi') }}</small>
+                                                        @else
+                                                            <small class="form-text text-muted">
+                                                                panduan pengisian:
+                                                                <ol>
+                                                                    <li>Untuk kegiatan tahunan, langsung tulis nama
+                                                                        singkatan resmi dari survei yang dipilih. Contoh:
+                                                                        PODES, SUPAS, SKP</li>
+                                                                    <li>Untuk kegiatan semesteran, tulis nama singkatan
+                                                                        resmi dari survei yang dipilih diikuti dengan
+                                                                        semester/bulan. Contoh: SUSENAS Maret, SAKERNAS
+                                                                        Agustus</li>
+                                                                    <li>Untuk kegiatan triwulanan, tulis nama singkatan
+                                                                        resmi dari survei yang dipilih diikuti dengan
+                                                                        triwulan/bulan. Contoh: IMK Triwulan I,
+                                                                        Ubinan Subround I</li>
+                                                                    <li>Untuk kegiatan bulanan, tulis nama singkatan
+                                                                        resmi dari survei yang dipilih diikuti dengan
+                                                                        bulan. Contoh: VHTS Januari, SHPB Februari</li>
+                                                                </ol>
+                                                            </small>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -964,6 +984,43 @@
                                             <p>JUDUL KERANGKA ACUAN KERJA (KAK)</p>
                                             <input type="text" name="judul_kak" id="judul_kak" class="form-control"
                                                 value="{{ old('judul_kak', $kegiatan->nama) }}" />
+                                            @if ($errors->has('judul_kak'))
+                                                <small
+                                                    class="form-text text-muted text-danger">{{ $errors->first('judul_kak') }}</small>
+                                            @else
+                                                <small class="form-text text-muted">
+                                                    @if ($jenis_kak == 'translok-biasa')
+                                                        petunjuk pengisian: TRANSPORT LOKAL DI BAWAH 8 JAM
+                                                        [ORGANIK/MITRA] [SUPERVISI/PENGAWASAN/PENDATAAN]
+                                                        [UPDATING/PENDATAAN] [nama_kegiatan] TAHUN 2026 BPS
+                                                        KABUPATEN
+                                                        SIMEULUE TAHUN ANGGARAN 2026
+                                                    @elseif ($jenis_kak == 'translok-8jam')
+                                                        petunjuk pengisian: TRANSPORT LOKAL DI ATAS 8 JAM
+                                                        [ORGANIK/MITRA] [SUPERVISI/PENGAWASAN/PENDATAAN]
+                                                        [UPDATING/PENDATAAN] [nama_kegiatan] TAHUN 2026 BPS
+                                                        KABUPATEN
+                                                        SIMEULUE TAHUN ANGGARAN 2026
+                                                    @elseif ($jenis_kak == 'pemanggilan-konsultasi')
+                                                        petunjuk pengisian: PERJALANAN DINAS DALAM RANGKA
+                                                        [KONSULTASI/PEMANGGILAN] KE [tujuan] TAHUN 2026 BPS
+                                                        KABUPATEN
+                                                        SIMEULUE TAHUN ANGGARAN 2026
+                                                    @elseif($jenis_kak == 'honor-inda')
+                                                        petunjuk pengisian: HONOR INSTRUKTUR DAERAH (INDA)
+                                                        [nama_kegiatan] TAHUN 2026 BPS
+                                                        KABUPATEN
+                                                        SIMEULUE TAHUN ANGGARAN 2026
+                                                    @elseif($jenis_kak == 'honor-mitra')
+                                                        petunjuk pengisian: HONOR PETUGAS PEMUTAKHIRAN DAN
+                                                        PENDATAAN
+                                                        [nama_kegiatan] TAHUN 2026
+                                                        BPS
+                                                        KABUPATEN
+                                                        SIMEULUE TAHUN ANGGARAN 2026
+                                                    @endif
+                                                </small>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

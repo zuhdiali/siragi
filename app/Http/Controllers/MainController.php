@@ -113,9 +113,9 @@ class MainController extends Controller
         $tahun = date('Y');
 
         $mitraAdaHonor = DB::table('mitras')
-            ->select('mitras.id as mitra_id', 'mitras.nama as nama', 'mitras.kec_asal as kec_asal', DB::raw("COUNT('kegiatan_mitras.kegiatan_id') as total_kegiatan"), DB::raw("SUM(estimasi_honor) as total_estimasi_honor"), DB::raw("SUM(honor) as total_honor"))
-            ->leftJoin('kegiatan_mitras', 'mitras.id', '=', 'kegiatan_mitras.mitra_id')
-            ->leftJoin('kegiatans', 'kegiatan_mitras.kegiatan_id', '=', 'kegiatans.id')
+            ->select('mitras.id as mitra_id', 'mitras.nama as nama', 'mitras.kec_asal as kec_asal', DB::raw("COUNT('kegiatan_lampirans.kegiatan_id') as total_kegiatan"), DB::raw("SUM(transport_bayar) as total_estimasi_honor"))
+            ->leftJoin('kegiatan_lampirans', 'mitras.id', '=', 'kegiatan_lampirans.peserta_id')
+            ->leftJoin('kegiatans', 'kegiatan_lampirans.kegiatan_id', '=', 'kegiatans.id')
             ->whereRaw('YEAR(kegiatans.tgl_mulai) = ' . $tahun)
             ->groupBy('mitras.id', 'mitras.nama', 'mitras.kec_asal')
             ->orderBy('mitras.nama', 'asc')
@@ -153,9 +153,9 @@ class MainController extends Controller
         $tahun = $request->tahun ?? date('Y');
 
         $mitraAdaHonor = DB::table('mitras')
-            ->select('mitras.id as mitra_id', 'mitras.nama as nama', 'mitras.kec_asal as kec_asal', DB::raw("COUNT('kegiatan_mitras.kegiatan_id') as total_kegiatan"), DB::raw("SUM(estimasi_honor) as total_estimasi_honor"), DB::raw("SUM(honor) as total_honor"))
-            ->leftJoin('kegiatan_mitras', 'mitras.id', '=', 'kegiatan_mitras.mitra_id')
-            ->leftJoin('kegiatans', 'kegiatan_mitras.kegiatan_id', '=', 'kegiatans.id')
+            ->select('mitras.id as mitra_id', 'mitras.nama as nama', 'mitras.kec_asal as kec_asal', DB::raw("COUNT('kegiatan_lampirans.kegiatan_id') as total_kegiatan"), DB::raw("SUM(transport_bayar) as total_estimasi_honor"))
+            ->leftJoin('kegiatan_lampirans', 'mitras.id', '=', 'kegiatan_lampirans.peserta_id')
+            ->leftJoin('kegiatans', 'kegiatan_lampirans.kegiatan_id', '=', 'kegiatans.id')
             ->whereRaw('MONTH(kegiatans.tgl_mulai) = ' . $bulan)
             ->whereRaw('YEAR(kegiatans.tgl_mulai) = ' . $tahun)
             ->groupBy('mitras.id', 'mitras.nama', 'mitras.kec_asal')

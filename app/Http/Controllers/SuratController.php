@@ -896,6 +896,73 @@ class SuratController extends Controller
         return response()->download($surat->file);
     }
 
+    public function downloadBASTPCL($id)
+    {
+        $surat = Surat::find($id);
+        $kegiatan = Kegiatan::find($surat->id_kegiatan);
+        $mitra = Mitra::find($surat->mitra_spk);
+        $spk = Surat::find($surat->spk_id);
+        if (!$kegiatan || !$spk) {
+            return redirect()->back()->with('error', 'Tidak dapat mengunduh BAST PCL karena kegiatan tidak ditemukan.');
+        }
+        if (!$mitra) {
+            return redirect()->back()->with('error', 'Tidak dapat mengunduh BAST PCL karena mitra tidak ditemukan.');
+        }
+        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("bast-pcl-ke-ppk.docx");
+        $phpWord->setValue('singkatan_resmi_uppercase', strtoupper($kegiatan->singkatan_resmi));
+        $phpWord->setValue('singkatan_resmi', ($kegiatan->singkatan_resmi));
+        $phpWord->setValue('no_bast', $surat->nomor_surat);
+        $phpWord->setValue('hari_surat', \Carbon\Carbon::parse($surat->tgl_surat)->locale('id')->translatedFormat('l'));
+        $phpWord->setValue('tanggal_surat', \Carbon\Carbon::parse($surat->tgl_surat)->locale('id')->translatedFormat('d'));
+        $phpWord->setValue('bulan_surat', \Carbon\Carbon::parse($surat->tgl_surat)->locale('id')->translatedFormat('F'));
+        $phpWord->setValue('tahun_surat', \Carbon\Carbon::parse($surat->tgl_surat)->locale('id')->translatedFormat('Y'));
+        $phpWord->setValue('nama_mitra', $mitra->nama);
+        $phpWord->setValue('nik_mitra', $mitra->nik);
+        $phpWord->setValue('kec_asal_mitra', $this->konversiKodeKec($mitra->kec_asal));
+        $phpWord->setValue('no_spk', $spk->no_terakhir);
+        $phpWord->setValue('tahun_spk', $spk->tahun_spk);
+        $values = [];
+        $count = 1;
+        $total_honor = 0;
+        foreach ($kegiatan->kegiatanLampiran as $kl) {
+            $mitra = null;
+            if ($kl->tipe_personil != 'mitra') {
+                continue;
+            } else {
+                $mitra = Mitra::find($kl->peserta_id);
+            }
+            array_push($values, [
+                'lamp_no' => $count++,
+                'lamp_nama' => $mitra->nama,
+                'lamp_kec_asal' => $this->konversiKodeKec($mitra->kec_asal),
+                'lamp_nama_sls' => $kl->nama_sls,
+                'lamp_jml' => $kl->jml_sampel_pcl
+            ]);
+        }
+        $phpWord->cloneRowAndSetValues('lamp_no', $values);
+        $phpWord->setValue('tgl_bast', \Carbon\Carbon::parse($surat->tgl_surat)->locale('id')->translatedFormat('d F Y'));
+        $phpWord->setValue('kak8_pengaju', $kegiatan->kak8_pengaju);
+        $pengaju = Pegawai::find($kegiatan->id_pjk);
+        $phpWord->setValue('nama_pengaju', $pengaju->nama);
+        $phpWord->setValue('nip_pengaju', $pengaju->nip);
+
+        // 1. Tentukan nama file yang akan dilihat user saat download
+        $fileNameUser = 'BAST_PCL_' . str_replace(' ', '_', $mitra->nama) . '_' . date('Ymd_His') . '.docx';
+
+        // 2. Buat file temporary (sementara) di sistem server
+        $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
+        $phpWord->saveAs($tempFile);
+        // Parameter 1: Path file sementara
+        // Parameter 2: Nama file yang akan didownload user
+        return response()->download($tempFile, $fileNameUser)->deleteFileAfterSend(true);
+    }
+
+    public function donwloadBASTPJK($id)
+    {
+        $surat = Surat::find($id);
+        return response()->download($surat->file);
+    }
+
     public  function generateSPK($id_mitra, $bulan, $tahun)
     {
         $mitra = Mitra::find($id_mitra);

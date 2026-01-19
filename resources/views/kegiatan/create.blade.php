@@ -117,10 +117,23 @@
                                                                 class="form-text text-muted">{{ $errors->first('singkatan_resmi') }}</small>
                                                         @else
                                                             <small class="form-text text-muted">
-                                                                contoh pengisian: PODES 2026, SUPAS 2026, SUSENAS Maret, KSA
-                                                                Padi Triwulan
-                                                                I,
-                                                                VHTS Januari
+                                                                panduan pengisian:
+                                                                <ol>
+                                                                    <li>Untuk kegiatan tahunan, langsung tulis nama
+                                                                        singkatan resmi dari survei yang dipilih. Contoh:
+                                                                        PODES, SUPAS, SKP</li>
+                                                                    <li>Untuk kegiatan semesteran, tulis nama singkatan
+                                                                        resmi dari survei yang dipilih diikuti dengan
+                                                                        semester/bulan. Contoh: SUSENAS Maret, SAKERNAS
+                                                                        Agustus</li>
+                                                                    <li>Untuk kegiatan triwulanan, tulis nama singkatan
+                                                                        resmi dari survei yang dipilih diikuti dengan
+                                                                        triwulan/bulan. Contoh: IMK Triwulan I,
+                                                                        Ubinan Subround I</li>
+                                                                    <li>Untuk kegiatan bulanan, tulis nama singkatan
+                                                                        resmi dari survei yang dipilih diikuti dengan
+                                                                        bulan. Contoh: VHTS Januari, SHPB Februari</li>
+                                                                </ol>
                                                             </small>
                                                         @endif
                                                     </div>

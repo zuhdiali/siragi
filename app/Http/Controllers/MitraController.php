@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kegiatan;
+use App\Models\KegiatanLampiran;
 use App\Models\KegiatanMitra;
 use Illuminate\Http\Request;
 use App\Models\Mitra;
@@ -97,10 +98,15 @@ class MitraController extends Controller
     public function estimasiHonor($id)
     {
         $mitra = Mitra::find($id);
-        $kegiatan_mitra = KegiatanMitra::where('mitra_id', $id)->get();
-        foreach ($kegiatan_mitra as $km) {
+        // $kegiatan_mitra = KegiatanMitra::where('mitra_id', $id)->get();
+        $kegiatan_mitra_awal = KegiatanLampiran::where('peserta_id', $id)->where('tipe_personil', 'mitra')->get();
+        $kegiatan_mitra = [];
+        foreach ($kegiatan_mitra_awal as $km) {
             $kegiatan = Kegiatan::find($km->kegiatan_id);
-            $km->kegiatan = $kegiatan;
+            if ($kegiatan->jenis_kak == 'honor-mitra') {
+                $km->kegiatan = $kegiatan;
+                array_push($kegiatan_mitra, $km);
+            }
         }
         // dd($kegiatan_mitra[0]->kegiatan->nama);
         return view('mitra.estimasi-honor', ['mitra' => $mitra, 'kegiatan_mitra' => $kegiatan_mitra]);
@@ -112,13 +118,18 @@ class MitraController extends Controller
         $tahun = $request->tahun ?? date('Y');
         $id = $request->id_mitra;
 
-        $kegiatan_mitra = KegiatanMitra::where('mitra_id', $id)->get();
-        foreach ($kegiatan_mitra as $km) {
+        $kegiatan_mitra_awal = KegiatanLampiran::where('peserta_id', $id)->where('tipe_personil', 'mitra')->get();
+        $kegiatan_mitra = [];
+        foreach ($kegiatan_mitra_awal as $km) {
             $kegiatan = Kegiatan::find($km->kegiatan_id);
             if (Carbon::parse($kegiatan->tgl_mulai)->month == $bulan && Carbon::parse($kegiatan->tgl_mulai)->year == $tahun) {
+                if ($kegiatan->jenis_kak != 'honor-mitra') {
+                    continue;
+                }
                 $km->kegiatan = $kegiatan;
+                array_push($kegiatan_mitra, $km);
             } else {
-                $kegiatan_mitra = $kegiatan_mitra->except($km->id);
+                continue;
             }
             if ($km->honor == null) {
                 $km->honor = 0;
