@@ -103,6 +103,9 @@ class MitraController extends Controller
         $kegiatan_mitra = [];
         foreach ($kegiatan_mitra_awal as $km) {
             $kegiatan = Kegiatan::find($km->kegiatan_id);
+            if (!$kegiatan) {
+                continue;
+            }
             if ($kegiatan->jenis_kak == 'honor-mitra') {
                 $km->kegiatan = $kegiatan;
                 array_push($kegiatan_mitra, $km);
