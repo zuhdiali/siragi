@@ -529,7 +529,7 @@
                                                         <div
                                                             class="form-group {{ $errors->has('honor_pengawasan') ? 'has-error has-feedback' : '' }}">
                                                             <label for="honor_pengawasan">Honor
-                                                                <strong>Pengawasan</strong></label>
+                                                                <strong>Pengawasan</strong> per satuan</label>
                                                             <input type="number" class="form-control"
                                                                 id="honor_pengawasan" name="honor_pengawasan"
                                                                 placeholder="Masukkan honor per satuan"
@@ -548,7 +548,7 @@
                                                         <div
                                                             class="form-group {{ $errors->has('honor_pencacahan') ? 'has-error has-feedback' : '' }}">
                                                             <label for="honor_pencacahan">Honor <strong>Pencacahan /
-                                                                    Pengolahan</strong></label>
+                                                                    Pengolahan</strong> per satuan</label>
                                                             <input type="number" class="form-control"
                                                                 id="honor_pencacahan" name="honor_pencacahan"
                                                                 placeholder="Masukkan honor per satuan"
