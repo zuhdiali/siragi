@@ -956,6 +956,38 @@
                                 <div class="row">
                                     @if ($jenis_kak == 'lainnya')
                                         <div class="col-12">
+                                            <div class="form-group">
+                                                <label for="kak4_pjk">Tim</label>
+                                                <select class="form-select" id="kak4_pjk" name="kak4_pjk">
+                                                    <option value="">(Pilih salah satu)</option>
+                                                    <option value="11011"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11011' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11011' ? 'selected' : '') }}>
+                                                        Umum</option>
+                                                    <option value="11012"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11012' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11012' ? 'selected' : '') }}>
+                                                        Statistik Sosial</option>
+                                                    <option value="11013"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11013' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11013' ? 'selected' : '') }}>
+                                                        Statistik Ekonomi Produksi</option>
+                                                    <option value="11014"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11014' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11014' ? 'selected' : '') }}>
+                                                        Statistik Ekonomi Distribusi</option>
+                                                    <option value="11015"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11015' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11015' ? 'selected' : '') }}>
+                                                        Neraca dan Analisis Statistik</option>
+                                                    <option value="11016"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11016' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11016' ? 'selected' : '') }}>
+                                                        TI dan Pengolahan</option>
+                                                    <option value="11017"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11017' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11017' ? 'selected' : '') }}>
+                                                        Diseminasi, Publisitas, dan Humas</option>
+                                                    <option value="11018"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11018' ? 'selected' : '') : ($kegiatan->kak4_pjk == '11018' ? 'selected' : '') }}>
+                                                        Pembinaan Statistik Sektoral</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
                                             <div
                                                 class="form-group  {{ $errors->has('id_pjk') ? 'has-error has-feedback' : '' }}">
                                                 <label for="id_pjk">Nama Pegawai Penanggung Jawab

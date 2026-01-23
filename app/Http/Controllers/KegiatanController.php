@@ -618,9 +618,12 @@ class KegiatanController extends Controller
             }
             $kegiatan->kak6_total = $jumlah;
         }
-        if ($request->jenis_kak == 'lainnya' && !$request->has('tim')) {
+        if ($request->jenis_kak == 'lainnya' && !$request->has('kak4_pjk')) {
             $kegiatan->kak4_pjk = '11011';
             $kegiatan->tim = '11011';
+        } else {
+            $kegiatan->kak4_pjk = $request->kak4_pjk;
+            $kegiatan->tim = $request->kak4_pjk;
         }
         $kegiatan->save();
 

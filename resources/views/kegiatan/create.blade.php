@@ -770,6 +770,43 @@
                                 <div class="row">
                                     {{-- ID PJK untuk KAK lainnya --}}
                                     @if ($jenis_kak == 'lainnya')
+                                        <div class="col-12 ">
+                                            <div
+                                                class="form-group  {{ $errors->has('kak4_pjk') ? 'has-error has-feedback' : '' }}">
+                                                <label for="kak4_pjk">Tim </label>
+                                                <select class="form-select" id="kak4_pjk" name="kak4_pjk">
+                                                    <option value="">(Pilih salah satu)</option>
+                                                    <option value="11011"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11011' ? 'selected' : '') : (Auth::user()->tim == '11011' ? 'selected' : '') }}>
+                                                        Umum</option>
+                                                    <option value="11012"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11012' ? 'selected' : '') : (Auth::user()->tim == '11012' ? 'selected' : '') }}>
+                                                        Statistik Sosial</option>
+                                                    <option value="11013"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11013' ? 'selected' : '') : (Auth::user()->tim == '11013' ? 'selected' : '') }}>
+                                                        Statistik Ekonomi Produksi</option>
+                                                    <option value="11014"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11014' ? 'selected' : '') : (Auth::user()->tim == '11014' ? 'selected' : '') }}>
+                                                        Statistik Ekonomi Distribusi</option>
+                                                    <option value="11015"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11015' ? 'selected' : '') : (Auth::user()->tim == '11015' ? 'selected' : '') }}>
+                                                        Neraca dan Analisis Statistik</option>
+                                                    <option value="11016"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11016' ? 'selected' : '') : (Auth::user()->tim == '11016' ? 'selected' : '') }}>
+                                                        TI dan Pengolahan</option>
+                                                    <option value="11017"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11017' ? 'selected' : '') : (Auth::user()->tim == '11017' ? 'selected' : '') }}>
+                                                        Diseminasi, Publisitas, dan Humas</option>
+                                                    <option value="11018"
+                                                        {{ old('kak4_pjk') ? (old('kak4_pjk') == '11018' ? 'selected' : '') : (Auth::user()->tim == '11018' ? 'selected' : '') }}>
+                                                        Pembinaan Statistik Sektoral</option>
+                                                </select>
+                                            </div>
+                                            @if ($errors->has('kak4_pjk'))
+                                                <small
+                                                    class="form-text text-muted">{{ $errors->first('kak4_pjk') }}</small>
+                                            @endif
+                                        </div>
                                         <div class="col-12">
                                             <div
                                                 class="form-group  {{ $errors->has('id_pjk') ? 'has-error has-feedback' : '' }}">
