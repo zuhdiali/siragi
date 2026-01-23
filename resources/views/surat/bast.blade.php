@@ -30,15 +30,14 @@
                     <h3 class="fw-bold mb-3">BAST</h3>
                     <h6 class="op-7 mb-2">Daftar BAST </h6>
                 </div>
-                @if (Auth::user()->role == 'Admin')
-                    <div class="ms-md-auto py-2 py-md-0">
-                        <button type="button" class="btn  btn-primary " data-bs-toggle="modal"
-                            data-bs-target="#tambahBAST">
-                            <i class="fa fa-plus"></i> Tambah BAST
-                        </button>
 
-                    </div>
-                @endif
+                <div class="ms-md-auto py-2 py-md-0">
+                    <button type="button" class="btn  btn-primary " data-bs-toggle="modal" data-bs-target="#tambahBAST">
+                        <i class="fa fa-plus"></i> Tambah BAST
+                    </button>
+
+                </div>
+
             </div>
             <div class="row">
                 <div class="col-sm-6 col-md-3">
