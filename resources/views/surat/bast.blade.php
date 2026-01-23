@@ -128,34 +128,37 @@
                                             </div>
                                             <tr>
                                                 <td>
+                                                    @if (Auth::user()->role == 'Admin' ||
+                                                            $surat->id_pembuat_surat == Auth::user()->id ||
+                                                            (Auth::user()->role == 'Ketua Tim' && $surat->tim == Auth::user()->tim))
+                                                        <div class="form-button-action">
+                                                            <form
+                                                                action="{{ url('surat/edit/' . $surat->jenis_surat . '/' . $surat->id) }}">
+                                                                <button type="submit" data-bs-toggle="tooltip"
+                                                                    title="Edit" class="btn btn-link btn-primary px-2"
+                                                                    data-original-title="Edit Surat">
+                                                                    <i class="fa fa-edit"></i>
+                                                                </button>
+                                                            </form>
 
-                                                    <div class="form-button-action">
-                                                        <form
-                                                            action="{{ url('surat/edit/' . $surat->jenis_surat . '/' . $surat->id) }}">
-                                                            <button type="submit" data-bs-toggle="tooltip" title="Edit"
-                                                                class="btn btn-link btn-primary px-2"
-                                                                data-original-title="Edit Surat">
-                                                                <i class="fa fa-edit"></i>
+                                                            <button type="button" title="Hapus"
+                                                                class="btn btn-link btn-danger px-2" data-bs-toggle="modal"
+                                                                data-bs-target="{{ '#exampleModal' . $surat->id }}"
+                                                                data-original-title="Hapus">
+                                                                <i class="fa fa-trash-alt"></i>
                                                             </button>
-                                                        </form>
 
-                                                        <button type="button" title="Hapus"
-                                                            class="btn btn-link btn-danger px-2" data-bs-toggle="modal"
-                                                            data-bs-target="{{ '#exampleModal' . $surat->id }}"
-                                                            data-original-title="Hapus">
-                                                            <i class="fa fa-trash-alt"></i>
-                                                        </button>
-
-                                                        @if (!$surat->tipe_bast)
-                                                            <a href="{{ url('surat/download-bast-pcl/' . $surat->id) }}"
-                                                                data-bs-toggle="tooltip" title="Download BAST PCL ke PPK"
-                                                                class="btn btn-link btn-success px-2"
-                                                                data-original-title="Download BAST PCL ke PPK">
-                                                                <i class="fa fa-download"></i>
-                                                            </a>
-                                                        @endif
-                                                    </div>
-
+                                                            @if (!$surat->tipe_bast)
+                                                                <a href="{{ url('surat/download-bast-pcl/' . $surat->id) }}"
+                                                                    data-bs-toggle="tooltip"
+                                                                    title="Download BAST PCL ke PPK"
+                                                                    class="btn btn-link btn-success px-2"
+                                                                    data-original-title="Download BAST PCL ke PPK">
+                                                                    <i class="fa fa-download"></i>
+                                                                </a>
+                                                            @endif
+                                                        </div>
+                                                    @endif
                                                 </td>
                                                 <th scope="row">{{ $surat->nomor_surat }}<button type="button"
                                                         data-bs-toggle="tooltip" title="Copy Nomor Surat"
