@@ -470,7 +470,7 @@
                                                                             <td>
                                                                                 <select class="form-select form-control-sm"
                                                                                     name="rincian_satuan[]">
-                                                                                    @php $satuans = ['Dokumen','SLS','BS','Ruta','OK','OH','OB','OP','Segmen','EA','Responden','Pasar']; @endphp
+                                                                                    @php $satuans = ['Dokumen','SLS','BS','Ruta','OJP','OK','OH','OB','OP','Segmen','EA','Responden','Pasar']; @endphp
                                                                                     <option value="">(Pilih)</option>
                                                                                     @foreach ($satuans as $s)
                                                                                         <option
@@ -1402,10 +1402,33 @@
                         <td>
                              <select class="form-select form-control-sm" name="rincian_satuan[]">
                                 <option value="">(Pilih)</option>
-                                <option value="Dokumen">Dokumen</option><option value="SLS">SLS</option><option value="BS">BS</option>
-                                <option value="Ruta">Ruta</option><option value="OK">OK</option><option value="OH">OH</option>
-                                <option value="OB">OB</option><option value="OP">OP</option><option value="Segmen">Segmen</option>
-                                <option value="EA">EA</option><option value="Responden">Responden</option><option value="Pasar">Pasar</option>
+                                <option value="">(Pilih salah satu)</option>
+                                                            <option value="Dokumen">
+                                                                Dokumen</option>
+                                                            <option value="SLS">
+                                                                SLS (Satuan Lingkungan Setempat)</option>
+                                                            <option value="BS">
+                                                                BS (Blok Sensus)</option>
+                                                            <option value="Ruta">
+                                                                Ruta (Rumah Tangga)</option>
+                                                            <option value="OJP">
+                                                                OJP (Orang Jam Pelajaran) </option>
+                                                            <option value="OK">
+                                                                OK (Orang Kegiatan) </option>
+                                                            <option value="OH">
+                                                                OH (Orang Harian)</option>
+                                                            <option value="OB">
+                                                                OB (Orang Bulan) </option>
+                                                            <option value="OP">
+                                                                OP (Orang Perjalanan)</option>
+                                                            <option value="Segmen">
+                                                                Segmen</option>
+                                                            <option value="EA">
+                                                                EA (Enumeration Area) </option>
+                                                            <option value="Responden">
+                                                                Responden</option>
+                                                            <option value="Pasar">
+                                                                Pasar</option>
                             </select>
                         </td>
                         <td><input type="number" name="rincian_harga[]" class="form-control form-control-sm hitung-total input-harga" min="0" value="0" required></td>

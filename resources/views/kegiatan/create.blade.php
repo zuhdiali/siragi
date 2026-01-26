@@ -1237,32 +1237,34 @@
                         </td>
                         <td>
                             <select class="form-select form-control-sm" name="rincian_satuan[]">
-                                                            <option value="">(Pilih salah satu)</option>
-                                                            <option value="Dokumen">
-                                                                Dokumen</option>
-                                                            <option value="SLS">
-                                                                SLS (Satuan Lingkungan Setempat)</option>
-                                                            <option value="BS">
-                                                                BS (Blok Sensus)</option>
-                                                            <option value="Ruta">
-                                                                Ruta (Rumah Tangga)</option>
-                                                            <option value="OK">
-                                                                OK (Orang Kegiatan) </option>
-                                                            <option value="OH">
-                                                                OH (Orang Harian)</option>
-                                                            <option value="OB">
-                                                                OB (Orang Bulan) </option>
-                                                            <option value="OP">
-                                                                OP (Orang Perjalanan)</option>
-                                                            <option value="Segmen">
-                                                                Segmen</option>
-                                                            <option value="EA">
-                                                                EA (Enumeration Area) </option>
-                                                            <option value="Responden">
-                                                                Responden</option>
-                                                            <option value="Pasar">
-                                                                Pasar</option>
-                                                        </select>
+                                <option value="">(Pilih salah satu)</option>
+                                <option value="Dokumen">
+                                    Dokumen</option>
+                                <option value="SLS">
+                                    SLS (Satuan Lingkungan Setempat)</option>
+                                <option value="BS">
+                                    BS (Blok Sensus)</option>
+                                <option value="Ruta">
+                                    Ruta (Rumah Tangga)</option>
+                                <option value="OJP">
+                                    OJP (Orang Jam Pelajaran) </option>
+                                <option value="OK">
+                                    OK (Orang Kegiatan) </option>
+                                <option value="OH">
+                                    OH (Orang Harian)</option>
+                                <option value="OB">
+                                    OB (Orang Bulan) </option>
+                                <option value="OP">
+                                    OP (Orang Perjalanan)</option>
+                                <option value="Segmen">
+                                    Segmen</option>
+                                <option value="EA">
+                                    EA (Enumeration Area) </option>
+                                <option value="Responden">
+                                    Responden</option>
+                                <option value="Pasar">
+                                    Pasar</option>
+                            </select>
                         </td>
                         <td>
                             <input type="number" name="rincian_harga[]" class="form-control form-control-sm hitung-total input-harga" min="0" value="0" required>

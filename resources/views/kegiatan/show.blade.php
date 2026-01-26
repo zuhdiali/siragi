@@ -400,7 +400,7 @@
                                                                         <td>
                                                                             <select class="form-select form-control-sm"
                                                                                 name="rincian_satuan[]" disabled>
-                                                                                @php $satuans = ['Dokumen','SLS','BS','Ruta','OK','OH','OB','OP','Segmen','EA','Responden','Pasar']; @endphp
+                                                                                @php $satuans = ['Dokumen','SLS','BS','Ruta','OJP','OK','OH','OB','OP','Segmen','EA','Responden','Pasar']; @endphp
                                                                                 <option value="">(Pilih)</option>
                                                                                 @foreach ($satuans as $s)
                                                                                     <option value="{{ $s }}"
