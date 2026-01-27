@@ -636,7 +636,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <input type="text" name="transport_bayar[]"
-                                                                        class="form-control form-control-sm text-end currency"
+                                                                        class="form-control form-control-sm text-end currency input-transport"
                                                                         readonly value="{{ $t->transport_bayar }}">
                                                                 </td>
                                                             @elseif ($jenis_kak == 'pemanggilan-konsultasi')
