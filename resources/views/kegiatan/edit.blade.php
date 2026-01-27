@@ -1495,7 +1495,7 @@
         const standarBiaya = {
             "010": {
                 nama: "Teupah Selatan",
-                biaya: 140000
+                biaya: 130000
             },
             "020": {
                 nama: "Simeulue Timur",
@@ -1503,35 +1503,35 @@
             },
             "021": {
                 nama: "Teupah Barat",
-                biaya: 140000
+                biaya: 130000
             },
             "022": {
                 nama: "Teupah Tengah",
-                biaya: 120000
+                biaya: 110000
             },
             "030": {
                 nama: "Simeulue Tengah",
-                biaya: 160000
+                biaya: 150000
             },
             "031": {
                 nama: "Teluk Dalam",
-                biaya: 160000
+                biaya: 150000
             },
             "032": {
                 nama: "Simeulue Cut",
-                biaya: 170000
+                biaya: 155000
             },
             "040": {
                 nama: "Salang",
-                biaya: 180000
+                biaya: 160000
             },
             "050": {
                 nama: "Simeulue Barat",
-                biaya: 190000
+                biaya: 170000
             },
             "051": {
                 nama: "Alafan",
-                biaya: 200000
+                biaya: 170000
             },
         };
 
