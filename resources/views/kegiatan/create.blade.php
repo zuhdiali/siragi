@@ -588,6 +588,7 @@
                                                                 <th style="width: 120px">Tanggal Selesai</th>
                                                                 <th style="width: 150px;">Perkiraan Biaya Per Orang</th>
                                                             @elseif($jenis_kak == 'honor-inda')
+                                                                <th style="width: 150px;">OJP</th>
                                                                 <th style="width: 150px;">Honor per OJP</th>
                                                             @elseif($jenis_kak == 'honor-mitra')
                                                                 <th style="width: 80px;">Tugas (PCL/PML)</th>
@@ -604,7 +605,7 @@
                                                     <tbody id="body_transport">
                                                         {{-- Baris akan ditambahkan via JavaScript --}}
                                                     </tbody>
-                                                    @if ($jenis_kak != 'honor-mitra')
+                                                    @if ($jenis_kak != 'honor-mitra' && $jenis_kak != 'honor-inda')
                                                         <tfoot class="table-light fw-bold">
                                                             <tr>
                                                                 @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
@@ -615,10 +616,6 @@
                                                                     <td colspan="5" class="text-end">TOTAL ESTIMASI
                                                                         BIAYA
                                                                         PERJALANAN DINAS:</td>
-                                                                @elseif($jenis_kak == 'honor-inda')
-                                                                    <td colspan="2" class="text-end">TOTAL ESTIMASI
-                                                                        BIAYA
-                                                                        HONOR INDA:</td>
                                                                 @endif
 
                                                                 <td>
@@ -1318,6 +1315,8 @@
                 $('#grand_total').val(formatNumber(grandTotal)); // Anda bisa format currency di sini jika perlu
             }
 
+
+
             function generateJudulKAK() {
                 var jenis_kegiatan = $('input[name="jenis_kegiatan"]:checked').val();
                 var nama_kegiatan = $('#filter_sbks').val();
@@ -1563,6 +1562,9 @@
                         
                         <td>
                             <input type="text" name="nip[]" class="form-control form-control-sm text-center input-nip" readonly placeholder="-">
+                        </td>
+                        <td>
+                            <input type="number" name="jml_ok[]" class="form-control form-control-sm text-end input-transport input-mask-rupiah" placeholder="0">
                         </td>
                         <td>
                             <input type="number" name="transport_bayar[]" class="form-control form-control-sm text-end input-transport input-mask-rupiah" placeholder="0">

@@ -607,6 +607,7 @@
                                                                 <th style="width: 120px">Tanggal Selesai</th>
                                                                 <th style="width: 150px;">Perkiraan Biaya Per Orang</th>
                                                             @elseif($jenis_kak == 'honor-inda')
+                                                                <th style="width: 150px;">OJP</th>
                                                                 <th style="width: 150px;">Honor per OJP</th>
                                                             @elseif($jenis_kak == 'honor-mitra')
                                                                 <th style="width: 80px;">Tugas (PCL/PML)</th>
@@ -745,6 +746,11 @@
                                                                     </td>
                                                                 @elseif($jenis_kak == 'honor-inda')
                                                                     <td>
+                                                                        <input type="text" name="jml_ok[]"
+                                                                            class="form-control form-control-sm text-end input-transport input-mask-rupiah"
+                                                                            value="{{ $t->jml_ok }}" />
+                                                                    </td>
+                                                                    <td>
                                                                         <input type="text" name="transport_bayar[]"
                                                                             class="form-control form-control-sm text-end input-transport input-mask-rupiah"
                                                                             value="{{ $t->transport_bayar }}" />
@@ -834,7 +840,7 @@
                                                             </tr>
                                                         @endforeach
                                                     </tbody>
-                                                    @if ($jenis_kak != 'honor-mitra')
+                                                    @if ($jenis_kak != 'honor-mitra' && $jenis_kak != 'honor-inda')
                                                         <tfoot class="table-light fw-bold">
                                                             <tr>
                                                                 @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
@@ -845,10 +851,6 @@
                                                                     <td colspan="5" class="text-end">TOTAL ESTIMASI
                                                                         BIAYA
                                                                         PERJALANAN DINAS:</td>
-                                                                @elseif($jenis_kak == 'honor-inda')
-                                                                    <td colspan="2" class="text-end">TOTAL ESTIMASI
-                                                                        BIAYA
-                                                                        HONOR INDA:</td>
                                                                 @endif
                                                                 <td>
                                                                     <input type="text" id="grand_total_transport"

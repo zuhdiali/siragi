@@ -193,6 +193,7 @@ class KegiatanController extends Controller
                 }
                 $values = [];
                 $no = 1;
+                $total_biaya = 0;
                 foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
                     $petugas = null;
                     if ($lampiran->tipe_personil == 'mitra') {
@@ -213,8 +214,11 @@ class KegiatanController extends Controller
                         'lamp_vol' => $lampiran->jml_ok,
                         'lamp_transport_bayar' => number_format($lampiran->transport_bayar, 0, ',', '.'),
                     ]);
+                    $total_biaya += $lampiran->jml_ok * $lampiran->transport_bayar;
                 }
                 $phpWord->cloneRowAndSetValues('lamp_no', $values);
+                $phpWord->setValue('total_biaya', number_format($total_biaya, 0, ',', '.'));
+                $phpWord->setValue('total_biaya_terbilang', $this->terbilang($total_biaya));
                 // 1. Tentukan nama file yang akan dilihat user saat download
                 $fileNameUser = 'KAK_Translok_Biasa_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
 
@@ -252,6 +256,7 @@ class KegiatanController extends Controller
                 }
                 $values = [];
                 $no = 1;
+                $total_biaya = 0;
                 foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
                     $petugas = null;
                     if ($lampiran->tipe_personil == 'mitra') {
@@ -272,8 +277,11 @@ class KegiatanController extends Controller
                         'lamp_vol' => $lampiran->jml_ok,
                         'lamp_transport_bayar' => number_format($lampiran->transport_bayar, 0, ',', '.'),
                     ]);
+                    $total_biaya += $lampiran->jml_ok * $lampiran->transport_bayar;
                 }
                 $phpWord->cloneRowAndSetValues('lamp_no', $values);
+                $phpWord->setValue('total_biaya', number_format($total_biaya, 0, ',', '.'));
+                $phpWord->setValue('total_biaya_terbilang', $this->terbilang($total_biaya));
                 // 1. Tentukan nama file yang akan dilihat user saat download
                 $fileNameUser = 'KAK_Translok_DI_ATAS_8_JAM_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
 
@@ -310,6 +318,7 @@ class KegiatanController extends Controller
                 }
                 $values = [];
                 $no = 1;
+                $total_biaya = 0;
                 foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
                     $peserta = Pegawai::find($lampiran->peserta_id);
                     array_push($values, [
@@ -321,8 +330,11 @@ class KegiatanController extends Controller
                         'lamp_tgl_selesai' => Carbon::parse($lampiran->tgl_selesai)->locale('id')->translatedFormat('d F Y'),
                         'lamp_biaya' => number_format($lampiran->transport_bayar, 0, ',', '.'),
                     ]);
+                    $total_biaya += $lampiran->transport_bayar;
                 }
                 $phpWord->cloneRowAndSetValues('lamp_no', $values);
+                $phpWord->setValue('total_biaya', number_format($total_biaya, 0, ',', '.'));
+                $phpWord->setValue('total_biaya_terbilang', $this->terbilang($total_biaya));
 
                 // 1. Tentukan nama file yang akan dilihat user saat download
                 $fileNameUser = 'KAK_Pemanggilan_Konsul_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
@@ -368,6 +380,7 @@ class KegiatanController extends Controller
                 }
                 $values = [];
                 $no = 1;
+                $total_biaya = 0;
                 foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
                     $petugas = Mitra::find($lampiran->peserta_id);
                     $pengawas = null;
@@ -389,8 +402,11 @@ class KegiatanController extends Controller
                         'lamp_tgl_selesai' => Carbon::parse($lampiran->lampiran_tgl_selesai)->locale('id')->translatedFormat('d F Y'),
                         'lamp_honor' => $lampiran->pcl_or_pml == 1 ? number_format($kegiatan->honor_pengawasan, 0, ',', '.') : number_format($kegiatan->honor_pencacahan, 0, ',', '.'),
                     ]);
+                    $total_biaya += $lampiran->jml_sampel_pcl * ($lampiran->pcl_or_pml == 1 ? $kegiatan->honor_pengawasan : $kegiatan->honor_pencacahan);
                 }
                 $phpWord->cloneRowAndSetValues('lamp_no', $values);
+                $phpWord->setValue('total_biaya', number_format($total_biaya, 0, ',', '.'));
+                $phpWord->setValue('total_biaya_terbilang', $this->terbilang($total_biaya));
 
                 // 1. Tentukan nama file yang akan dilihat user saat download
                 $fileNameUser = 'KAK_Honor_Mitra_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
@@ -436,16 +452,22 @@ class KegiatanController extends Controller
                 }
                 $values = [];
                 $no = 1;
+                $total_biaya = 0;
                 foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
                     $inda = Pegawai::find($lampiran->peserta_id);
                     array_push($values, [
                         'lamp_no' => $no++,
                         'lamp_nama' => $inda ? $inda->nama : '-',
                         'lamp_nik' => $inda ? $inda->nip : '-',
+                        'lamp_ojp'  => $lampiran->jml_ok ? $lampiran->jml_ok : 0,
                         'lamp_honor' => number_format($lampiran->transport_bayar, 0, ',', '.'),
                     ]);
+                    $total_biaya += $lampiran->jml_ok ? $lampiran->jml_ok * $lampiran->transport_bayar : $lampiran->transport_bayar;
                 }
                 $phpWord->cloneRowAndSetValues('lamp_no', $values);
+                $phpWord->setValue('total_biaya', number_format($total_biaya, 0, ',', '.'));
+                $phpWord->setValue('total_biaya_terbilang', $this->terbilang($total_biaya));
+
 
                 // 1. Tentukan nama file yang akan dilihat user saat download
                 $fileNameUser = 'KAK_Honor_Inda_' . str_replace(' ', '_', $kegiatan->singkatan_resmi) . '_' . time() . '.docx';
@@ -510,7 +532,7 @@ class KegiatanController extends Controller
                 $phpWord->setValue('sub_komponen', '-');
             }
             $values = [];
-            $total_biaya = 0;
+            // $total_biaya = 0;
             foreach ($kegiatan->kegiatanRincian as $index => $rincian) {
                 $pok_akun = POK::find($rincian->pok_id);
                 array_push($values, [
@@ -521,10 +543,10 @@ class KegiatanController extends Controller
                     'harga' => number_format($rincian->harga_satuan, 0, ',', '.'),
                     'jml' => number_format($rincian->jumlah, 0, ',', '.'),
                 ]);
-                $total_biaya += $rincian->jumlah;
+                // $total_biaya += $rincian->jumlah;
             }
-            $phpWord->setValue('total_biaya', number_format($total_biaya, 0, ',', '.'));
-            $phpWord->setValue('total_biaya_terbilang', $this->terbilang($total_biaya));
+            // $phpWord->setValue('total_biaya', number_format($total_biaya, 0, ',', '.'));
+            // $phpWord->setValue('total_biaya_terbilang', $this->terbilang($total_biaya));
             $phpWord->cloneRowAndSetValues('akun', $values);
         }
         return $phpWord;
@@ -660,6 +682,7 @@ class KegiatanController extends Controller
                     'peserta_id' => $request->peserta_id[$index],
                     'tipe_personil' => $request->tipe_peserta[$index],
                     'nip_nik' => $request->nip[$index],
+                    'jml_ok' => $request->jml_ok[$index],
                     'transport_bayar' => $request->transport_bayar[$index],
                 ]);
             }
@@ -834,6 +857,7 @@ class KegiatanController extends Controller
                         'peserta_id' => $request->peserta_id[$index],
                         'tipe_personil' => $request->tipe_peserta[$index],
                         'nip_nik' => $request->nip[$index],
+                        'jml_ok' => $request->jml_ok[$index],
                         'transport_bayar' => $request->transport_bayar[$index],
                     ]);
                 }
