@@ -925,16 +925,16 @@ class SuratController extends Controller
         $count = 1;
         $total_honor = 0;
         foreach ($kegiatan->kegiatanLampiran as $kl) {
-            $mitra = null;
+            $mitra2 = null;
             if ($kl->tipe_personil != 'mitra') {
                 continue;
             } else {
-                $mitra = Mitra::find($kl->peserta_id);
+                $mitra2 = Mitra::find($kl->peserta_id);
             }
             array_push($values, [
                 'lamp_no' => $count++,
-                'lamp_nama' => $mitra->nama,
-                'lamp_kec_asal' => $this->konversiKodeKec($mitra->kec_asal),
+                'lamp_nama' => $mitra2->nama,
+                'lamp_kec_asal' => $this->konversiKodeKec($mitra2->kec_asal),
                 'lamp_nama_sls' => $kl->nama_sls,
                 'lamp_jml' => $kl->jml_sampel_pcl
             ]);
