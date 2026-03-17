@@ -172,7 +172,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/edit-terlibat/{id}', [SuratController::class, 'editTerlibat'])->name('edit.terlibat');
         Route::post('/update-terlibat/{id}', [SuratController::class, 'updateTerlibat'])->name('update.terlibat');
         Route::get('/destroy/{id}', [SuratController::class, 'destroy'])->name('destroy');
-        Route::get('/generate-spk', [SuratController::class, 'generateSPK'])->name('generate-spk');
+        // Route::get('/generate-spk', [SuratController::class, 'generateSPK'])->name('generate-spk');
         Route::get('/download-spk/{id}', [SuratController::class, 'downloadSPK'])->name('download-spk');
         Route::get('/download-bast-pcl/{id}', [SuratController::class, 'downloadBASTPCL'])->name('download-bast-pcl');
         Route::get('/download-bast-pjk/{id}', [SuratController::class, 'downloadBASTPJK'])->name('download-bast-pjk');

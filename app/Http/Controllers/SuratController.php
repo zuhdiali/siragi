@@ -8,11 +8,12 @@ use App\Models\Surat;
 use App\Models\KamusSurat;
 use App\Models\Pegawai;
 use App\Models\Kegiatan;
-use App\Models\KegiatanMitra;
+use App\Models\KegiatanRincian;
 use Illuminate\Support\Facades\Auth;
 use App\Models\FotoSuratMasuk;
 use App\Models\KegiatanLampiran;
 use App\Models\KegiatanPegawai;
+use App\Models\POK;
 // use PhpOffice\PhpWord\Phpword;
 use Carbon\Carbon;
 // use PhpOffice\PhpWord\TemplateProcessor;
@@ -305,7 +306,7 @@ class SuratController extends Controller
                 $surat->mitra_spk = $request->mitra_spk;
                 $surat->bulan_spk = $request->bulan_spk;
                 $surat->tahun_spk = $request->tahun_spk;
-                $surat->file = $this->generateSPK($request->mitra_spk, $request->bulan_spk, $request->tahun_spk);
+                // $surat->file = $this->generateSPK($request->mitra_spk, $request->bulan_spk, $request->tahun_spk);
             }
             $surat->save();
         } else { //jika jenis surat masuk
@@ -515,7 +516,7 @@ class SuratController extends Controller
                     $surat->mitra_spk = $request->mitra_spk;
                     $surat->bulan_spk = $request->bulan_spk;
                     $surat->tahun_spk = $request->tahun_spk;
-                    $surat->file = $this->generateSPK($request->mitra_spk, $request->bulan_spk, $request->tahun_spk);
+                    // $surat->file = $this->generateSPK($request->mitra_spk, $request->bulan_spk, $request->tahun_spk);
                 }
 
                 // dd($request->all(), $surat, $jenis);
@@ -892,8 +893,130 @@ class SuratController extends Controller
     {
         $surat = Surat::find($id);
         $bulan = str_pad($surat->bulan_spk, 2, '0', STR_PAD_LEFT);
-        $surat->file = $this->generateSPK($surat->mitra_spk, $bulan, $surat->tahun_spk);
-        return response()->download($surat->file);
+        // $surat->file = $this->generateSPK($surat->mitra_spk, $bulan, $surat->tahun_spk);
+        $id_mitra = $surat->mitra_spk;
+        $tahun = $surat->tahun_spk;
+        $mitra = Mitra::find($id_mitra);
+        $kegiatan_lampiran = KegiatanLampiran::where('peserta_id', $id_mitra)->where('tipe_personil', 'mitra')->get();
+        // dd($kegiatan_lampiran);
+        $namaBulan = $this->convertDigitBulan($bulan);
+        $tglAwal = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
+        $tglAkhir = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+        $namaHariAwal = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth()->locale('id')->translatedFormat('l');
+
+        $suratTerakhir = Surat::where('jenis_surat', 'spk')->where('tahun_spk', $tahun)->orderBy('no_terakhir', 'desc')->first();
+        // dd($suratTerakhir);
+        if ($suratTerakhir == null) {
+            $noTerakhir = 0;
+        } else {
+            $noTerakhir = $suratTerakhir->no_terakhir;
+        }
+
+        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("SPK.docx");
+        $phpWord->setValue('nomor', $noTerakhir + 1);
+        $phpWord->setValue('hari', $namaHariAwal);
+        $phpWord->setValue('tanggal', 1);
+        $phpWord->setValue('bulan', strtolower($namaBulan));
+        $phpWord->setValue('Bulan', $namaBulan);
+        $phpWord->setValue('BULAN', strtoupper($namaBulan));
+        $phpWord->setValue('nama_mitra', $mitra->nama);
+        $phpWord->setValue('kec_asal', $this->konversiKodeKec($mitra->kec_asal));
+        $phpWord->setValue('tgl_awal', $tglAwal->locale('id')->translatedFormat('d F'));
+        $phpWord->setValue('tgl_akhir', $tglAkhir->locale('id')->translatedFormat('d F'));
+        $jumlah_honor = 0;
+        $count = 1;
+        $values = [];
+        foreach ($kegiatan_lampiran as $km) {
+            $kegiatan = Kegiatan::find($km->kegiatan_id);
+
+            if (!$kegiatan) {
+                continue;
+            }
+
+            // butuh informasi kegiatan rincian untuk mengetahui satuan honor dan honor per satuan
+            $kegiatan_rincian = KegiatanRincian::where('kegiatan_id', $kegiatan->id)->first();
+            $total_honor = 0;
+            try {
+                if ($km->pcl_or_pml == 1) {
+                    $kegiatan->honor_pengawasan == null ? $total_honor = 0 : $total_honor = $kegiatan->honor_pengawasan;
+                } else {
+                    $kegiatan->honor_pencacahan == null ? $total_honor = 0 : $total_honor = $kegiatan->honor_pencacahan;
+                }
+
+                if ($total_honor < 10) {
+
+                    if ($kegiatan_rincian) {
+                        $total_honor = $kegiatan_rincian->harga_satuan;
+                    }
+                }
+            } catch (\Exception $e) {
+                $total_honor = 0;
+            }
+            // dd($km, $kegiatan, $total_honor);
+            // Jika satuan honor kurang dari 10 artinya kegiatan dummy
+            // if ($total_honor < 10 || Carbon::parse($kegiatan->tgl_mulai)->format('m') != $bulan || $total_honor == null || $km->jumlah == null || Carbon::parse($kegiatan->tgl_mulai)->format('Y') != $tahun) {
+            //     continue;
+            // }
+
+            // generate jangka waktu kegiatan
+            $jkw = '';
+            if (Carbon::parse($kegiatan->tgl_mulai)->format('m') == Carbon::parse($kegiatan->tgl_selesai)->format('m')) {
+                $jkw = Carbon::parse($kegiatan->tgl_mulai)->format('d') . ' s.d. ' . Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F Y');
+            } else {
+                $jkw = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F') . ' s.d. ' . Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F');
+            }
+
+            // beban anggaran
+            try {
+                $POK = POK::where('id', $kegiatan->kak6_sub_komponen)->first();
+                $beban_anggaran = $POK->kode_aktivitas . "." . $POK->kode_klasifikasi_rincian_output . "." . $POK->kode_rincian_output . "." . $POK->kode_komponen . "." . $POK->kode_sub_komponen;
+                $POK_akun = POK::where('id', $kegiatan_rincian->pok_id)->first();
+                if ($POK_akun) {
+                    $beban_anggaran .= "." . $POK_akun->kode_akun;
+                }
+            } catch (\Exception $e) {
+                $beban_anggaran = "{#beban_anggaran#}";
+            }
+
+
+            if ($kegiatan_rincian) {
+                $satuan_honor = $kegiatan_rincian->satuan;
+            } else {
+                $satuan_honor = "{#satuan_honor#}";
+            }
+
+            $jumlah_honor += $km->transport_bayar;
+            array_push($values, [
+                'no_keg' => $count,
+                'nama_keg' => $kegiatan->singkatan_resmi,
+                'jkw' => $jkw,
+                'vol_keg' => $km->jml_sampel_pcl,
+                'sat_keg' => $satuan_honor,
+                'harga_sat' => $total_honor,
+                'honor' => $km->transport_bayar,
+                'beban_ang' => $beban_anggaran,
+            ]);
+            $count++;
+        }
+        // $values = [
+        //     ['no_keg' => 1, 'nama_keg' => 'SUSENAS Maret 2025', 'jkw' => '01 s.d. 28 Februari 2025', 'vol_keg' => 20, 'sat_keg' => 'Dokumen', 'harga_sat' => '37.000', 'honor' => '740.000'],
+        //     ['no_keg' => 2, 'nama_keg' => 'SUSENAS April 2025', 'jkw' => '01 s.d. 30 April 2025', 'vol_keg' => 20, 'sat_keg' => 'Dokumen', 'harga_sat' => '37.000', 'honor' => '740.000'],
+        // ];
+        $honorTerbilang = $this->terbilang($jumlah_honor);
+        $phpWord->cloneRowAndSetValues('no_keg', $values);
+        $phpWord->setValue('total_honor', $jumlah_honor);
+        $phpWord->setValue('total_honor_terbilang',  $honorTerbilang . " Rupiah");
+        $phpWord->setValue('total_honor_terbilang_kecil',  strtolower($honorTerbilang) . " rupiah");
+
+        // 1. Tentukan nama file yang akan dilihat user saat download
+        $fileNameUser = 'SPK_' . str_replace(' ', '_', $mitra->nama) . '_' . $bulan . '_' . $tahun . '.docx';
+
+        // 2. Buat file temporary (sementara) di sistem server
+        $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
+        $phpWord->saveAs($tempFile);
+        // Parameter 1: Path file sementara
+        // Parameter 2: Nama file yang akan didownload user
+        return response()->download($tempFile, $fileNameUser)->deleteFileAfterSend(true);
     }
 
     public function downloadBASTPCL($id)
@@ -963,89 +1086,7 @@ class SuratController extends Controller
         return response()->download($surat->file);
     }
 
-    public  function generateSPK($id_mitra, $bulan, $tahun)
-    {
-        $mitra = Mitra::find($id_mitra);
-        $kegiatan_mitra = KegiatanMitra::where('mitra_id', $id_mitra)->get();
-
-        $namaBulan = $this->convertDigitBulan($bulan);
-        $tglAwal = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
-        $tglAkhir = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
-        $namaHariAwal = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth()->locale('id')->translatedFormat('l');
-
-        $suratTerakhir = Surat::where('jenis_surat', 'spk')->where('tahun_spk', $tahun)->orderBy('no_terakhir', 'desc')->first();
-        // dd($suratTerakhir);
-        if ($suratTerakhir == null) {
-            $noTerakhir = 0;
-        } else {
-            $noTerakhir = $suratTerakhir->no_terakhir;
-        }
-
-        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("SPK.docx");
-        $phpWord->setValue('nomor', $noTerakhir + 1);
-        $phpWord->setValue('hari', $namaHariAwal);
-        $phpWord->setValue('tanggal', 1);
-        $phpWord->setValue('bulan', strtolower($namaBulan));
-        $phpWord->setValue('Bulan', $namaBulan);
-        $phpWord->setValue('BULAN', strtoupper($namaBulan));
-        $phpWord->setValue('nama_mitra', $mitra->nama);
-        $phpWord->setValue('kec_asal', $this->konversiKodeKec($mitra->kec_asal));
-        $phpWord->setValue('tgl_awal', $tglAwal->locale('id')->translatedFormat('d F'));
-        $phpWord->setValue('tgl_akhir', $tglAkhir->locale('id')->translatedFormat('d F'));
-        $jumlah_honor = 0;
-        $count = 1;
-        $values = [];
-        foreach ($kegiatan_mitra as $km) {
-            $beban_anggaran = "{#beban_anggaran#}";
-            $kegiatan = Kegiatan::find($km->kegiatan_id);
-
-            $satuan_honor = ($km->is_pml == 1 ? $kegiatan->honor_pengawasan : $kegiatan->honor_pencacahan);
-            // Jika satuan honor kurang dari 10 artinya kegiatan dummy
-            if ($satuan_honor < 10 || Carbon::parse($kegiatan->tgl_mulai)->format('m') != $bulan || $satuan_honor == null || $km->jumlah == null || Carbon::parse($kegiatan->tgl_mulai)->format('Y') != $tahun) {
-                continue;
-            }
-            $jkw = '';
-            if (Carbon::parse($kegiatan->tgl_mulai)->format('m') == Carbon::parse($kegiatan->tgl_selesai)->format('m')) {
-                $jkw = Carbon::parse($kegiatan->tgl_mulai)->format('d') . ' s.d. ' . Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F Y');
-            } else {
-                $jkw = Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F') . ' s.d. ' . Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F');
-            }
-            if ($kegiatan->beban_anggaran) {
-                $beban_anggaran = $kegiatan->beban_anggaran;
-            }
-            $jumlah_honor += $km->estimasi_honor;
-            array_push($values, [
-                'no_keg' => $count,
-                'nama_keg' => $kegiatan->nama,
-                'jkw' => $jkw,
-                'vol_keg' => $km->jumlah,
-                'sat_keg' => ($km->is_pml == 1 ? $kegiatan->satuan_honor_pengawasan : $kegiatan->satuan_honor_pencacahan),
-                'harga_sat' => $satuan_honor,
-                'honor' => $km->estimasi_honor,
-                'beban_ang' => $beban_anggaran,
-            ]);
-            $count++;
-        }
-        // $values = [
-        //     ['no_keg' => 1, 'nama_keg' => 'SUSENAS Maret 2025', 'jkw' => '01 s.d. 28 Februari 2025', 'vol_keg' => 20, 'sat_keg' => 'Dokumen', 'harga_sat' => '37.000', 'honor' => '740.000'],
-        //     ['no_keg' => 2, 'nama_keg' => 'SUSENAS April 2025', 'jkw' => '01 s.d. 30 April 2025', 'vol_keg' => 20, 'sat_keg' => 'Dokumen', 'harga_sat' => '37.000', 'honor' => '740.000'],
-        // ];
-        $honorTerbilang = $this->terbilang($jumlah_honor);
-        $phpWord->cloneRowAndSetValues('no_keg', $values);
-        $phpWord->setValue('total_honor', $jumlah_honor);
-        $phpWord->setValue('total_honor_terbilang',  $honorTerbilang . " Rupiah");
-        $phpWord->setValue('total_honor_terbilang_kecil',  strtolower($honorTerbilang) . " rupiah");
-
-        // 1. Tentukan nama file yang akan dilihat user saat download
-        $fileNameUser = 'SPK_' . str_replace(' ', '_', $mitra->nama) . '_' . $bulan . '_' . $tahun . '.docx';
-
-        // 2. Buat file temporary (sementara) di sistem server
-        $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
-        $phpWord->saveAs($tempFile);
-        // Parameter 1: Path file sementara
-        // Parameter 2: Nama file yang akan didownload user
-        return response()->download($tempFile, $fileNameUser)->deleteFileAfterSend(true);
-    }
+    public  function generateSPK($id_mitra, $bulan, $tahun) {}
 
     public function convertDigitBulan($digit)
     {
