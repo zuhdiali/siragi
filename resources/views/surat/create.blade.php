@@ -204,7 +204,7 @@
                                                     </div>
                                                 @endif
 
-                                                @if ($jenis == 'bast' && $tipe_bast == null)
+                                                {{-- @if ($jenis == 'bast' && $tipe_bast == null)
                                                     <div
                                                         class="form-group {{ $errors->has('bulan_spk') ? 'has-error has-feedback' : '' }}">
                                                         <label for="bulan_spk">Pilih Bulan</label>
@@ -259,7 +259,7 @@
                                                                 class="form-text text-muted">{{ $errors->first('bulan_spk') }}</small>
                                                         @endif
                                                     </div>
-                                                @endif
+                                                @endif --}}
 
                                                 <div
                                                     class="form-group {{ $errors->has('perihal') ? 'has-error has-feedback' : '' }}">

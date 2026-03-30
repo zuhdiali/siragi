@@ -422,14 +422,13 @@ class SuratController extends Controller
                 return redirect()->back()->with('error', 'BAST banyak hanya untuk kegiatan dengan jenis KAK Honor Mitra.');
             }
             foreach ($kegiatan->kegiatanLampiran as $lampiran) {
-                // dd($request->all(), $lampiran);
                 $surat = new Surat();
                 $surat->jenis_surat = $jenis;
                 $surat->perihal = $request->perihal;
                 $surat->id_kegiatan = $request->id_kegiatan;
                 $spk = Surat::where('mitra_spk', $lampiran->peserta_id)
                     ->where('jenis_surat', 'spk')
-                    ->where('bulan_spk', $request->bulan_spk)
+                    ->where('bulan_spk', (int)Carbon::parse($kegiatan->tgl_mulai)->format('m'))
                     ->where('tahun_spk', date('Y'))
                     ->where('flag', null)
                     ->first();
@@ -438,7 +437,7 @@ class SuratController extends Controller
                     $spk = new Surat();
                     $spk->jenis_surat = 'spk';
                     $spk->mitra_spk = $lampiran->peserta_id;
-                    $spk->bulan_spk = $request->bulan_spk;
+                    $spk->bulan_spk = (int)Carbon::parse($kegiatan->tgl_mulai)->format('m');
                     $spk->tahun_spk = date('Y');
                     $spk->no_terakhir = $noTerakhirSPK + 1;
                     $spk->id_pembuat_surat = Auth::user()->id;
@@ -461,6 +460,7 @@ class SuratController extends Controller
                 // $lampiran->save();
             }
         } else {
+            // jika bukan buat spk
             $surat = new Surat();
             $surat->jenis_surat = $jenis;
             $surat->perihal = $request->perihal;
@@ -1057,7 +1057,7 @@ class SuratController extends Controller
             array_push($values, [
                 'lamp_no' => $count++,
                 'lamp_nama' => $mitra2->nama,
-                'lamp_kec_asal' => $this->konversiKodeKec($mitra2->kec_asal),
+                'lamp_kec_asal' => $this->konversiKodeKec($kl->kec_tujuan), //aslinya bukan kec asal, tapi kec yang dicacah. Malas mengubah semua template
                 'lamp_nama_sls' => $kl->nama_sls,
                 'lamp_jml' => $kl->jml_sampel_pcl
             ]);
