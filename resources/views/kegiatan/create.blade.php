@@ -379,6 +379,49 @@
 
                                     <hr />
 
+                                    @if ($jenis_kak == 'honor-mitra')
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div
+                                                    class="form-group {{ $errors->has('honor_pengawasan') ? 'has-error has-feedback' : '' }}">
+                                                    <label for="honor_pengawasan">Honor
+                                                        <strong>Pengawasan</strong> per satuan</label>
+                                                    <input type="number" class="form-control" id="honor_pengawasan"
+                                                        name="honor_pengawasan" placeholder="Masukkan honor per satuan"
+                                                        value="{{ old('honor_pengawasan') }}" />
+                                                    @if ($errors->has('honor_pengawasan'))
+                                                        <small
+                                                            class="form-text text-muted">{{ $errors->first('honor_pengawasan') }}</small>
+                                                    @else
+                                                        <small class="form-text text-muted">
+                                                            {{-- (isian honor dapat dikosongkan jika satuan honor belum dipilih) --}}
+                                                        </small>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div
+                                                    class="form-group {{ $errors->has('honor_pencacahan') ? 'has-error has-feedback' : '' }}">
+                                                    <label for="honor_pencacahan">Honor <strong>Pencacahan /
+                                                            Pengolahan</strong> per satuan</label>
+                                                    <input type="number" class="form-control" id="honor_pencacahan"
+                                                        name="honor_pencacahan" placeholder="Masukkan honor per satuan"
+                                                        value="{{ old('honor_pencacahan') }}" />
+                                                    @if ($errors->has('honor_pencacahan'))
+                                                        <small
+                                                            class="form-text text-muted">{{ $errors->first('honor_pencacahan') }}</small>
+                                                    @else
+                                                        <small class="form-text text-muted">
+                                                            {{-- (isian honor dapat dikosongkan jika satuan honor belum dipilih) --}}
+                                                        </small>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <hr />
+
                                     <div class="row">
                                         <div class="col">
                                             <div class="form-group">
@@ -523,48 +566,7 @@
 
                                     <div class="row">
                                         <div class="col-12">
-                                            @if ($jenis_kak == 'honor-mitra')
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div
-                                                            class="form-group {{ $errors->has('honor_pengawasan') ? 'has-error has-feedback' : '' }}">
-                                                            <label for="honor_pengawasan">Honor
-                                                                <strong>Pengawasan</strong> per satuan</label>
-                                                            <input type="number" class="form-control"
-                                                                id="honor_pengawasan" name="honor_pengawasan"
-                                                                placeholder="Masukkan honor per satuan"
-                                                                value="{{ old('honor_pengawasan') }}" />
-                                                            @if ($errors->has('honor_pengawasan'))
-                                                                <small
-                                                                    class="form-text text-muted">{{ $errors->first('honor_pengawasan') }}</small>
-                                                            @else
-                                                                <small class="form-text text-muted">
-                                                                    {{-- (isian honor dapat dikosongkan jika satuan honor belum dipilih) --}}
-                                                                </small>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div
-                                                            class="form-group {{ $errors->has('honor_pencacahan') ? 'has-error has-feedback' : '' }}">
-                                                            <label for="honor_pencacahan">Honor <strong>Pencacahan /
-                                                                    Pengolahan</strong> per satuan</label>
-                                                            <input type="number" class="form-control"
-                                                                id="honor_pencacahan" name="honor_pencacahan"
-                                                                placeholder="Masukkan honor per satuan"
-                                                                value="{{ old('honor_pencacahan') }}" />
-                                                            @if ($errors->has('honor_pencacahan'))
-                                                                <small
-                                                                    class="form-text text-muted">{{ $errors->first('honor_pencacahan') }}</small>
-                                                            @else
-                                                                <small class="form-text text-muted">
-                                                                    {{-- (isian honor dapat dikosongkan jika satuan honor belum dipilih) --}}
-                                                                </small>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endif
+
                                             <p>Rincian Biaya </p>
 
                                             <div class="table-responsive">
@@ -901,6 +903,7 @@
 @section('script')
     <script src="{{ asset('select2/js/select2.full.min.js') }}"></script>
     <script>
+        var jenisKAKJS = <?php echo json_encode($jenis_kak); ?>;
         $(document).ready(function() {
             $('#pegawai').select2({
                 theme: "bootstrap-5",
@@ -1329,11 +1332,13 @@
                         @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
 
                             if (maksud == 'pendataan') {
-                                return 'TRANSPORT LOKAL DI BAWAH 8 JAM ' + tujuan.toUpperCase() + ' ' +
+                                return 'TRANSPORT LOKAL ' + (jenisKAKJS == 'translok-8jam' ? 'DI ATAS 8 JAM' :
+                                        'DI BAWAH 8 JAM') + ' ' + tujuan.toUpperCase() + ' ' +
                                     maksud.toUpperCase() + ' ' + nama_kegiatan.toUpperCase() +
                                     ' TAHUN 2026 BPS KABUPATEN SIMEULUE TAHUN ANGGARAN 2026 ';
                             } else {
-                                return 'TRANSPORT LOKAL DI BAWAH 8 JAM ' + tujuan.toUpperCase() + ' ' +
+                                return 'TRANSPORT LOKAL ' + (jenisKAKJS == 'translok-8jam' ? 'DI ATAS 8 JAM' :
+                                        'DI BAWAH 8 JAM') + ' ' + tujuan.toUpperCase() + ' ' +
                                     maksud.toUpperCase() + ' ' +
                                     jenis_kegiatan.toUpperCase() + ' ' + nama_kegiatan.toUpperCase() +
                                     ' TAHUN 2026 BPS KABUPATEN SIMEULUE TAHUN ANGGARAN 2026 ';
@@ -1351,7 +1356,10 @@
                                 .toUpperCase() +
                                 ' TAHUN 2026 BPS KABUPATEN SIMEULUE TAHUN ANGGARAN 2026 ';
                         @elseif ($jenis_kak == 'honor-mitra')
-                            return 'HONOR PETUGAS PEMUTAKHIRAN DAN PENDATAAN LAPANGAN ' + (nama_kegiatan ??
+                            return 'HONOR PETUGAS' + (jenis_kegiatan == 'pendataan' ? ' PENDATAAN LAPANGAN ' : (
+                                    jenis_kegiatan ==
+                                    'updating' ? ' PEMUTAKHIRAN ' : ' PENGOLAHAN ')) +
+                                (nama_kegiatan ??
                                     singkatan_resmi)
                                 .toUpperCase() +
                                 ' TAHUN 2026 BPS KABUPATEN SIMEULUE TAHUN ANGGARAN 2026 ';
@@ -1377,6 +1385,7 @@
                     $('#judul_kak').val(judulKAK);
                 });
         });
+
 
 
         // --- Script Khusus Tabel Lampiran--- //
