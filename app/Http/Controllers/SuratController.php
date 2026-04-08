@@ -487,6 +487,9 @@ class SuratController extends Controller
                             $surat->tim = $request->tim;
                             $surat->no_terakhir = $noTerakhir + 1;
                             $surat->tgl_surat = $request->tgl_surat;
+                            if ($jenis == 'sk') {
+                                $surat->id_kegiatan = $request->id_kegiatan;
+                            }
                         } else {
                             $surat->nomor_surat = $this->generateNomorSurat("11010", $request->kode, $jenis, $noTerakhir);
                         }
@@ -555,10 +558,18 @@ class SuratController extends Controller
     {
         $surat = Surat::find($id);
 
-        if ($jenis == 'masuk' || $jenis == 'sk') {
+        if ($jenis == 'masuk') {
             return view('surat.edit', [
                 'surat' => $surat,
                 'jenis' => $jenis,
+            ]);
+        } else if ($jenis == 'sk') {
+            $kegiatan = Kegiatan::where('id', $surat->id_kegiatan)->first();
+
+            return view('surat.edit', [
+                'surat' => $surat,
+                'jenis' => $jenis,
+                'kegiatan' => $kegiatan,
             ]);
         } else {
             $kegiatan = Kegiatan::where('id', $surat->id_kegiatan)->first();
@@ -671,6 +682,9 @@ class SuratController extends Controller
                     'tgl_surat' => 'required',
                 ]);
                 $surat->tgl_surat = $request->tgl_surat;
+                if ($jenis == 'sk') {
+                    $surat->tim = $request->tim;
+                }
             }
 
             if ($request->no_spk) {
@@ -678,6 +692,7 @@ class SuratController extends Controller
             }
         }
         $surat->perihal = $request->perihal;
+
         $surat->save();
 
         return redirect()->route('surat.' . $jenis)->with('success', 'Surat berhasil diubah.');
@@ -730,8 +745,13 @@ class SuratController extends Controller
             'id_pegawai' => 'required',
         ]);
         $kegiatans = null;
+        $jenis = $request->input('jenis', null);
         if (Auth::user()->role == 'Admin') {
-            $kegiatans = Kegiatan::where('is_approved', 1)->where('tim', $request->tim)->get();
+            if ($jenis == 'sk') {
+                $kegiatans = Kegiatan::where('is_approved', 1)->where('tim', $request->tim)->where('jenis_kak', 'honor-mitra')->get();
+            } else {
+                $kegiatans = Kegiatan::where('is_approved', 1)->where('tim', $request->tim)->get();
+            }
         } else {
             if (Auth::user()->role == 'Ketua Tim') {
                 $kegiatans = Kegiatan::where('tim', $request->tim)->where('is_approved', 1)->get();
@@ -740,7 +760,7 @@ class SuratController extends Controller
             }
             $kegiatan_lampirans = KegiatanLampiran::where('peserta_id', Auth::user()->id)->where('tipe_personil', "pegawai")->get();
 
-            // $kegiatan_pegawais = KegiatanPegawai::where('pegawai_id', Auth::user()->id)->get();
+            // mencari kegiatan yang melibatkan pegawai yang login sebagai peserta kegiatan lampiran, kemudian menambahkan kegiatan tersebut ke dalam list kegiatan jika belum ada di dalam list kegiatan
             foreach ($kegiatan_lampirans as $kegiatan_lampiran) {
                 $kegiatan = Kegiatan::find($kegiatan_lampiran->kegiatan_id);
                 if (!$kegiatan) {
@@ -1084,6 +1104,149 @@ class SuratController extends Controller
     {
         $surat = Surat::find($id);
         return response()->download($surat->file);
+    }
+
+    public function generateSK($id)
+    {
+        $surat = Surat::find($id);
+        $kegiatan = Kegiatan::find($surat->id_kegiatan);
+        if (!$kegiatan) {
+            return redirect()->back()->with('error', 'Tidak dapat generate SK karena kegiatan belum dipilih.');
+        }
+        $kegiatan_lampiran = KegiatanLampiran::where('kegiatan_id', $kegiatan->id)->get();
+        $tglAwal = \Carbon\Carbon::parse($kegiatan->tgl_mulai)->locale('id')->translatedFormat('d F Y');
+        $tglAkhir = \Carbon\Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F Y');
+        $tglSK = \Carbon\Carbon::parse($surat->tgl_surat)->locale('id')->translatedFormat('d F Y');
+        $singkatanResmiUpper = strtoupper($kegiatan->singkatan_resmi);
+        $phpWord = new \PhpOffice\PhpWord\TemplateProcessor("SK-untuk-2026.docx");
+        $phpWord->setValue('no', $surat->no_terakhir);
+        $phpWord->setValue('perihal', strtoupper($surat->perihal));
+        $phpWord->setValue('singkatan_resmi', $kegiatan->singkatan_resmi);
+        $phpWord->setValue('singkatan_resmi_upper', $singkatanResmiUpper);
+        $phpWord->setValue('tgl_mulai', $tglAwal);
+        $phpWord->setValue('tgl_akhir', $tglAkhir);
+        $phpWord->setValue('tgl_sk', $tglSK);
+        $array_id_organik = [];
+        $array_id_mitra = [];
+        $count = 0;
+        $values = [];
+        foreach ($kegiatan_lampiran as $kl) {
+            $nama = "";
+            $jabatan = "";
+            $tugas = "";
+            $honor = 0;
+
+            if ($kl->tipe_personil == 'mitra') {
+                if (!in_array($kl->peserta_id, $array_id_mitra)) {
+                    // Alternative approach (using push method)
+                    array_push($array_id_mitra, $kl->peserta_id);
+                    $mitra = Mitra::find($kl->peserta_id);
+                    $nama = $mitra->nama;
+                    $jabatan = "Mitra";
+                    if ($kl->pcl_or_pml == 1) {
+                        $tugas = "PML";
+                        $honor = $kegiatan->honor_pengawasan ?? 0;
+                    } else {
+                        $tugas = "PCL";
+                        if ($kegiatan->honor_pencacahan == null || $kegiatan->honor_pencacahan < 10) {
+                            $kegiatan_rincian = KegiatanRincian::where('kegiatan_id', $kegiatan->id)->first();
+                            if ($kegiatan_rincian) {
+                                $honor = $kegiatan_rincian->harga_satuan ?? 0;
+                            } else {
+                                $honor = 0;
+                            }
+                        } else {
+                            $honor = $kegiatan->honor_pencacahan;
+                        }
+                    }
+                } else {
+                    continue;
+                }
+            } else {
+                if (!in_array($kl->peserta_id, $array_id_organik)) {
+                    // Alternative approach (using push method)
+                    array_push($array_id_organik, $kl->peserta_id);
+                    $pegawai = Pegawai::find($kl->peserta_id);
+                    $nama = $pegawai->nama;
+                    $jabatan = "Organik";
+                    $tugas = $kl->pcl_or_pml == 1 ? "PML" : "PCL";
+                } else {
+                    continue;
+                }
+            }
+
+            array_push($values, [
+                'lamp_no' => ++$count,
+                'lamp_nama' => $nama,
+                'lamp_jabatan' => $jabatan,
+                'lamp_tugas' => $tugas,
+                'lamp_honor' => $honor == null ? "{#honor#}" : number_format($honor, 0, ',', '.'),
+            ]);
+
+            $nama = "";
+            $jabatan = "";
+            $tugas = "";
+            $honor = 0;
+
+            if ($kl->tipe_pengawas == "organik") {
+                if (!in_array($kl->pengawas_id, $array_id_organik)) {
+                    // Alternative approach (using push method)
+                    array_push($array_id_organik, $kl->pengawas_id);
+                    $pegawai = Pegawai::find($kl->pengawas_id);
+                    $nama = $pegawai->nama;
+                    $jabatan = "Organik";
+                    $tugas = "PML";
+                    $honor = 0;
+                    array_push($values, [
+                        'lamp_no' => ++$count,
+                        'lamp_nama' => $nama,
+                        'lamp_jabatan' => $jabatan,
+                        'lamp_tugas' => $tugas,
+                        'lamp_honor' => number_format(0, 0, ',', '.'),
+                    ]);
+                }
+            }
+        }
+        $phpWord->cloneRowAndSetValues('lamp_no', $values);
+
+        // 1. Tentukan nama file yang akan dilihat user saat download
+        $fileNameUser = 'SK_' . str_replace(' ', '_', $surat->perihal) . '_' . date('Ymd_His') . '.docx';
+
+        // 2. Buat file temporary (sementara) di sistem server
+        $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
+        $phpWord->saveAs($tempFile);
+        // Parameter 1: Path file sementara
+        // Parameter 2: Nama file yang akan didownload user
+        return response()->download($tempFile, $fileNameUser)->deleteFileAfterSend(true);
+    }
+
+
+    public function uploadSK(Request $request, $id)
+    {
+        $request->validate([
+            'file' => 'required|mimes:pdf',
+        ]);
+
+        $surat = Surat::find($id);
+        if ($request->has('file')) {
+            $file = $request->file('file');
+            $extension = $file->getClientOriginalExtension();
+
+            $filename = date('Y-m-d') . '_' . time() . '_' . '.' . $extension;
+
+            $path = 'uploads/surat/';
+            $file->move($path, $filename);
+            $surat->file = $filename;
+            $surat->save();
+        }
+
+        return redirect()->back()->with('success', 'File SK berhasil diunggah.');
+    }
+
+    public function downloadSK($id)
+    {
+        $surat = Surat::find($id);
+        return response()->download('uploads/surat/' . $surat->file);
     }
 
     public  function generateSPK($id_mitra, $bulan, $tahun) {}

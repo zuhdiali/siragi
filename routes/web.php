@@ -178,6 +178,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/download-bast-pjk/{id}', [SuratController::class, 'downloadBASTPJK'])->name('download-bast-pjk');
         Route::get('/generate-surat-tugas/{id_kegiatan}/{id_form_permintaan}', [SuratController::class, 'generateSuratTugas'])->name('generate-surat-tugas');
         Route::get('/generate-spd/{id_kegiatan}/{id_form_permintaan}', [SuratController::class, 'generateSPD'])->name('generate-spd');
+
+        Route::get('/generate-sk/{id}', [SuratController::class, 'generateSK'])->name('generate-sk');
+        Route::post('/upload-sk/{id}', [SuratController::class, 'uploadSK'])->name('upload-sk');
+        Route::get('/download-sk/{id}', [SuratController::class, 'downloadSK'])->name('download-sk');
     });
 
     Route::prefix('sbks')->name('sbks.')->group(function () {

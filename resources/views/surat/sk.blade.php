@@ -54,6 +54,7 @@
                                             <th style="width: 10%">Nomor SK</th>
                                             <th style="width: 10%">Tanggal Surat</th>
                                             <th>Perihal</th>
+                                            <th>Kegiatan</th>
                                         </tr>
                                     </thead>
                                     <tfoot>
@@ -62,11 +63,12 @@
                                             <th>Nomor SK</th>
                                             <th>Tanggal Surat</th>
                                             <th>Perihal</th>
+                                            <th>Kegiatan</th>
                                         </tr>
                                     </tfoot>
                                     <tbody>
                                         @foreach ($surats as $surat)
-                                            <!-- Modal -->
+                                            <!-- Modal Hapus surat -->
                                             <div class="modal fade" id="{{ 'exampleModal' . $surat->id }}" tabindex="-1"
                                                 aria-labelledby="{{ 'exampleModalLabel' . $surat->id }}" aria-hidden="true">
                                                 <div class="modal-dialog">
@@ -93,32 +95,101 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <!-- Modal unggah SK -->
+                                            <div class="modal fade" id="{{ 'uploadSK' . $surat->id }}" tabindex="-1"
+                                                aria-labelledby="{{ 'uploadSKLabel' . $surat->id }}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <form action="{{ url('surat/upload-sk/' . $surat->id) }}" method="POST"
+                                                        enctype="multipart/form-data">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h1 class="modal-title fs-5"
+                                                                    id="{{ 'uploadSKLabel' . $surat->id }}">Unggah SK </h1>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                @csrf
+                                                                <div class="form-group">
+                                                                    <label for="file">Pilih File SK:</label>
+                                                                    <input type="file" class="form-control"
+                                                                        id="file" name="file" accept=".pdf">
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Batalkan</button>
+
+                                                                <button type="submit" class="btn btn-success">Unggah
+                                                                    SK</button>
+
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
                                             <tr>
                                                 <td>
-                                                    @if (Auth::user()->role == 'Admin')
-                                                        <div class="form-button-action">
-                                                            <form
-                                                                action="{{ url('surat/edit/' . $surat->jenis_surat . '/' . $surat->id) }}">
-                                                                <button type="submit" data-bs-toggle="tooltip"
-                                                                    title="Edit" class="btn btn-link btn-primary px-2"
-                                                                    data-original-title="Edit Surat">
-                                                                    <i class="fa fa-edit"></i>
-                                                                </button>
-                                                            </form>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            @if (Auth::user()->role == 'Admin')
+                                                                <div class="form-button-action">
+                                                                    <form
+                                                                        action="{{ url('surat/edit/' . $surat->jenis_surat . '/' . $surat->id) }}">
+                                                                        <button type="submit" data-bs-toggle="tooltip"
+                                                                            title="Edit"
+                                                                            class="btn btn-link btn-primary px-2"
+                                                                            data-original-title="Edit Surat">
+                                                                            <i class="fa fa-edit"></i>
+                                                                        </button>
+                                                                    </form>
 
-                                                            <button type="button" title="Hapus"
-                                                                class="btn btn-link btn-danger px-2" data-bs-toggle="modal"
-                                                                data-bs-target="{{ '#exampleModal' . $surat->id }}"
-                                                                data-original-title="Hapus">
-                                                                <i class="fa fa-trash-alt"></i>
-                                                            </button>
+                                                                    <button type="button" title="Hapus"
+                                                                        class="btn btn-link btn-danger px-2"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="{{ '#exampleModal' . $surat->id }}"
+                                                                        data-original-title="Hapus">
+                                                                        <i class="fa fa-trash-alt"></i>
+                                                                    </button>
+                                                                    <a href="{{ url('surat/generate-sk/' . $surat->id) }}"
+                                                                        data-bs-toggle="tooltip" title="Generate SK"
+                                                                        class="btn btn-link btn-primary px-2"
+                                                                        data-original-title="Generate SK">
+                                                                        <i class="fa fa-file-download"></i>
+                                                                    </a>
+                                                                </div>
+                                                            @endif
                                                         </div>
-                                                    @endif
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            @if (Auth::user()->role == 'Admin')
+                                                                <button type="button" title="Upload SK"
+                                                                    class="btn btn-link btn-primary px-2"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="{{ '#uploadSK' . $surat->id }}"
+                                                                    data-original-title="Upload SK">
+                                                                    <i class="fa fa-upload"></i>
+                                                                </button>
+                                                            @endif
+                                                            @if ($surat->file)
+                                                                <a href="{{ url('surat/download-sk/' . $surat->id) }}"
+                                                                    data-bs-toggle="tooltip" title="Download SK"
+                                                                    class="btn btn-link btn-success px-2"
+                                                                    data-original-title="Download SK">
+                                                                    <i class="fa fa-download"></i>
+                                                                </a>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
                                                 </td>
                                                 <th scope="row">{{ $surat->no_terakhir }}</th>
                                                 <td>{{ \Carbon\Carbon::parse($surat->tgl_surat)->translatedFormat('d F Y') }}
                                                 </td>
                                                 <td>{{ $surat->perihal }}</td>
+                                                <td>{{ $surat->kegiatan ? $surat->kegiatan->singkatan_resmi : 'N/A' }}</td>
                                                 {{-- <td>
                         @if ($surat->flag == null)
                         <span class="badge bg-success">Aktif</span>

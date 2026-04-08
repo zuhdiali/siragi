@@ -25,7 +25,8 @@
                                             <div
                                                 class="form-group  {{ $errors->has('tim') ? 'has-error has-feedback' : '' }}">
                                                 <label for="tim">Tim</label>
-                                                <select class="form-select" id="tim" name="tim" disabled>
+                                                <select class="form-select" id="tim" name="tim"
+                                                    @if ($jenis != 'sk') disabled @endif>
                                                     <option value="">(Pilih salah satu)</option>
                                                     <option value="11011" {{ $surat->tim == '11011' ? 'selected' : '' }}>
                                                         Umum</option>
@@ -38,7 +39,7 @@
                                                     <option value="11014" {{ $surat->tim == '11014' ? 'selected' : '' }}>
                                                         Statistik Ekonomi Distribusi</option>
                                                     <option value="11016" {{ $surat->tim == '11016' ? 'selected' : '' }}>
-                                                        IPDS</option>
+                                                        TI dan Pengolahan</option>
                                                     <option value="11017" {{ $surat->tim == '11017' ? 'selected' : '' }}>
                                                         Diseminasi, Publisitas, dan Humas</option>
                                                     <option value="11018" {{ $surat->tim == '11018' ? 'selected' : '' }}>
@@ -99,17 +100,19 @@
                                         </div>
 
                                         <div class="col-md-6">
-                                            @if ($jenis != 'keluar' && $jenis != 'sk' && ($jenis == 'bast' && $surat->tipe_bast == null))
+                                            @if ($jenis != 'keluar' || ($jenis == 'bast' && $surat->tipe_bast == null))
                                                 <div
                                                     class="form-group  {{ $errors->has('id_kegiatan') ? 'has-error has-feedback' : '' }}">
                                                     <label for="id_kegiatan">Kegiatan</label>
                                                     <select class="form-select" id="single-select-field" name="id_kegiatan"
                                                         data-placeholder="Pilih salah satu" {{-- disabled --}}>
                                                         <option value="">(Pilih salah satu)</option>
-                                                        {{-- @foreach ($kegiatans as $k) --}}
-                                                        <option value="{{ $kegiatan->id }}"
-                                                            {{ $surat->id_kegiatan == $kegiatan->id ? 'selected' : '' }}>
-                                                            {{ $kegiatan->nama }}</option>
+                                                        {{-- @foreach ($kegiatans as $kegiatan) --}}
+                                                        @isset($kegiatan)
+                                                            <option value="{{ $kegiatan->id }}"
+                                                                {{ $surat->id_kegiatan == $kegiatan->id ? 'selected' : '' }}>
+                                                                {{ $kegiatan->nama }}</option>
+                                                        @endisset
                                                         {{-- @endforeach --}}
                                                     </select>
                                                     @if ($errors->has('id_kegiatan'))
@@ -486,7 +489,8 @@
                 url: "{{ route('kegiatan.get-kegiatan-api') }}",
                 data: {
                     tim: tim,
-                    id_pegawai: {{ Auth::user()->id }}
+                    id_pegawai: {{ Auth::user()->id }},
+                    jenis: jenis,
                 },
 
                 success: function(msg) {
@@ -507,7 +511,13 @@
 
         $(document).ready(function() {
 
-            gantiTimDanKegiatan();
+            // gantiTimDanKegiatan();
+            $('#tim').change(function() {
+                var tim = $(this).val();
+                gantiTimDanKegiatan();
+
+
+            });
             // @if ($surat->tim == '11011')
             //     $('#kode').append(opsiUmum);
             // @elseif ($surat->tim == '11016')

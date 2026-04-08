@@ -184,7 +184,7 @@
                                                 <input type="hidden" name="tipe_bast" id="tipe_bast" value="lainnya">
                                             @endif
                                             <div class="col-md-6">
-                                                @if ($jenis != 'keluar' && $jenis != 'sk' && $tipe_bast == null)
+                                                @if ($jenis != 'keluar' && $tipe_bast == null)
                                                     <div
                                                         class="form-group  {{ $errors->has('id_kegiatan') ? 'has-error has-feedback' : '' }}">
                                                         <label for="id_kegiatan">Kegiatan</label>
@@ -580,6 +580,7 @@
     <script>
         const jenis = '{{ $jenis }}';
 
+
         function gantiTimDanKegiatan() {
             var tim = $('#tim').val();
             if (jenis != "keluar") {
@@ -605,11 +606,12 @@
                 url: "{{ route('kegiatan.get-kegiatan-api') }}",
                 data: {
                     tim: tim,
-                    id_pegawai: {{ Auth::user()->id }}
+                    id_pegawai: {{ Auth::user()->id }},
+                    jenis: jenis
                 },
 
                 success: function(msg) {
-                    console.log(msg);
+                    // console.log(msg);
                     $('#single-select-field').empty();
                     $.each(msg, function(key, value) {
                         $('#single-select-field').append('<option value="' + value.id + '">' + value
