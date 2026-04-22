@@ -52,6 +52,11 @@
                     <h6 class="op-7 mb-2">Daftar kegiatan </h6>
                 </div>
                 <div class="ms-md-auto py-2 py-md-0">
+                    @if (Auth::user()->role == 'Admin')
+                        <a href="{{ route('kegiatan.export-pj-kegiatan') }}" class="btn btn-primary">
+                            <i class="fa fa-download"></i> Unduh Daftar PJK
+                        </a>
+                    @endif
                     <button type="button" class="btn  btn-primary " data-bs-toggle="modal" data-bs-target="#pilihKAK">
                         <i class="fa fa-plus"></i> Tambah KAK
                     </button>

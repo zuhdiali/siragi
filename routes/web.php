@@ -97,6 +97,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/mitra-belum-dibayar/{id}', [MainController::class, 'mitraKegiatanBelumDibayar']);
         Route::get('/pegawai-belum-dibayar/{id}', [MainController::class, 'pegawaiKegiatanBelumDibayar']);
 
+        Route::get('/export-pj-kegiatan', [KegiatanController::class, 'exportPJKegiatan'])->name('export-pj-kegiatan');
+
         Route::post('/get-kegiatan-api', [SuratController::class, 'getKegiatanApi'])->name('get-kegiatan-api');
 
         Route::post('/approve/{id}', [KegiatanController::class, 'approveKegiatan'])->name('approve');

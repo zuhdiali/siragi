@@ -15,6 +15,7 @@ use App\Imports\KegiatanMitraImport;
 use App\Exports\ExportHonorKegiatan;
 use App\Exports\ExportTranslok;
 use App\Exports\ExportMitra;
+use App\Exports\ExportPJKegiatan;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -1169,6 +1170,12 @@ class KegiatanController extends Controller
             return redirect()->route('kegiatan.show', ['id' => $id])->with('warning', 'Pembaruan estimasi honor berhasil, namun mitra (' . implode(", ", $mitraYangPerluWarning) . ') masih melebihi batas honor. Sebaiknya segera kurangi honor yang diterimanya.');
         }
         return redirect()->route('kegiatan.show', ['id' => $id])->with('success', 'Data mitra dan estimasi honor berhasil diimpor.');
+    }
+
+    public function exportPJKegiatan()
+    {
+        $fileName = 'pj-kegiatan-' . now()->format('Y-m-d') . '.xlsx';
+        return Excel::download(new ExportPJKegiatan(), $fileName);
     }
 
     public function exportMitraDanHonor($id)
