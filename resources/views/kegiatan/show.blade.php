@@ -642,7 +642,6 @@
                                                                 </td>
                                                             @elseif ($jenis_kak == 'pemanggilan-konsultasi')
                                                                 <td>
-                                                                <td>
                                                                     <input type="text" name="nama_sls[]"
                                                                         class="form-control form-control-sm"
                                                                         value="{{ $t->nama_sls }}" readonly />
@@ -661,7 +660,6 @@
                                                                     <input type="text" name="transport_bayar[]"
                                                                         class="form-control form-control-sm text-end currency"
                                                                         value="{{ $t->transport_bayar }}" readonly />
-                                                                </td>
                                                                 </td>
                                                             @elseif($jenis_kak == 'honor-inda')
                                                                 <td>
