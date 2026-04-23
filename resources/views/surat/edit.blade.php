@@ -472,6 +472,7 @@
                 $('#kode-tim').text('11010');
             }
             $('#nomor_surat').val($('.kemungkinan_no_surat').text());
+
             $("#kode").empty();
             if (tim == '11011') {
                 $("#kode").append(opsiUmum);
@@ -511,11 +512,16 @@
 
         $(document).ready(function() {
 
-            // gantiTimDanKegiatan();
+            var tim = $('#tim').val();
+            if (tim == '11011') {
+                $("#kode").append(opsiUmum);
+            } else if (tim == '11016') {
+                $("#kode").append(opsiIPDS);
+            } else {
+                $("#kode").append(opsiTeknis);
+            }
             $('#tim').change(function() {
-                var tim = $(this).val();
                 gantiTimDanKegiatan();
-
 
             });
             // @if ($surat->tim == '11011')
