@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Concerns\WithCustomValueBinder; // <-- 1. Import
 use PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;   // <-- 2. Import
 
 
-class MitraSheetExport extends StringValueBinder implements FromCollection, WithHeadings, WithTitle, WithMapping, WithCustomValueBinder
+class SheetMitraExport extends StringValueBinder implements FromCollection, WithHeadings, WithTitle, WithMapping, WithCustomValueBinder
 {
     protected $kegiatan;
 
@@ -30,7 +30,7 @@ class MitraSheetExport extends StringValueBinder implements FromCollection, With
     public function headings(): array
     {
         return [
-            'nip',
+            'nik',
             'nama',
         ];
     }

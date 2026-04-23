@@ -28,10 +28,10 @@ class ExportTranslok implements WithMultipleSheets
     {
         return [
             // Sheet 1
-            new TranslokSheetExport($this->kegiatan, $this->tgl_mulai, $this->tgl_selesai, $this->tujuan),
+            new SheetTranslokExport($this->kegiatan, $this->tgl_mulai, $this->tgl_selesai, $this->tujuan),
 
             // Sheet 2
-            new MitraSheetExport($this->kegiatan),
+            new SheetMitraExport($this->kegiatan),
         ];
     }
 }

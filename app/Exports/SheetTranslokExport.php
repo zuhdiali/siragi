@@ -12,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;
 use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 
 // 2. Tambahkan WithTitle di sini
-class TranslokSheetExport extends StringValueBinder implements FromCollection, WithHeadings, WithMapping, WithCustomValueBinder, WithTitle
+class SheetTranslokExport extends StringValueBinder implements FromCollection, WithHeadings, WithMapping, WithCustomValueBinder, WithTitle
 {
     // ... (Semua kode constructor, collection, headings, map Anda tetap sama)
     // ... (Tidak ada yang perlu diubah di sini)

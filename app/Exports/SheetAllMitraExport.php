@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Concerns\WithCustomValueBinder; // <-- 1. Import
 use PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;   // <-- 2. Import
 
 
-class AllMitraSheetExport extends StringValueBinder implements FromCollection, WithHeadings, WithTitle, WithMapping, WithCustomValueBinder
+class SheetAllMitraExport extends StringValueBinder implements FromCollection, WithHeadings, WithTitle, WithMapping, WithCustomValueBinder
 {
     public function collection()
     {

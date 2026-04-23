@@ -9,12 +9,14 @@ use App\Models\Mitra;
 use App\Models\Surat;
 use App\Models\SBKS;
 use App\Models\POK;
+use App\Models\KegiatanLampiran;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Imports\KegiatanMitraImport;
+use App\Imports\KegiatanLampiranImport;
 use App\Exports\ExportHonorKegiatan;
 use App\Exports\ExportTranslok;
-use App\Exports\ExportMitra;
+use App\Exports\ExportTemplateHonorMitra;
 use App\Exports\ExportPJKegiatan;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -1139,7 +1141,7 @@ class KegiatanController extends Controller
         return redirect()->route('kegiatan.show', ['id' => $id])->with('success', 'Estimasi honor berhasil diperbarui.');
     }
 
-    public function importMitraDanHonor(Request $request, $id)
+    public function importMitraDanHonorLama(Request $request, $id)
     {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,csv,xls',
@@ -1172,6 +1174,30 @@ class KegiatanController extends Controller
         return redirect()->route('kegiatan.show', ['id' => $id])->with('success', 'Data mitra dan estimasi honor berhasil diimpor.');
     }
 
+    public function importMitraDanHonor(Request $request, $id)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+        try {
+            $kegiatanLampiran = KegiatanLampiran::where('kegiatan_id', $id)->get();
+            foreach ($kegiatanLampiran as $lampiran) {
+                $lampiran->delete();
+            }
+            Excel::import(new KegiatanLampiranImport(), $request->file('file'));
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errorMessages = [];
+            foreach ($failures as $failure) {
+                $errorMessages[] = 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+            }
+            return redirect()->route('kegiatan.honor-mitra.edit', ['id' => $id])->with('error', implode(' | ', $errorMessages));
+        } catch (\Throwable $th) {
+            return redirect()->route('kegiatan.honor-mitra.edit', ['id' => $id])->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $th->getMessage());
+        }
+
+        return redirect()->route('kegiatan.honor-mitra.edit', ['id' => $id])->with('success', 'Data mitra dan estimasi honor berhasil diimpor.');
+    }
     public function exportPJKegiatan()
     {
         $fileName = 'pj-kegiatan-' . now()->format('Y-m-d') . '.xlsx';
@@ -1207,7 +1233,7 @@ class KegiatanController extends Controller
     public function exportMitraId()
     {
         $fileName = 'all-mitra-' . now()->format('Y-m-d') . '.xlsx';
-        return Excel::download(new ExportMitra(), $fileName);
+        return Excel::download(new ExportTemplateHonorMitra(), $fileName);
     }
 
     public function duplicate($id)

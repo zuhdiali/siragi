@@ -5,7 +5,7 @@ namespace App\Exports;
 use App\Models\Kegiatan;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class ExportMitra implements WithMultipleSheets
+class ExportTemplateHonorMitra implements WithMultipleSheets
 {
 
     /**
@@ -16,10 +16,19 @@ class ExportMitra implements WithMultipleSheets
     {
         return [
             // Sheet 1
-            new TemplateSheetExport(),
+            new SheetTemplateHonorExport(),
 
             // Sheet 2
-            new AllMitraSheetExport(),
+            new SheetAllMitraExport(),
+
+            // Sheet 3
+            new SheetPegawai(),
+
+            // Sheet 4
+            new SheetKeteranganKolomHonorMitraExport(),
+
+            // Sheet 5
+            new SheetKodeKecamatan(),
         ];
     }
 }
