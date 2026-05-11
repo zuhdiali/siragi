@@ -123,10 +123,10 @@ class MitraController extends Controller
 
         $kegiatan_mitra_awal = KegiatanLampiran::where('peserta_id', $id)->where('tipe_personil', 'mitra')->get();
         $kegiatan_mitra = [];
-        dd($kegiatan_mitra_awal);
+        // dd($kegiatan_mitra_awal);
         foreach ($kegiatan_mitra_awal as $km) {
             $kegiatan = Kegiatan::find($km->kegiatan_id);
-            if (!$kegiatan->tgl_mulai) {
+            if (!$kegiatan) {
                 continue;
             }
             if (Carbon::parse($kegiatan->tgl_mulai)->month == $bulan && Carbon::parse($kegiatan->tgl_mulai)->year == $tahun) {
