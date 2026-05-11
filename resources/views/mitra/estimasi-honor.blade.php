@@ -200,8 +200,8 @@
                                 </form>
                               </div>
                             <th scope="row">${item.kegiatan.nama}</th>
-                            <td>${new Date(item.kegiatan.tgl_mulai).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
-                            <td>${new Date(item.kegiatan.tgl_selesai).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                            <td>${new Date(item.lampiran_tgl_mulai).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                            <td>${new Date(item.lampiran_tgl_selesai).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                             <td data-order="${(item.transport_bayar)}">Rp ${new Intl.NumberFormat('id-ID').format((item.transport_bayar))}</td>
                             
                           </tr>
