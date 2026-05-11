@@ -125,6 +125,9 @@ class MitraController extends Controller
         $kegiatan_mitra = [];
         foreach ($kegiatan_mitra_awal as $km) {
             $kegiatan = Kegiatan::find($km->kegiatan_id);
+            if (!$kegiatan->tgl_mulai) {
+                continue;
+            }
             if (Carbon::parse($kegiatan->tgl_mulai)->month == $bulan && Carbon::parse($kegiatan->tgl_mulai)->year == $tahun) {
                 if ($kegiatan->jenis_kak != 'honor-mitra') {
                     continue;
