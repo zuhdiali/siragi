@@ -130,7 +130,7 @@
                                                     </div>
                                                 </td>
                                                 {{-- <th scope="row">{{(strlen($kegiatan->kegiatan->nama)>90 ? substr($kegiatan->kegiatan->nama, 0, 90) . '...' : $kegiatan->nama)}}</th> --}}
-                                                <th scope="row">{{ $kegiatan->kegiatan->nama }}</th>
+                                                <th scope="row">{{ $kegiatan->kegiatan->singkatan_resmi }}</th>
                                                 <td>{{ Carbon\Carbon::parse($kegiatan->kegiatan->tgl_mulai)->locale('id')->translatedFormat('d M Y') }}
                                                 </td>
                                                 <td>{{ Carbon\Carbon::parse($kegiatan->kegiatan->tgl_selesai)->locale('id')->translatedFormat('d M Y') }}
@@ -180,7 +180,7 @@
                     id_mitra: {{ $mitra->id }}
                 },
                 success: function(data) {
-                    console.log(data);
+                    // console.log(data);
                     $('#basic-datatables').DataTable().destroy();
                     $('#basic-datatables tbody').empty();
                     data.forEach(function(item) {
