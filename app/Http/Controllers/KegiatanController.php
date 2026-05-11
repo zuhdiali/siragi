@@ -37,11 +37,16 @@ class KegiatanController extends Controller
             $kegiatan->pjk = Pegawai::find($kegiatan->id_pjk);
             $kegiatan->namaTim = $this->konversiTim($kegiatan->kak4_pjk);
         }
-        return view('kegiatan.index', ['kegiatans' => $kegiatans, 'kegiatanTahunIni' => $kegiatanTahunIni]);
+        session()->flash('warning', 'Mohon maaf menu KAK sedang dalam perbaikan sehingga Bapak/Ibu tidak bisa menambah/mengedit KAK');
+        return view('kegiatan.index', [
+            'kegiatans' => $kegiatans,
+            'kegiatanTahunIni' => $kegiatanTahunIni,
+        ]);
     }
 
     private function loadCreateEditView($viewPath, $jenis_kak, $id = null)
     {
+        return redirect()->back()->with('warning', 'Mohon maaf menu KAK sedang dalam perbaikan sehingga Bapak/Ibu tidak bisa menambah/mengedit KAK');
         $data = [
             'pegawais' => Pegawai::where('flag', null)->where('nama', 'not like', '%Admin%')->where('nama', 'not like', '%Dummy%')->orderBy('nama', 'asc')->get(),
             'mitras' => Mitra::where('flag', null)->orderBy('nama', 'asc')->get(),

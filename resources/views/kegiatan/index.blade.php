@@ -60,9 +60,9 @@
                     {{-- <a href="{{ route('kegiatan.export-mitra-id') }}" class="btn btn-primary">
                         <i class="fa fa-download"></i> Template Impor Mitra Kegiatan
                     </a> --}}
-                    <button type="button" class="btn  btn-primary " data-bs-toggle="modal" data-bs-target="#pilihKAK">
+                    {{-- <button type="button" class="btn  btn-primary " data-bs-toggle="modal" data-bs-target="#pilihKAK">
                         <i class="fa fa-plus"></i> Tambah KAK
-                    </button>
+                    </button> --}}
                 </div>
             </div>
             <div class="row">
@@ -196,45 +196,50 @@
                                                 </div>
 
                                                 {{-- Modal Impor Mitra Kegiatan --}}
-                                                <div class="modal fade" id="{{ 'modalImportMitra' . $kegiatan->id }}"
-                                                    tabindex="-1"
-                                                    aria-labelledby="{{ 'modalImportMitraLabel' . $kegiatan->id }}"
-                                                    aria-hidden="true">
-                                                    <div class="modal-dialog">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h1 class="modal-title fs-5"
-                                                                    id="{{ 'modalImportMitraLabel' . $kegiatan->id }}">
-                                                                    Impor Mitra
-                                                                    Kegiatan</h1>
-                                                                <button type="button" class="btn-close"
-                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div
-                                                                class="modal-body d-flex flex-column align-items-center justify-content-center">
-                                                                <p>Unduh template berikut dan isi data mitra kegiatan
-                                                                    dengan benar.</p>
-                                                                <a href="{{ route('kegiatan.export-mitra-id') }}"
-                                                                    class="btn btn-primary mb-3">
-                                                                    <i class="fa fa-download"></i> Unduh Template
-                                                                </a>
-                                                                <p>Setelah mengisi template, unggah kembali file tersebut
-                                                                    menggunakan formulir di bawah ini.</p>
-                                                                <form
-                                                                    action="{{ route('kegiatan.import-mitra-dan-honor', $kegiatan->id) }}"
-                                                                    method="POST" enctype="multipart/form-data">
-                                                                    @csrf
-                                                                    <div class="mb-3">
-                                                                        <input type="file" name="file"
-                                                                            class="form-control" required>
-                                                                    </div>
-                                                                    <button type="submit" class="btn btn-success">Unggah
-                                                                        File</button>
-                                                                </form>
+                                                @if ($kegiatan->jenis_kak == 'honor-mitra')
+                                                    <div class="modal fade" id="{{ 'modalImportMitra' . $kegiatan->id }}"
+                                                        tabindex="-1"
+                                                        aria-labelledby="{{ 'modalImportMitraLabel' . $kegiatan->id }}"
+                                                        aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h1 class="modal-title fs-5"
+                                                                        id="{{ 'modalImportMitraLabel' . $kegiatan->id }}">
+                                                                        Impor Mitra
+                                                                        Kegiatan</h1>
+                                                                    <button type="button" class="btn-close"
+                                                                        data-bs-dismiss="modal"
+                                                                        aria-label="Close"></button>
+                                                                </div>
+                                                                <div
+                                                                    class="modal-body d-flex flex-column align-items-center justify-content-center">
+                                                                    <p>Unduh template berikut dan isi data mitra kegiatan
+                                                                        dengan benar.</p>
+                                                                    <a href="{{ route('kegiatan.export-mitra-id') }}"
+                                                                        class="btn btn-primary mb-3">
+                                                                        <i class="fa fa-download"></i> Unduh Template
+                                                                    </a>
+                                                                    <p>Setelah mengisi template, unggah kembali file
+                                                                        tersebut
+                                                                        menggunakan formulir di bawah ini.</p>
+                                                                    <form
+                                                                        action="{{ route('kegiatan.import-mitra-dan-honor', $kegiatan->id) }}"
+                                                                        method="POST" enctype="multipart/form-data">
+                                                                        @csrf
+                                                                        <div class="mb-3">
+                                                                            <input type="file" name="file"
+                                                                                class="form-control" required>
+                                                                        </div>
+                                                                        <button type="submit"
+                                                                            class="btn btn-success">Unggah
+                                                                            File</button>
+                                                                    </form>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                @endif
                                             @endif
                                             <tr>
                                                 <td>
@@ -258,7 +263,7 @@
                                                                         Auth::user()->tim == $kegiatan->kak4_pjk &&
                                                                         $kegiatan->is_approved == 0) ||
                                                                     Auth::user()->nama == env('NAMA_PPK'))
-                                                                <form
+                                                                {{-- <form
                                                                     action="{{ url('kegiatan/' . str_replace('_', '-', $kegiatan->jenis_kak) . '/edit/' . $kegiatan->id) }}"
                                                                     style="display: inline">
                                                                     <button type="submit" data-bs-toggle="tooltip"
@@ -267,7 +272,7 @@
                                                                         data-original-title="Edit Kegiatan">
                                                                         <i class="fa fa-edit"></i>
                                                                     </button>
-                                                                </form>
+                                                                </form> --}}
 
                                                                 <button type="button" title="Duplikasi"
                                                                     class="btn btn-link btn-primary px-2"
@@ -303,19 +308,21 @@
                                                                     </button>
                                                                 </form>
                                                             @endif
-                                                            @if (Auth::user()->role == 'Admin' ||
-                                                                    Auth::user()->id == $kegiatan->id_pjk ||
-                                                                    (Auth::user()->role == 'Ketua Tim' &&
-                                                                        Auth::user()->tim == $kegiatan->kak4_pjk &&
-                                                                        $kegiatan->is_approved == 0) ||
-                                                                    Auth::user()->nama == env('NAMA_PPK'))
-                                                                <button type="button" title="Impor Mitra Kegiatan"
+                                                            @if (
+                                                                $kegiatan->jenis_kak == 'honor-mitra' &&
+                                                                    (Auth::user()->role == 'Admin' ||
+                                                                        Auth::user()->id == $kegiatan->id_pjk ||
+                                                                        (Auth::user()->role == 'Ketua Tim' &&
+                                                                            Auth::user()->tim == $kegiatan->kak4_pjk &&
+                                                                            $kegiatan->is_approved == 0) ||
+                                                                        Auth::user()->nama == env('NAMA_PPK')))
+                                                                {{-- <button type="button" title="Impor Mitra Kegiatan"
                                                                     class="btn btn-link btn-primary px-2"
                                                                     data-bs-toggle="modal"
                                                                     data-bs-target="{{ '#modalImportMitra' . $kegiatan->id }}"
                                                                     data-original-title="Impor Mitra Kegiatan">
                                                                     <i class="fa fa-upload"></i>
-                                                                </button>
+                                                                </button> --}}
                                                             @endif
                                                         </div>
                                                     </div>
@@ -342,12 +349,12 @@
                                                 </td>
                                                 <td>{{ $kegiatan->progress ?? '-' }} %</td>
                                                 {{-- <td>
-                        @if ($kegiatan->flag == null)
-                        <span class="badge bg-success">Aktif</span>
-                        @else
-                        <span class="badge bg-danger">Tidak Aktif</span>
-                        @endif
-                      </td> --}}
+                                                        @if ($kegiatan->flag == null)
+                                                        <span class="badge bg-success">Aktif</span>
+                                                        @else
+                                                        <span class="badge bg-danger">Tidak Aktif</span>
+                                                        @endif
+                                                    </td> --}}
                                             </tr>
                                         @endforeach
                                     </tbody>
