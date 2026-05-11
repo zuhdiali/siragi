@@ -53,6 +53,7 @@
                                             <th>Tanggal Dibuat</th>
                                             <th>Pembuat Surat</th>
                                             <th>Kegiatan</th>
+                                            <th>Pegawai yang Bertugas</th>
                                             <th>Perihal</th>
                                         </tr>
                                     </thead>
@@ -63,6 +64,7 @@
                                             <th>Tanggal Dibuat</th>
                                             <th>Pembuat Surat</th>
                                             <th>Kegiatan</th>
+                                            <th>Pegawai yang Bertugas</th>
                                             <th>Perihal</th>
                                         </tr>
                                     </tfoot>
@@ -192,6 +194,7 @@
                                                 </td>
                                                 <td>{{ $surat->pembuat_surat->nama }}</td>
                                                 <td>{{ $surat->kegiatan->nama }}</td>
+                                                <td>{{ $surat->pegawai ? $surat->pegawai->nama : '-' }}</td>
                                                 <td>{{ $surat->perihal }}<button type="button" data-bs-toggle="tooltip"
                                                         title="Copy Perihal" class="btn btn-link btn-primary px-2"
                                                         onclick="copyText('{{ $surat->perihal }}')">

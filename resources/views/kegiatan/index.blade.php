@@ -105,8 +105,9 @@
                                             <th>ID</th>
                                             <th>Nama Singkatan Resmi</th>
                                             <th>Jenis KAK</th>
-                                            <th>Nama KAK</th>
                                             <th>PJK</th>
+                                            <th>Pelaksana</th>
+                                            <th>Nama KAK</th>
                                             <th>Tim</th>
                                             <th>Tanggal Pelaksanaan</th>
                                             <th>Progress</th>
@@ -118,8 +119,9 @@
                                             <th>ID</th>
                                             <th>Nama Singkatan Resmi</th>
                                             <th>Jenis KAK</th>
-                                            <th>Nama KAK</th>
                                             <th>PJK</th>
+                                            <th>Pelaksana</th>
+                                            <th>Nama KAK</th>
                                             <th>Tim</th>
                                             <th>Tanggal Pelaksanaan</th>
                                             <th>Progress</th>
@@ -332,9 +334,11 @@
                                                     {{ $kegiatan->singkatan_resmi ?? '-' }}
                                                 </th>
                                                 <td>{{ $kegiatan->jenis_kak ?? '-' }}</td>
+                                                <td>{{ $kegiatan->pjk->nama ?? '-' }}</td>
+                                                <td>{{ $kegiatan->nama_pelaksana ? (strlen($kegiatan->nama_pelaksana) > 30 ? substr($kegiatan->nama_pelaksana, 0, 30) . '...' : $kegiatan->nama_pelaksana) : '-' }}
+                                                </td>
                                                 <td>{{ $kegiatan->nama ? (strlen($kegiatan->nama) > 90 ? substr($kegiatan->nama, 0, 90) . '...' : $kegiatan->nama) : '-' }}
                                                 </td>
-                                                <td>{{ $kegiatan->pjk->nama ?? '-' }}</td>
                                                 <td>{{ $kegiatan->namaTim ?? '-' }}</td>
                                                 <td>
                                                     @if ($kegiatan->tgl_mulai && $kegiatan->tgl_selesai)

@@ -125,22 +125,22 @@
                                                     @endif
                                                 </div>
                                                 {{-- <div class="form-group  {{$errors->has('tipe') ? 'has-error has-feedback' : ''}}">
-                                            <label for="tipe"
-                                            >Tipe</label
-                                            >
-                                            <select
-                                            class="form-select"
-                                            id="tipe"
-                                            name="tipe"
-                                            >
-                                            <option value="">(Pilih salah satu)</option>
-                                            <option value="SS" {{ old('tipe') == 'SS' ? 'selected' : ''}}>Sensus</option>
-                                            <option value="VS" {{old('tipe') == 'VS' ? 'selected' : ''}}>Survei</option>
-                                            </select>
-                                            @if ($errors->has('tipe'))
-                                            <small class="form-text text-muted">{{ $errors->first('tipe') }}</small>
-                                            @endif
-                                        </div> --}}
+                                                            <label for="tipe"
+                                                            >Tipe</label
+                                                            >
+                                                            <select
+                                                            class="form-select"
+                                                            id="tipe"
+                                                            name="tipe"
+                                                            >
+                                                            <option value="">(Pilih salah satu)</option>
+                                                            <option value="SS" {{ old('tipe') == 'SS' ? 'selected' : ''}}>Sensus</option>
+                                                            <option value="VS" {{old('tipe') == 'VS' ? 'selected' : ''}}>Survei</option>
+                                                            </select>
+                                                            @if ($errors->has('tipe'))
+                                                            <small class="form-text text-muted">{{ $errors->first('tipe') }}</small>
+                                                            @endif
+                                                        </div> --}}
                                                 @if ($jenis != 'sk')
                                                     <div
                                                         class="form-group  {{ $errors->has('kode') ? 'has-error has-feedback' : '' }}">
@@ -160,24 +160,33 @@
                                                     </div>
                                                 @endif
 
-                                                @if ($jenis == 'tugas' || $jenis == 'sk' || $jenis == 'bast')
+                                                {{-- Pegawai yang berkegiatan di SPD ada di bawah, tidak pakai ini --}}
+                                                @if ($jenis != 'spd')
                                                     <div
-                                                        class="form-group {{ $errors->has('tgl_surat') ? 'has-error has-feedback' : '' }}">
-                                                        <label for="tgl_surat">Tanggal
-                                                            {{ $jenis == 'tugas' ? 'Surat Tugas' : ($jenis == 'sk' ? 'SK' : 'BAST') }}</label>
-                                                        <input type="date" class="form-control" id="tgl_surat"
-                                                            name="tgl_surat"
-                                                            value="{{ old('tgl_surat') ? old('tgl_surat') : date('Y-m-d') }}" />
-                                                        @if ($errors->has('tgl_surat'))
+                                                        class="form-group {{ $errors->has('pegawai_yang_bertugas') ? 'has-error has-feedback' : '' }}">
+                                                        <label for="pegawai_yang_bertugas">Pegawai Yang Berkegiatan</label>
+                                                        <select class="form-select" id="single-select-field-2"
+                                                            name="pegawai_yang_bertugas"
+                                                            value="{{ old('pegawai_yang_bertugas') }}"
+                                                            data-placeholder="Pilih salah satu">
+                                                            <option value="">(Pilih salah satu)</option>
+                                                            @foreach ($pegawais as $p)
+                                                                <option value="{{ $p->id }}"
+                                                                    {{ old('pegawai_yang_bertugas') == $p->id ? 'selected' : '' }}>
+                                                                    {{ $p->nama }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        @if ($errors->has('pegawai_yang_bertugas'))
                                                             <small
-                                                                class="form-text text-muted">{{ $errors->first('tgl_surat') }}</small>
+                                                                class="form-text text-muted">{{ $errors->first('pegawai_yang_bertugas') }}</small>
                                                         @else
                                                             <small class="form-text text-muted">
-                                                                Format: bulan/tanggal/tahun
                                                             </small>
                                                         @endif
                                                     </div>
                                                 @endif
+
+
 
                                             </div>
                                             @if ($tipe_bast != null)
@@ -200,6 +209,24 @@
                                                         @if ($errors->has('id_kegiatan'))
                                                             <small
                                                                 class="form-text text-muted">{{ $errors->first('id_kegiatan') }}</small>
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                                @if ($jenis == 'tugas' || $jenis == 'sk' || $jenis == 'bast')
+                                                    <div
+                                                        class="form-group {{ $errors->has('tgl_surat') ? 'has-error has-feedback' : '' }}">
+                                                        <label for="tgl_surat">Tanggal
+                                                            {{ $jenis == 'tugas' ? 'Surat Tugas' : ($jenis == 'sk' ? 'SK' : 'BAST') }}</label>
+                                                        <input type="date" class="form-control" id="tgl_surat"
+                                                            name="tgl_surat"
+                                                            value="{{ old('tgl_surat') ? old('tgl_surat') : date('Y-m-d') }}" />
+                                                        @if ($errors->has('tgl_surat'))
+                                                            <small
+                                                                class="form-text text-muted">{{ $errors->first('tgl_surat') }}</small>
+                                                        @else
+                                                            <small class="form-text text-muted">
+                                                                Format: bulan/tanggal/tahun
+                                                            </small>
                                                         @endif
                                                     </div>
                                                 @endif

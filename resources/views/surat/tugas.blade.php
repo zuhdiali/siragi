@@ -53,6 +53,7 @@
                                             <th>Tanggal Surat Tugas</th>
                                             <th>Pembuat Surat</th>
                                             <th>Kegiatan</th>
+                                            <th>Pegawai yang Bertugas</th>
                                             <th>Perihal</th>
                                         </tr>
                                     </thead>
@@ -63,6 +64,7 @@
                                             <th>Tanggal Surat Tugas</th>
                                             <th>Pembuat Surat</th>
                                             <th>Kegiatan</th>
+                                            <th>Pegawai yang Bertugas</th>
                                             <th>Perihal</th>
                                         </tr>
                                     </tfoot>
@@ -72,8 +74,8 @@
                                             @if (Auth::user()->role == 'Admin' ||
                                                     $surat->id_pembuat_surat == Auth::user()->id ||
                                                     (Auth::user()->role == 'Ketua Tim' && $surat->tim == Auth::user()->tim))
-                                                <div class="modal fade" id="{{ 'exampleModal' . $surat->id }}" tabindex="-1"
-                                                    aria-labelledby="{{ 'exampleModalLabel' . $surat->id }}"
+                                                <div class="modal fade" id="{{ 'exampleModal' . $surat->id }}"
+                                                    tabindex="-1" aria-labelledby="{{ 'exampleModalLabel' . $surat->id }}"
                                                     aria-hidden="true">
                                                     <div class="modal-dialog">
                                                         <div class="modal-content">
@@ -134,6 +136,7 @@
                                                 </td>
                                                 <td>{{ $surat->pembuat_surat->nama }}</td>
                                                 <td>{{ $surat->kegiatan->nama }}</td>
+                                                <td>{{ $surat->pegawai ? $surat->pegawai->nama : '-' }}</td>
                                                 <td>{{ $surat->perihal }}</td>
                                                 {{-- <td>
                         @if ($surat->flag == null)

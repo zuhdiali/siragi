@@ -27,6 +27,7 @@ class KegiatanController extends Controller
     {
         $kegiatanTahunIni = Kegiatan::whereRaw(DB::raw('YEAR(tgl_selesai) = ' . date('Y')))->count();
         $kegiatans = Kegiatan::orderBy('tgl_selesai', 'asc')->get();
+        $namaPelaksana = "";
         foreach ($kegiatans as $kegiatan) {
             if ($kegiatan->honor_pencacahan == null) {
                 $kegiatan->honor_pencacahan = 0;
@@ -36,6 +37,20 @@ class KegiatanController extends Controller
             }
             $kegiatan->pjk = Pegawai::find($kegiatan->id_pjk);
             $kegiatan->namaTim = $this->konversiTim($kegiatan->kak4_pjk);
+            $kegiatanLampiran = KegiatanLampiran::where('kegiatan_id', $kegiatan->id)->get();
+            if ($kegiatan->jenis_kak == 'translok-8jam' || $kegiatan->jenis_kak == 'translok-biasa') {
+
+
+                foreach ($kegiatanLampiran as $lampiran) {
+                    if ($lampiran->tipe_personil == 'mitra') {
+                        $pelaksana = Mitra::find($lampiran->peserta_id)->nama;
+                    } else {
+                        $pelaksana = Pegawai::find($lampiran->peserta_id)->nama;
+                    }
+                    $namaPelaksana .= $pelaksana . ', ';
+                }
+                $kegiatan->nama_pelaksana = rtrim($namaPelaksana, ', ');
+            }
         }
         session()->flash('warning', 'Mohon maaf menu KAK sedang dalam perbaikan sehingga Bapak/Ibu tidak bisa menambah/mengedit KAK');
         return view('kegiatan.index', [

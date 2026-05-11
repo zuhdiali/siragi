@@ -42,6 +42,11 @@ class SuratController extends Controller
     {
         $surats = Surat::where('jenis_surat', 'tugas')->where('flag', null)->orderBy('no_terakhir', 'desc')->get();
         $surats = $this->tambahInformasiSurat($surats);
+        foreach ($surats as $surat) {
+            if ($surat->pegawai_yang_bertugas) {
+                $surat->pegawai = Pegawai::find($surat->pegawai_yang_bertugas);
+            }
+        }
         return view('surat.tugas', ['surats' => $surats]);
     }
 
@@ -57,6 +62,9 @@ class SuratController extends Controller
             if ($surat->spd_id) {
                 $spd = Surat::find($surat->spd_id);
                 $surat->nomor_surat_spd = $spd->nomor_surat;
+            }
+            if ($surat->pegawai_yang_bertugas) {
+                $surat->pegawai = Pegawai::find($surat->pegawai_yang_bertugas);
             }
         }
         return view('surat.permintaan', ['surats' => $surats]);
@@ -482,6 +490,9 @@ class SuratController extends Controller
                         if ($jenis == 'bast') {
                             $surat->spk_id = $request->no_spk;
                         }
+                        if ($request->pegawai_yang_bertugas) {
+                            $surat->pegawai_yang_bertugas = $request->pegawai_yang_bertugas;
+                        }
                     } else { // jika jenis surat keluar atau sk
                         if ($jenis == 'sk' || $jenis == 'bast') {
                             $surat->tim = $request->tim;
@@ -686,7 +697,9 @@ class SuratController extends Controller
                     $surat->tim = $request->tim;
                 }
             }
-
+            if ($request->pegawai_yang_bertugas) {
+                $surat->pegawai_yang_bertugas = $request->pegawai_yang_bertugas;
+            }
             if ($request->no_spk) {
                 $surat->spk_id = $request->no_spk;
             }
