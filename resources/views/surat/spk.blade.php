@@ -108,16 +108,16 @@
                                                             </form>
 
                                                             {{-- <form action="{{url('surat/edit/'.$surat->jenis_surat."/".$surat->id)}}">
-                            <button
-                              type="submit"
-                              data-bs-toggle="tooltip"
-                              title="Edit"
-                              class="btn btn-link btn-primary px-2"
-                              data-original-title="Edit Surat"
-                            >
-                            <i class="fa fa-edit"></i>
-                            </button>
-                          </form> --}}
+                                                                            <button
+                                                                            type="submit"
+                                                                            data-bs-toggle="tooltip"
+                                                                            title="Edit"
+                                                                            class="btn btn-link btn-primary px-2"
+                                                                            data-original-title="Edit Surat"
+                                                                            >
+                                                                            <i class="fa fa-edit"></i>
+                                                                            </button>
+                                                                        </form> --}}
 
                                                             <button type="button" title="Hapus"
                                                                 class="btn btn-link btn-danger px-2" data-bs-toggle="modal"
@@ -130,7 +130,7 @@
                                                 </td>
                                                 <th scope="row">Nomor {{ $surat->no_terakhir }} Tahun
                                                     {{ $surat->tahun_spk }}</th>
-                                                <td>{{ $surat->mitra->nama }}</td>
+                                                <td>{{ $surat->mitra ? $surat->mitra->nama : 'N/A' }}</td>
                                                 <td>{{ $surat->bulan }} {{ $surat->tahun_spk }}</td>
                                                 {{-- <td>{{$surat->perihal}}</td> --}}
                                                 {{-- <td>

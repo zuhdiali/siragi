@@ -722,7 +722,7 @@ class SuratController extends Controller
         }
         if ($surat->jenis_surat == 'spk') {
             $filePath = $surat->file;
-            unlink($filePath);
+            // unlink($filePath);
             $bast = Surat::where('spk_id', $surat->id)->get();
             foreach ($bast as $b) {
                 $b->spk_id = null;

@@ -161,7 +161,7 @@
                                                 @endif
 
                                                 {{-- Pegawai yang berkegiatan di SPD ada di bawah, tidak pakai ini --}}
-                                                @if ($jenis != 'spd')
+                                                @if ($jenis != 'spd' && $jenis != 'sk' && $jenis != 'spk')
                                                     <div
                                                         class="form-group {{ $errors->has('pegawai_yang_bertugas') ? 'has-error has-feedback' : '' }}">
                                                         <label for="pegawai_yang_bertugas">Pegawai Yang Berkegiatan</label>
