@@ -60,9 +60,9 @@
                     {{-- <a href="{{ route('kegiatan.export-mitra-id') }}" class="btn btn-primary">
                         <i class="fa fa-download"></i> Template Impor Mitra Kegiatan
                     </a> --}}
-                    {{-- <button type="button" class="btn  btn-primary " data-bs-toggle="modal" data-bs-target="#pilihKAK">
+                    <button type="button" class="btn  btn-primary " data-bs-toggle="modal" data-bs-target="#pilihKAK">
                         <i class="fa fa-plus"></i> Tambah KAK
-                    </button> --}}
+                    </button>
                 </div>
             </div>
             <div class="row">
@@ -265,7 +265,7 @@
                                                                         Auth::user()->tim == $kegiatan->kak4_pjk &&
                                                                         $kegiatan->is_approved == 0) ||
                                                                     Auth::user()->nama == env('NAMA_PPK'))
-                                                                {{-- <form
+                                                                <form
                                                                     action="{{ url('kegiatan/' . str_replace('_', '-', $kegiatan->jenis_kak) . '/edit/' . $kegiatan->id) }}"
                                                                     style="display: inline">
                                                                     <button type="submit" data-bs-toggle="tooltip"
@@ -274,7 +274,7 @@
                                                                         data-original-title="Edit Kegiatan">
                                                                         <i class="fa fa-edit"></i>
                                                                     </button>
-                                                                </form> --}}
+                                                                </form>
 
                                                                 <button type="button" title="Duplikasi"
                                                                     class="btn btn-link btn-primary px-2"

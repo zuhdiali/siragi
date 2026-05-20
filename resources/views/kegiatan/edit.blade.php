@@ -289,14 +289,8 @@
                                         <div class="col">
                                             <div class="form-group">
                                                 <p>5. SPESIFIKASI PENGADAAN BARANG/JASA</p>
-                                                @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
-                                                    <p>Transport lokal sesuai SK Kepala BPS Kabupaten Simeulue nomor 01
-                                                        Tahun
-                                                        2026
-                                                        tanggal 05-01-2025 tentang Penetapan Rate Biaya Transport dari
-                                                        Kabupaten
-                                                        Simeulue Ke Kecamatan Tahun 2026</p>
-                                                @elseif ($jenis_kak == 'pemanggilan-konsultasi')
+
+                                                @if ($jenis_kak == 'pemanggilan-konsultasi')
                                                     <p>Perjalanan dinas ini sesuai dengan PMK Nomor 32 Tahun 2025 tanggal 14
                                                         Mei
                                                         2025 tetang Standar biaya Masukan (SBM) Tahun Anggaran 2026</p>
@@ -1022,17 +1016,13 @@
                                             @else
                                                 <small class="form-text text-muted">
                                                     @if ($jenis_kak == 'translok-biasa')
-                                                        petunjuk pengisian: TRANSPORT LOKAL DI BAWAH 8 JAM
-                                                        [ORGANIK/MITRA] [SUPERVISI/PENGAWASAN/PENDATAAN]
-                                                        [UPDATING/PENDATAAN] [nama_kegiatan] TAHUN 2026 BPS
-                                                        KABUPATEN
-                                                        SIMEULUE TAHUN ANGGARAN 2026
+                                                        petunjuk pengisian: [SUPERVISI/PENGAWASAN/PENDATAAN]
+                                                        [UPDATING/PENDATAAN] [nama_kegiatan]
+                                                        [--NAMA_BULAN/NAMA_TRIWULAN--] TAHUN 2026
                                                     @elseif ($jenis_kak == 'translok-8jam')
-                                                        petunjuk pengisian: TRANSPORT LOKAL DI ATAS 8 JAM
-                                                        [ORGANIK/MITRA] [SUPERVISI/PENGAWASAN/PENDATAAN]
-                                                        [UPDATING/PENDATAAN] [nama_kegiatan] TAHUN 2026 BPS
-                                                        KABUPATEN
-                                                        SIMEULUE TAHUN ANGGARAN 2026
+                                                        petunjuk pengisian: [SUPERVISI/PENGAWASAN/PENDATAAN]
+                                                        [UPDATING/PENDATAAN] [nama_kegiatan]
+                                                        [--NAMA_BULAN/NAMA_TRIWULAN--] TAHUN 2026
                                                     @elseif ($jenis_kak == 'pemanggilan-konsultasi')
                                                         petunjuk pengisian: PERJALANAN DINAS DALAM RANGKA
                                                         [KONSULTASI/PEMANGGILAN] KE [tujuan] TAHUN 2026 BPS
@@ -1044,12 +1034,9 @@
                                                         KABUPATEN
                                                         SIMEULUE TAHUN ANGGARAN 2026
                                                     @elseif($jenis_kak == 'honor-mitra')
-                                                        petunjuk pengisian: HONOR PETUGAS PEMUTAKHIRAN DAN
-                                                        PENDATAAN
-                                                        [nama_kegiatan] TAHUN 2026
-                                                        BPS
-                                                        KABUPATEN
-                                                        SIMEULUE TAHUN ANGGARAN 2026
+                                                        petunjuk pengisian:
+                                                        [--NAMA_KEGIATAN--] [--NAMA_BULAN/NAMA_TRIWULAN--] TAHUN
+                                                        2026
                                                     @endif
                                                 </small>
                                             @endif
