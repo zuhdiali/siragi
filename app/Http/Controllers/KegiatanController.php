@@ -60,7 +60,7 @@ class KegiatanController extends Controller
 
     private function loadCreateEditView($viewPath, $jenis_kak, $id = null)
     {
-        if ($jenis_kak != 'honor-mitra' && $jenis_kak != 'translok-8jam') {
+        if ($jenis_kak != 'honor-mitra' && $jenis_kak != 'translok-8jam'  && $jenis_kak != 'lainnya') {
             return redirect()->back()->with('warning', 'Mohon maaf menu KAK ' . $jenis_kak . ' sedang dalam perbaikan sehingga Bapak/Ibu tidak bisa menambah/mengedit KAK');
         }
         $data = [
