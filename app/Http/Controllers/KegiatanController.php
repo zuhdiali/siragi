@@ -60,7 +60,7 @@ class KegiatanController extends Controller
 
     private function loadCreateEditView($viewPath, $jenis_kak, $id = null)
     {
-        if ($jenis_kak != 'honor-mitra' && $jenis_kak != 'translok-8jam'  && $jenis_kak != 'lainnya') {
+        if ($jenis_kak == 'honor-inda' || $jenis_kak == 'pemanggilan-konsultasi') {
             return redirect()->back()->with('warning', 'Mohon maaf menu KAK ' . $jenis_kak . ' sedang dalam perbaikan sehingga Bapak/Ibu tidak bisa menambah/mengedit KAK');
         }
         $data = [
@@ -202,6 +202,13 @@ class KegiatanController extends Controller
                 $kak4_tgl_selesai = Carbon::parse($kegiatan->tgl_selesai)->locale('id')->translatedFormat('d F Y');
                 $phpWord->setValue('kak4_tgl_mulai', $kak4_tgl_mulai);
                 $phpWord->setValue('kak4_tgl_selesai', $kak4_tgl_selesai);
+                $sk = Surat::find($kegiatan->kak5_sk);
+                if ($sk) {
+                    $phpWord->setValue('no_sk', $sk->no_terakhir);
+                    $phpWord->setValue('tgl_sk', Carbon::parse($sk->tgl_surat)->locale('id')->translatedFormat('d F Y'));
+                    $phpWord->setValue('perihal_sk', $sk->perihal);
+                }
+                $phpWord->setValue('bulan_kegiatan', Carbon::parse($kegiatan->kak8_tgl)->locale('id')->translatedFormat('F'));
                 $phpWord->setValue('pj', $this->konversiTim($kegiatan->tim));
                 $phpWord = $this->findDetailRincianPOK($phpWord, $kegiatan->id);
                 $phpWord->setValue('kak6_pembiayaan', $kegiatan->kak6_pembiayaan);
@@ -218,6 +225,7 @@ class KegiatanController extends Controller
                 $values = [];
                 $no = 1;
                 $total_biaya = 0;
+                $kec_tujuan_total = [];
                 foreach ($kegiatan->kegiatanLampiran as $index => $lampiran) {
                     $petugas = null;
                     if ($lampiran->tipe_personil == 'mitra') {
@@ -226,6 +234,9 @@ class KegiatanController extends Controller
                         $petugas = Pegawai::find($lampiran->peserta_id);
                     }
                     $pcl_diawasi = Mitra::find($lampiran->pcl_diawasi);
+                    if (!in_array($this->konversiKodeKec($lampiran->kec_tujuan), $kec_tujuan_total)) {
+                        array_push($kec_tujuan_total, $this->konversiKodeKec($lampiran->kec_tujuan));
+                    }
                     array_push($values, [
                         'lamp_no' => $no++,
                         'lamp_nama' => $petugas ? $petugas->nama : '-',
@@ -240,6 +251,7 @@ class KegiatanController extends Controller
                     ]);
                     $total_biaya += $lampiran->jml_ok * $lampiran->transport_bayar;
                 }
+                $phpWord->setValue('kec_tujuan_total', implode(', ', $kec_tujuan_total));
                 $phpWord->cloneRowAndSetValues('lamp_no', $values);
                 $phpWord->setValue('total_biaya', number_format($total_biaya, 0, ',', '.'));
                 $phpWord->setValue('total_biaya_terbilang', $this->terbilang($total_biaya));

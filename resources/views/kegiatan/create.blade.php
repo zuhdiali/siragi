@@ -179,10 +179,6 @@
                                                             data yg dihasilkan.</div>
                                                         <div class="col-sm-9">
                                                             <textarea name="contoh_latbel" id="contoh_latbel" rows="15" readonly class="form-control"> [--- Survei Sosial Ekonomi Nasional (SUSENAS) adalah kegiatan pengumpulan data yang diselenggarakan oleh Badan Pusat Statistik (BPS) secara rutin dan berkelanjutan. SUSENAS bertujuan untuk memperoleh data mikro mengenai kondisi sosial dan ekonomi rumah tangga yang digunakan sebagai dasar perumusan kebijakan pembangunan nasional dan daerah. ---]
-
-Keberhasilan pelaksanaan pendataan lapangan [--- nama_kegiatan ---] sangat bergantung pada kualitas dan kinerja petugas lapangan yang terdiri dari Pencacah (PCL) dan Pengawas/Pemeriksa (PML). Petugas lapangan merupakan ujung tombak dalam proses pengumpulan data yang langsung berhadapan dengan responden di lapangan. 
-
-Sebagai bentuk penghargaan dan kompensasi atas pelaksanaan tugas tersebut, petugas lapangan berhak mendapatkan honor yang layak sesuai dengan beban kerja dan tanggung jawabnya. Pembayaran honor ini dianggarkan melalui DIPA BPS Kabupaten Simeulue dan pelaksanaannya harus dilakukan secara tertib, transparan, dan akuntabel sesuai peraturan perundang-undangan yang berlaku.
                                                         </textarea>
                                                         </div>
                                                     </div>

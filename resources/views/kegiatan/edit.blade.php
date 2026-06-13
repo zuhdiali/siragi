@@ -124,6 +124,20 @@
                                                             placeholder="Masukkan latar belakang di sini">{{ old('kak1_latar_belakang', $kegiatan->kak1_latar_belakang) }}</textarea>
                                                     </div>
                                                 </div>
+                                                @if ($jenis_kak == 'translok-biasa' || $jenis_kak == 'translok-8jam')
+                                                    <div class="row mt-2">
+                                                        <div class="col-sm-3">Jika tidak ada surat yg dilampirkan, ganti
+                                                            latar
+                                                            belakang di atas dengan teks di samping yang mengacu pada
+                                                            penjelasan
+                                                            tentang survei dan apa
+                                                            data yg dihasilkan.</div>
+                                                        <div class="col-sm-9">
+                                                            <textarea name="contoh_latbel" id="contoh_latbel" rows="15" readonly class="form-control"> [--- Survei Sosial Ekonomi Nasional (SUSENAS) adalah kegiatan pengumpulan data yang diselenggarakan oleh Badan Pusat Statistik (BPS) secara rutin dan berkelanjutan. SUSENAS bertujuan untuk memperoleh data mikro mengenai kondisi sosial dan ekonomi rumah tangga yang digunakan sebagai dasar perumusan kebijakan pembangunan nasional dan daerah. ---]
+                                                        </textarea>
+                                                        </div>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -1093,7 +1107,7 @@
                     closeOnSelect: true,
                 });
             @endif
-            $('#filter_sbks, #kak6_program, #kak6_aktivitas, #kak6_kro, #kak6_ro, #kak6_komponen, #kak6_sub_komponen, #kak6_akun, #kak2_maksud, #id_pjk')
+            $('#filter_sbks, #kak6_program, #kak6_aktivitas, #kak6_kro, #kak6_ro, #kak6_komponen, #kak6_sub_komponen, #kak6_akun, #kak5_sk, #kak2_maksud, #id_pjk')
                 .select2({
                     theme: "bootstrap-5",
                     width: '100%',
