@@ -12,6 +12,7 @@ use App\Models\POK;
 use App\Models\KegiatanLampiran;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Imports\KegiatanMitraImport;
 use App\Imports\KegiatanLampiranImport;
 use App\Exports\ExportHonorKegiatan;
@@ -206,6 +207,7 @@ class KegiatanController extends Controller
                 if ($sk) {
                     $phpWord->setValue('no_sk', $sk->no_terakhir);
                     $phpWord->setValue('tgl_sk', Carbon::parse($sk->tgl_surat)->locale('id')->translatedFormat('d F Y'));
+                    $phpWord->setValue('tahun_sk', Carbon::parse($sk->tgl_surat)->locale('id')->translatedFormat('Y'));
                     $phpWord->setValue('perihal_sk', $sk->perihal);
                 }
                 $phpWord->setValue('bulan_kegiatan', Carbon::parse($kegiatan->kak8_tgl)->locale('id')->translatedFormat('F'));
@@ -281,6 +283,7 @@ class KegiatanController extends Controller
                 if ($sk) {
                     $phpWord->setValue('no_sk', $sk->no_terakhir);
                     $phpWord->setValue('tgl_sk', Carbon::parse($sk->tgl_surat)->locale('id')->translatedFormat('d F Y'));
+                    $phpWord->setValue('tahun_sk', Carbon::parse($sk->tgl_surat)->locale('id')->translatedFormat('Y'));
                     $phpWord->setValue('perihal_sk', $sk->perihal);
                 }
                 $phpWord->setValue('bulan_kegiatan', Carbon::parse($kegiatan->kak8_tgl)->locale('id')->translatedFormat('F'));
@@ -409,6 +412,7 @@ class KegiatanController extends Controller
                 if ($sk) {
                     $phpWord->setValue('no_sk', $sk->no_terakhir);
                     $phpWord->setValue('tgl_sk', Carbon::parse($sk->tgl_surat)->locale('id')->translatedFormat('d F Y'));
+                    $phpWord->setValue('tahun_sk', Carbon::parse($sk->tgl_surat)->locale('id')->translatedFormat('Y'));
                     $phpWord->setValue('perihal_sk', $sk->perihal);
                 } else {
                     $phpWord->setValue('no_sk', '-');
@@ -565,19 +569,22 @@ class KegiatanController extends Controller
             }
 
             if ($pok_ro) {
-                $phpWord->setValue('ro', $pok_ro->uraian . ' (' . $pok_ro->kode_rincian_output . ')');
+                $uraian_ro = Str::title(Str::lower(($pok_ro->uraian)));
+                $phpWord->setValue('ro', $uraian_ro . ' (' . $pok_ro->kode_rincian_output . ')');
             } else {
                 $phpWord->setValue('ro', '-');
             }
 
             if ($pok_komponen) {
-                $phpWord->setValue('komponen', $pok_komponen->uraian . ' (' . $pok_komponen->kode_komponen . ')');
+                $uraian_komponen = Str::title(Str::lower(($pok_komponen->uraian)));
+                $phpWord->setValue('komponen', $uraian_komponen . ' (' . $pok_komponen->kode_komponen . ')');
             } else {
                 $phpWord->setValue('komponen', '-');
             }
 
             if ($pok_sub_komponen) {
-                $phpWord->setValue('sub_komponen', $pok_sub_komponen->uraian . ' (' . $pok_sub_komponen->kode_sub_komponen . ')');
+                $uraian_sub_komponen = Str::title(Str::lower(($pok_sub_komponen->uraian)));
+                $phpWord->setValue('sub_komponen', $uraian_sub_komponen . ' (' . $pok_sub_komponen->kode_sub_komponen . ')');
             } else {
                 $phpWord->setValue('sub_komponen', '-');
             }
