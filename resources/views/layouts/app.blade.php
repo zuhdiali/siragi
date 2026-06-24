@@ -439,6 +439,17 @@
 
             $("#multi-filter-select").DataTable({
                 pageLength: 10,
+                // SOLUSI 1: Atur urutan default ke kolom ID (Index 1)
+                // Gunakan 'desc' untuk ID terbesar di atas, atau 'asc' untuk ID terkecil di atas
+                order: [
+                    [1, 'desc']
+                ],
+
+                // SOLUSI 2: Nonaktifkan panah pengurutan (sorting) di kolom Aksi (Index 0) agar lebih rapi
+                columnDefs: [{
+                    targets: 0,
+                    orderable: false
+                }],
                 initComplete: function() {
                     // Tambahkan baris filter di bawah header
                     $("#multi-filter-select thead").append('<tr></tr>');

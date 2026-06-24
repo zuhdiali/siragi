@@ -792,8 +792,8 @@ class KegiatanController extends Controller
         if (!$kegiatan->wasRecentlyCreated) {
             return redirect()->route('kegiatan.create')->with('error', 'Gagal.');
         }
-
-        return redirect()->route('kegiatan.' . str_replace('_', '-', $request->jenis_kak) . '.show', ['id' => $kegiatan->id])->with('success', 'KAK berhasil ditambahkan.');
+        return  redirect()->route('kegiatan.index')->with('success', 'KAK berhasil ditambahkan.');
+        // return redirect()->route('kegiatan.' . str_replace('_', '-', $request->jenis_kak) . '.show', ['id' => $kegiatan->id])->with('success', 'KAK berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -938,7 +938,8 @@ class KegiatanController extends Controller
             }
         }
 
-        return redirect()->route('kegiatan.' . str_replace('_', '-', $request->jenis_kak) . '.show', ['id' => $kegiatan->id])->with('success', 'KAK berhasil diperbarui.');
+        return redirect()->route('kegiatan.index')->with('success', 'KAK berhasil diperbarui.');
+        // return redirect()->route('kegiatan.' . str_replace('_', '-', $request->jenis_kak) . '.show', ['id' => $kegiatan->id])->with('success', 'KAK berhasil diperbarui.');
     }
 
     // public function update(Request $request, $id)
