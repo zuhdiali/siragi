@@ -1069,9 +1069,11 @@ class SuratController extends Controller
         $phpWord->setValue('singkatan_resmi', ($kegiatan->singkatan_resmi));
         $phpWord->setValue('no_bast', $surat->nomor_surat);
         $phpWord->setValue('hari_surat', \Carbon\Carbon::parse($surat->tgl_surat)->locale('id')->translatedFormat('l'));
-        $phpWord->setValue('tanggal_surat', \Carbon\Carbon::parse($surat->tgl_surat)->locale('id')->translatedFormat('d'));
-        $phpWord->setValue('bulan_surat', \Carbon\Carbon::parse($surat->tgl_surat)->locale('id')->translatedFormat('F'));
-        $phpWord->setValue('tahun_surat', \Carbon\Carbon::parse($surat->tgl_surat)->locale('id')->translatedFormat('Y'));
+        $tgl_surat = \Carbon\Carbon::parse($surat->tgl_surat)->locale('id');
+        $phpWord->setValue('tanggal_surat', trim($this->terbilang($tgl_surat->day)));
+        $phpWord->setValue('bulan_surat', $tgl_surat->translatedFormat('F'));
+        $phpWord->setValue('tahun_surat', trim($this->terbilang($tgl_surat->year)));
+        $phpWord->setValue('tanggal_lengkap', $tgl_surat->translatedFormat('d/m/Y'));
         $phpWord->setValue('nama_mitra', $mitra->nama);
         $phpWord->setValue('nik_mitra', $mitra->nik);
         $phpWord->setValue('kec_asal_mitra', $this->konversiKodeKec($mitra->kec_asal));
