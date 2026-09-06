@@ -1115,9 +1115,11 @@ class SuratController extends Controller
         // KHUSUS PERGANTIAN PPK DARI KAK WID KE BANG RONI
         if ($surat->tgl_surat < '2026-08-01') {
             $phpWord->setValue('nama_ppk', 'Widya Khairani, SST.');
+            $phpWord->setValue('nip_ppk', '199507282018022001');
         } else {
             $ppk = Pegawai::where('id', env('ID_PPK'))->first();
             $phpWord->setValue('nama_ppk', $ppk->nama);
+            $phpWord->setValue('nip_ppk', $ppk->nip);
         }
         $phpWord->setValue('nip_pengaju', $pengaju->nip);
         // END KHUSUS PERGANTIAN PPK DARI KAK WID KE BANG RONI
