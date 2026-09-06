@@ -714,7 +714,7 @@
                             <div class="card-action">
                                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                                 <a href="{{ route('kegiatan.index') }}" class="btn btn-danger">Batal</a>
-                                @if (Auth::user()->nama == env('NAMA_PPK'))
+                                @if (Auth::user()->id == env('ID_PPK'))
                                     @if ($kegiatan->is_approved == 1)
                                         <button type="button" class="btn btn-danger" id="btn_reject"
                                             data-bs-toggle="modal" data-bs-target="#exampleModal">

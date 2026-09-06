@@ -224,6 +224,16 @@ class KegiatanController extends Controller
                     $phpWord->setValue('nama_pengaju', '-');
                     $phpWord->setValue('nip_pengaju', '-');
                 }
+                // KHUSUS PERGANTIAN PPK DARI KAK WID KE BANG RONI
+                if ($kegiatan->tgl_mulai < '2026-08-01') {
+                    $phpWord->setValue('nama_ppk', 'Widya Khairani, SST.');
+                    $phpWord->setValue('nip_ppk', '199507282018022001');
+                } else {
+                    $ppk = Pegawai::where('id', env('ID_PPK'))->first();
+                    $phpWord->setValue('nama_ppk', $ppk->nama);
+                    $phpWord->setValue('nip_ppk', '' . $ppk->nip);
+                }
+
                 $values = [];
                 $no = 1;
                 $total_biaya = 0;
@@ -299,6 +309,15 @@ class KegiatanController extends Controller
                 } else {
                     $phpWord->setValue('nama_pengaju', '-');
                     $phpWord->setValue('nip_pengaju', '-');
+                }
+                // KHUSUS PERGANTIAN PPK DARI KAK WID KE BANG RONI
+                if ($kegiatan->tgl_mulai < '2026-08-01') {
+                    $phpWord->setValue('nama_ppk', 'Widya Khairani, SST.');
+                    $phpWord->setValue('nip_ppk', '199507282018022001');
+                } else {
+                    $ppk = Pegawai::where('id', env('ID_PPK'))->first();
+                    $phpWord->setValue('nama_ppk', $ppk->nama);
+                    $phpWord->setValue('nip_ppk', '' . $ppk->nip);
                 }
                 $values = [];
                 $no = 1;
@@ -430,6 +449,15 @@ class KegiatanController extends Controller
                 } else {
                     $phpWord->setValue('nama_pengaju', '-');
                     $phpWord->setValue('nip_pengaju', '-');
+                }
+                // KHUSUS PERGANTIAN PPK DARI KAK WID KE BANG RONI
+                if ($kegiatan->tgl_mulai < '2026-08-01') {
+                    $phpWord->setValue('nama_ppk', 'Widya Khairani, SST.');
+                    $phpWord->setValue('nip_ppk', '199507282018022001');
+                } else {
+                    $ppk = Pegawai::where('id', env('ID_PPK'))->first();
+                    $phpWord->setValue('nama_ppk', $ppk->nama);
+                    $phpWord->setValue('nip_ppk', '' . $ppk->nip);
                 }
                 $values = [];
                 $no = 1;
@@ -1084,7 +1112,7 @@ class KegiatanController extends Controller
     public function approveKegiatan($id)
     {
         $kegiatan = Kegiatan::find($id);
-        if (Auth::user()->nama != env('NAMA_PPK')) {
+        if (Auth::user()->id != env('ID_PPK')) {
             return redirect()->route('kegiatan.' . str_replace('_', '-', $kegiatan->jenis_kak) . '.edit', ['id' => $id])->with('error', 'Hanya PPK yang dapat menyetujui KAK.');
         }
         $kegiatan->is_approved = 1;
@@ -1095,7 +1123,7 @@ class KegiatanController extends Controller
     public function rejectKegiatan($id)
     {
         $kegiatan = Kegiatan::find($id);
-        if (Auth::user()->nama != env('NAMA_PPK')) {
+        if (Auth::user()->id != env('ID_PPK')) {
             return redirect()->route('kegiatan.' . str_replace('_', '-', $kegiatan->jenis_kak) . '.edit', ['id' => $id])->with('error', 'Hanya PPK yang dapat membatalkan persetujuan KAK.');
         }
         $kegiatan->is_approved = 0;

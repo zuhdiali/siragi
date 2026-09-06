@@ -7,6 +7,7 @@
 @endsection
 
 @section('content')
+
     <div class="container">
         <div class="page-inner">
             <div class="row">
@@ -99,7 +100,7 @@
                                                         <small
                                                             class="form-text text-muted">{{ $errors->first('pegawai_yang_bertugas') }}</small>
                                                     @else
-                                                        <small class="form-text text-muted">
+                                                        <small class="form-text text-muted"> (Bisa dikosongkan)
                                                         </small>
                                                     @endif
                                                 </div>
@@ -131,7 +132,7 @@
                                             @endif
 
                                             @if ($jenis == 'bast' && $surat->tipe_bast == null)
-                                                <div
+                                                {{-- <div
                                                     class="form-group  {{ $errors->has('no_spk') ? 'has-error has-feedback' : '' }}">
                                                     <label for="no_spk">No SPK</label>
                                                     <select class="form-select" id="no_spk" name="no_spk"
@@ -150,7 +151,7 @@
                                                         <small
                                                             class="form-text text-muted">{{ $errors->first('no_spk') }}</small>
                                                     @endif
-                                                </div>
+                                                </div> --}}
                                             @endif
 
                                             @if ($jenis == 'tugas' || $jenis == 'sk' || $jenis == 'bast')

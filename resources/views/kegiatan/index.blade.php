@@ -264,7 +264,7 @@
                                                                     (Auth::user()->role == 'Ketua Tim' &&
                                                                         Auth::user()->tim == $kegiatan->kak4_pjk &&
                                                                         $kegiatan->is_approved == 0) ||
-                                                                    Auth::user()->nama == env('NAMA_PPK'))
+                                                                    Auth::user()->id == env('ID_PPK'))
                                                                 <form
                                                                     action="{{ url('kegiatan/' . str_replace('_', '-', $kegiatan->jenis_kak) . '/edit/' . $kegiatan->id) }}"
                                                                     style="display: inline">
@@ -317,7 +317,7 @@
                                                                         (Auth::user()->role == 'Ketua Tim' &&
                                                                             Auth::user()->tim == $kegiatan->kak4_pjk &&
                                                                             $kegiatan->is_approved == 0) ||
-                                                                        Auth::user()->nama == env('NAMA_PPK')))
+                                                                        Auth::user()->id == env('ID_PPK')))
                                                                 {{-- <button type="button" title="Impor Mitra Kegiatan"
                                                                     class="btn btn-link btn-primary px-2"
                                                                     data-bs-toggle="modal"

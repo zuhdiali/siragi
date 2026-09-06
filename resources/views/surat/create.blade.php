@@ -180,7 +180,7 @@
                                                             <small
                                                                 class="form-text text-muted">{{ $errors->first('pegawai_yang_bertugas') }}</small>
                                                         @else
-                                                            <small class="form-text text-muted">
+                                                            <small class="form-text text-muted"> (Bisa dikosongkan)
                                                             </small>
                                                         @endif
                                                     </div>

@@ -956,6 +956,14 @@ class SuratController extends Controller
         $phpWord->setValue('kec_asal', $this->konversiKodeKec($mitra->kec_asal));
         $phpWord->setValue('tgl_awal', $tglAwal->locale('id')->translatedFormat('d F'));
         $phpWord->setValue('tgl_akhir', $tglAkhir->locale('id')->translatedFormat('d F'));
+        // KHUSUS PERGANTIAN PPK DARI KAK WID KE BANG RONI
+        if ($surat->tahun_spk == 2026 && $surat->bulan_spk < 8) {
+            $phpWord->setValue('nama_ppk', 'Widya Khairani, SST.');
+        } else {
+            $ppk = Pegawai::where('id', env('ID_PPK'))->first();
+            $phpWord->setValue('nama_ppk', $ppk->nama);
+        }
+
         $jumlah_honor = 0;
         $count = 1;
         $values = [];
@@ -1103,6 +1111,16 @@ class SuratController extends Controller
         $pengaju = Pegawai::find($kegiatan->id_pjk);
         $phpWord->setValue('nama_pengaju', $pengaju->nama);
         $phpWord->setValue('nip_pengaju', $pengaju->nip);
+
+        // KHUSUS PERGANTIAN PPK DARI KAK WID KE BANG RONI
+        if ($surat->tgl_surat < '2026-08-01') {
+            $phpWord->setValue('nama_ppk', 'Widya Khairani, SST.');
+        } else {
+            $ppk = Pegawai::where('id', env('ID_PPK'))->first();
+            $phpWord->setValue('nama_ppk', $ppk->nama);
+        }
+        $phpWord->setValue('nip_pengaju', $pengaju->nip);
+        // END KHUSUS PERGANTIAN PPK DARI KAK WID KE BANG RONI
 
         // 1. Tentukan nama file yang akan dilihat user saat download
         $fileNameUser = 'BAST_PCL_' . str_replace(' ', '_', $mitra->nama) . '_' . date('Ymd_His') . '.docx';
