@@ -930,7 +930,7 @@ class SuratController extends Controller
         $id_mitra = $surat->mitra_spk;
         $tahun = $surat->tahun_spk;
         $mitra = Mitra::find($id_mitra);
-        $kegiatan_lampiran = KegiatanLampiran::where('peserta_id', $id_mitra)->where('tipe_personil', 'mitra')->get();
+        $kegiatan_lampiran = KegiatanLampiran::where('peserta_id', $id_mitra)->where('tipe_personil', 'mitra')->where('lampiran_tgl_mulai', '<=', $surat->tahun_spk . '-' . $bulan . '-31')->where('lampiran_tgl_selesai', '>=', $surat->tahun_spk . '-' . $bulan . '-01')->get();
         // dd($kegiatan_lampiran);
         $namaBulan = $this->convertDigitBulan($bulan);
         $tglAwal = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
@@ -952,6 +952,8 @@ class SuratController extends Controller
         $phpWord->setValue('bulan', strtolower($namaBulan));
         $phpWord->setValue('Bulan', $namaBulan);
         $phpWord->setValue('BULAN', strtoupper($namaBulan));
+        $phpWord->setValue('tahun', $tahun);
+        $phpWord->setValue('tahun_terbilang', strtolower($this->terbilang($tahun)));
         $phpWord->setValue('nama_mitra', $mitra->nama);
         $phpWord->setValue('kec_asal', $this->konversiKodeKec($mitra->kec_asal));
         $phpWord->setValue('tgl_awal', $tglAwal->locale('id')->translatedFormat('d F'));
