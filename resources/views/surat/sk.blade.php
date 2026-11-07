@@ -68,67 +68,6 @@
                                     </tfoot>
                                     <tbody>
                                         @foreach ($surats as $surat)
-                                            <!-- Modal Hapus surat -->
-                                            <div class="modal fade" id="{{ 'exampleModal' . $surat->id }}" tabindex="-1"
-                                                aria-labelledby="{{ 'exampleModalLabel' . $surat->id }}" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h1 class="modal-title fs-5"
-                                                                id="{{ 'exampleModalLabel' . $surat->id }}">Yakin Menghapus
-                                                                Nomor Surat?</h1>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                                aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            Nomor surat <strong>{{ $surat->nomor_surat }}</strong> akan
-                                                            dihapus.
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-bs-dismiss="modal">Batalkan</button>
-                                                            <form action="{{ url('surat/destroy/' . $surat->id) }}">
-                                                                <button type="submit" class="btn btn-danger">Hapus
-                                                                    Surat</button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Modal unggah SK -->
-                                            <div class="modal fade" id="{{ 'uploadSK' . $surat->id }}" tabindex="-1"
-                                                aria-labelledby="{{ 'uploadSKLabel' . $surat->id }}" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <form action="{{ url('surat/upload-sk/' . $surat->id) }}" method="POST"
-                                                        enctype="multipart/form-data">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h1 class="modal-title fs-5"
-                                                                    id="{{ 'uploadSKLabel' . $surat->id }}">Unggah SK </h1>
-                                                                <button type="button" class="btn-close"
-                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                @csrf
-                                                                <div class="form-group">
-                                                                    <label for="file">Pilih File SK:</label>
-                                                                    <input type="file" class="form-control"
-                                                                        id="file" name="file" accept=".pdf">
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary"
-                                                                    data-bs-dismiss="modal">Batalkan</button>
-
-                                                                <button type="submit" class="btn btn-success">Unggah
-                                                                    SK</button>
-
-                                                            </div>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
                                             <tr>
                                                 <td>
                                                     <div class="row">
@@ -148,7 +87,9 @@
                                                                     <button type="button" title="Hapus"
                                                                         class="btn btn-link btn-danger px-2"
                                                                         data-bs-toggle="modal"
-                                                                        data-bs-target="{{ '#exampleModal' . $surat->id }}"
+                                                                        data-bs-target="#deleteSKModal"
+                                                                        data-action="{{ url('surat/destroy/' . $surat->id) }}"
+                                                                        data-nomor="{{ $surat->nomor_surat }}"
                                                                         data-original-title="Hapus">
                                                                         <i class="fa fa-trash-alt"></i>
                                                                     </button>
@@ -167,8 +108,8 @@
                                                             @if (Auth::user()->role == 'Admin')
                                                                 <button type="button" title="Upload SK"
                                                                     class="btn btn-link btn-primary px-2"
-                                                                    data-bs-toggle="modal"
-                                                                    data-bs-target="{{ '#uploadSK' . $surat->id }}"
+                                                                    data-bs-toggle="modal" data-bs-target="#uploadSKModal"
+                                                                    data-action="{{ url('surat/upload-sk/' . $surat->id) }}"
                                                                     data-original-title="Upload SK">
                                                                     <i class="fa fa-upload"></i>
                                                                 </button>
@@ -201,6 +142,73 @@
                                         @endforeach
                                     </tbody>
                                 </table>
+
+                                <!-- Modal Hapus surat, shared by every row -->
+                                <div class="modal fade" id="deleteSKModal" tabindex="-1"
+                                    aria-labelledby="deleteSKModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="deleteSKModalLabel">Yakin Menghapus Nomor
+                                                    Surat?</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Nomor surat <strong id="deleteSKNomor"></strong> akan dihapus.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Batalkan</button>
+                                                <form id="deleteSKForm" action="">
+                                                    <button type="submit" class="btn btn-danger">Hapus Surat</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal unggah SK, shared by every row -->
+                                <div class="modal fade" id="uploadSKModal" tabindex="-1"
+                                    aria-labelledby="uploadSKModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <form id="uploadSKForm" action="" method="POST"
+                                            enctype="multipart/form-data">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="uploadSKModalLabel">Unggah SK</h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    @csrf
+                                                    <div class="form-group">
+                                                        <label for="uploadSKFile">Pilih File SK:</label>
+                                                        <input type="file" class="form-control" id="uploadSKFile"
+                                                            name="file" accept=".pdf">
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Batalkan</button>
+                                                    <button type="submit" class="btn btn-success">Unggah SK</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <script>
+                                    document.getElementById('deleteSKModal').addEventListener('show.bs.modal', function(event) {
+                                        const button = event.relatedTarget;
+                                        document.getElementById('deleteSKForm').action = button.dataset.action;
+                                        document.getElementById('deleteSKNomor').textContent = button.dataset.nomor;
+                                    });
+
+                                    document.getElementById('uploadSKModal').addEventListener('show.bs.modal', function(event) {
+                                        document.getElementById('uploadSKForm').action = event.relatedTarget.dataset.action;
+                                    });
+                                </script>
                             </div>
                         </div>
                     </div>

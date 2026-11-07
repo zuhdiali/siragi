@@ -46,6 +46,63 @@
                     </div>
                 </div>
             </div>
+            {{-- Shared activity modals --}}
+            <div class="modal fade" id="modalDeleteKegiatan" tabindex="-1" aria-labelledby="modalDeleteKegiatanLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="modalDeleteKegiatanLabel">Yakin Menghapus Kegiatan?</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">Kegiatan <strong id="deleteKegiatanName"></strong> akan ditandai sebagai kegiatan tidak aktif!</div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batalkan</button>
+                            <form id="deleteKegiatanForm" method="GET">
+                                <button type="submit" class="btn btn-danger hapus-kegiatan">Hapus Kegiatan</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="modalDuplicateKegiatan" tabindex="-1" aria-labelledby="modalDuplicateKegiatanLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="modalDuplicateKegiatanLabel">Duplikasi Kegiatan</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">Apakah Anda yakin ingin menduplikasi <strong id="duplicateKegiatanName"></strong>?</div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batalkan</button>
+                            <form id="duplicateKegiatanForm" method="GET">
+                                <button type="submit" class="btn btn-primary">Duplikasi</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="modalImportMitra" tabindex="-1" aria-labelledby="modalImportMitraLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="modalImportMitraLabel">Impor Mitra Kegiatan</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body d-flex flex-column align-items-center justify-content-center">
+                            <p>Unduh template berikut dan isi data mitra kegiatan dengan benar.</p>
+                            <a href="{{ route('kegiatan.export-mitra-id') }}" class="btn btn-primary mb-3">
+                                <i class="fa fa-download"></i> Unduh Template
+                            </a>
+                            <p>Setelah mengisi template, unggah kembali file tersebut menggunakan formulir di bawah ini.</p>
+                            <form id="importMitraForm" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="mb-3"><input type="file" name="file" class="form-control" required></div>
+                                <button type="submit" class="btn btn-success">Unggah File</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
                 <div>
                     <h3 class="fw-bold mb-3">Manajemen Kegiatan</h3>
@@ -129,120 +186,6 @@
                                     </tfoot>
                                     <tbody>
                                         @foreach ($kegiatans as $kegiatan)
-                                            <!-- Modal -->
-                                            @if (Auth::user()->role == 'Admin' ||
-                                                    Auth::user()->id == $kegiatan->id_pjk ||
-                                                    (Auth::user()->role == 'Ketua Tim' && Auth::user()->tim == $kegiatan->kak4_pjk))
-                                                {{-- Modal Delete Kegiatan --}}
-                                                <div class="modal fade" id="{{ 'exampleModal' . $kegiatan->id }}"
-                                                    tabindex="-1"
-                                                    aria-labelledby="{{ 'exampleModalLabel' . $kegiatan->id }}"
-                                                    aria-hidden="true">
-                                                    <div class="modal-dialog">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h1 class="modal-title fs-5"
-                                                                    id="{{ 'exampleModalLabel' . $kegiatan->id }}">Yakin
-                                                                    Menghapus Kegiatan?</h1>
-                                                                <button type="button" class="btn-close"
-                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                Kegiatan <strong>{{ $kegiatan->nama }}</strong> akan
-                                                                ditandai sebagai kegiatan tidak aktif!
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary"
-                                                                    data-bs-dismiss="modal">Batalkan</button>
-                                                                <form
-                                                                    action="{{ url('kegiatan/destroy/' . $kegiatan->id) }}">
-                                                                    <button type="submit"
-                                                                        class="btn btn-danger hapus-kegiatan">Hapus
-                                                                        Kegiatan</button>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {{-- Modal Duplicate Kegiatan --}}
-                                                <div class="modal fade" id="{{ 'modalDuplicate' . $kegiatan->id }}"
-                                                    tabindex="-1"
-                                                    aria-labelledby="{{ 'modalDuplicateLabel' . $kegiatan->id }}"
-                                                    aria-hidden="true">
-                                                    <div class="modal-dialog">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h1 class="modal-title fs-5"
-                                                                    id="{{ 'modalDuplicateLabel' . $kegiatan->id }}">
-                                                                    Duplikasi
-                                                                    Kegiatan</h1>
-                                                                <button type="button" class="btn-close"
-                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                Apakah Anda yakin ingin menduplikasi
-                                                                <strong>{{ $kegiatan->nama }}</strong> ?
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary"
-                                                                    data-bs-dismiss="modal">Batalkan</button>
-                                                                <form
-                                                                    action="{{ url('kegiatan/duplicate/' . $kegiatan->id) }}">
-                                                                    <button type="submit"
-                                                                        class="btn btn-primary">Duplikasi</button>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {{-- Modal Impor Mitra Kegiatan --}}
-                                                @if ($kegiatan->jenis_kak == 'honor-mitra')
-                                                    <div class="modal fade" id="{{ 'modalImportMitra' . $kegiatan->id }}"
-                                                        tabindex="-1"
-                                                        aria-labelledby="{{ 'modalImportMitraLabel' . $kegiatan->id }}"
-                                                        aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h1 class="modal-title fs-5"
-                                                                        id="{{ 'modalImportMitraLabel' . $kegiatan->id }}">
-                                                                        Impor Mitra
-                                                                        Kegiatan</h1>
-                                                                    <button type="button" class="btn-close"
-                                                                        data-bs-dismiss="modal"
-                                                                        aria-label="Close"></button>
-                                                                </div>
-                                                                <div
-                                                                    class="modal-body d-flex flex-column align-items-center justify-content-center">
-                                                                    <p>Unduh template berikut dan isi data mitra kegiatan
-                                                                        dengan benar.</p>
-                                                                    <a href="{{ route('kegiatan.export-mitra-id') }}"
-                                                                        class="btn btn-primary mb-3">
-                                                                        <i class="fa fa-download"></i> Unduh Template
-                                                                    </a>
-                                                                    <p>Setelah mengisi template, unggah kembali file
-                                                                        tersebut
-                                                                        menggunakan formulir di bawah ini.</p>
-                                                                    <form
-                                                                        action="{{ route('kegiatan.import-mitra-dan-honor', $kegiatan->id) }}"
-                                                                        method="POST" enctype="multipart/form-data">
-                                                                        @csrf
-                                                                        <div class="mb-3">
-                                                                            <input type="file" name="file"
-                                                                                class="form-control" required>
-                                                                        </div>
-                                                                        <button type="submit"
-                                                                            class="btn btn-success">Unggah
-                                                                            File</button>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                @endif
-                                            @endif
                                             <tr>
                                                 <td>
                                                     <div class="row">
@@ -279,7 +222,9 @@
                                                                 <button type="button" title="Duplikasi"
                                                                     class="btn btn-link btn-primary px-2"
                                                                     data-bs-toggle="modal"
-                                                                    data-bs-target="{{ '#modalDuplicate' . $kegiatan->id }}"
+                                                                    data-bs-target="#modalDuplicateKegiatan"
+                                                                    data-action="{{ url('kegiatan/duplicate/' . $kegiatan->id) }}"
+                                                                    data-name="{{ $kegiatan->nama }}"
                                                                     data-original-title="Duplikasi">
                                                                     <i class="far fa-copy"></i>
                                                                 </button>
@@ -288,7 +233,9 @@
                                                                 <button type="button" title="Hapus"
                                                                     class="btn btn-link btn-danger px-2"
                                                                     data-bs-toggle="modal"
-                                                                    data-bs-target="{{ '#exampleModal' . $kegiatan->id }}"
+                                                                    data-bs-target="#modalDeleteKegiatan"
+                                                                    data-action="{{ url('kegiatan/destroy/' . $kegiatan->id) }}"
+                                                                    data-name="{{ $kegiatan->nama }}"
                                                                     data-original-title="Hapus">
                                                                     <i class="fa fa-trash-alt"></i>
                                                                 </button>
@@ -318,13 +265,14 @@
                                                                             Auth::user()->tim == $kegiatan->kak4_pjk &&
                                                                             $kegiatan->is_approved == 0) ||
                                                                         Auth::user()->id == env('ID_PPK')))
-                                                                {{-- <button type="button" title="Impor Mitra Kegiatan"
+                                                                <button type="button" title="Impor Mitra Kegiatan"
                                                                     class="btn btn-link btn-primary px-2"
                                                                     data-bs-toggle="modal"
-                                                                    data-bs-target="{{ '#modalImportMitra' . $kegiatan->id }}"
+                                                                    data-bs-target="#modalImportMitra"
+                                                                    data-action="{{ route('kegiatan.import-mitra-dan-honor', $kegiatan->id) }}"
                                                                     data-original-title="Impor Mitra Kegiatan">
                                                                     <i class="fa fa-upload"></i>
-                                                                </button> --}}
+                                                                </button>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -370,4 +318,21 @@
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('modalDeleteKegiatan').addEventListener('show.bs.modal', function (event) {
+            const trigger = event.relatedTarget;
+            document.getElementById('deleteKegiatanForm').action = trigger.dataset.action;
+            document.getElementById('deleteKegiatanName').textContent = trigger.dataset.name;
+        });
+
+        document.getElementById('modalDuplicateKegiatan').addEventListener('show.bs.modal', function (event) {
+            const trigger = event.relatedTarget;
+            document.getElementById('duplicateKegiatanForm').action = trigger.dataset.action;
+            document.getElementById('duplicateKegiatanName').textContent = trigger.dataset.name;
+        });
+
+        document.getElementById('modalImportMitra').addEventListener('show.bs.modal', function (event) {
+            document.getElementById('importMitraForm').action = event.relatedTarget.dataset.action;
+        });
+    </script>
 @endsection

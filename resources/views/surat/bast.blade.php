@@ -71,6 +71,29 @@
                             <h4 class="card-title">Daftar Riwayat Nomor BAST</h4>
                         </div>
                         <div class="card-body">
+                            <div class="modal fade" id="deleteBastModal" tabindex="-1"
+                                aria-labelledby="deleteBastModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="deleteBastModalLabel">Yakin Menghapus
+                                                Nomor Surat?</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Nomor surat <strong id="deleteBastNomor"></strong> akan dihapus.
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Batalkan</button>
+                                            <form id="deleteBastForm" action="#">
+                                                <button type="submit" class="btn btn-danger">Hapus Surat</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="table-responsive">
                                 <table id="multi-filter-select" class="display table table-striped table-hover">
                                     <thead>
@@ -99,33 +122,6 @@
                                     </tfoot>
                                     <tbody>
                                         @foreach ($surats as $surat)
-                                            <!-- Modal -->
-                                            <div class="modal fade" id="{{ 'exampleModal' . $surat->id }}" tabindex="-1"
-                                                aria-labelledby="{{ 'exampleModalLabel' . $surat->id }}" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h1 class="modal-title fs-5"
-                                                                id="{{ 'exampleModalLabel' . $surat->id }}">Yakin Menghapus
-                                                                Nomor Surat?</h1>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                                aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            Nomor surat <strong>{{ $surat->nomor_surat }}</strong> akan
-                                                            dihapus.
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-bs-dismiss="modal">Batalkan</button>
-                                                            <form action="{{ url('surat/destroy/' . $surat->id) }}">
-                                                                <button type="submit" class="btn btn-danger">Hapus
-                                                                    Surat</button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                             <tr>
                                                 <td>
                                                     @if (Auth::user()->role == 'Admin' ||
@@ -143,7 +139,9 @@
 
                                                             <button type="button" title="Hapus"
                                                                 class="btn btn-link btn-danger px-2" data-bs-toggle="modal"
-                                                                data-bs-target="{{ '#exampleModal' . $surat->id }}"
+                                                                data-bs-target="#deleteBastModal"
+                                                                data-delete-url="{{ url('surat/destroy/' . $surat->id) }}"
+                                                                data-nomor-surat="{{ $surat->nomor_surat }}"
                                                                 data-original-title="Hapus">
                                                                 <i class="fa fa-trash-alt"></i>
                                                             </button>
@@ -184,6 +182,13 @@
                                     </tbody>
                                 </table>
                             </div>
+                            <script>
+                                document.getElementById('deleteBastModal').addEventListener('show.bs.modal', function(event) {
+                                    const button = event.relatedTarget;
+                                    document.getElementById('deleteBastNomor').textContent = button.dataset.nomorSurat;
+                                    document.getElementById('deleteBastForm').action = button.dataset.deleteUrl;
+                                });
+                            </script>
                         </div>
                     </div>
                 </div>

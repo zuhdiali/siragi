@@ -66,33 +66,6 @@
                                     </tfoot>
                                     <tbody>
                                         @foreach ($surats as $surat)
-                                            <!-- Modal -->
-                                            <div class="modal fade" id="{{ 'exampleModal' . $surat->id }}" tabindex="-1"
-                                                aria-labelledby="{{ 'exampleModalLabel' . $surat->id }}" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h1 class="modal-title fs-5"
-                                                                id="{{ 'exampleModalLabel' . $surat->id }}">Yakin Menghapus
-                                                                Nomor Surat?</h1>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                                aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            Nomor surat <strong>{{ $surat->nomor_surat }}</strong> akan
-                                                            dihapus.
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-bs-dismiss="modal">Batalkan</button>
-                                                            <form action="{{ url('surat/destroy/' . $surat->id) }}">
-                                                                <button type="submit" class="btn btn-danger">Hapus
-                                                                    Surat</button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                             <tr>
                                                 <td>
                                                     @if (Auth::user()->role == 'Admin' ||
@@ -121,7 +94,9 @@
 
                                                             <button type="button" title="Hapus"
                                                                 class="btn btn-link btn-danger px-2" data-bs-toggle="modal"
-                                                                data-bs-target="{{ '#exampleModal' . $surat->id }}"
+                                                                data-bs-target="#deleteSpkModal"
+                                                                data-delete-url="{{ url('surat/destroy/' . $surat->id) }}"
+                                                                data-nomor-surat="{{ $surat->nomor_surat }}"
                                                                 data-original-title="Hapus">
                                                                 <i class="fa fa-trash-alt"></i>
                                                             </button>
@@ -145,6 +120,36 @@
                                     </tbody>
                                 </table>
                             </div>
+                            <div class="modal fade" id="deleteSpkModal" tabindex="-1" aria-labelledby="deleteSpkModalLabel"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="deleteSpkModalLabel">Yakin Menghapus
+                                                Nomor Surat?</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Nomor surat <strong id="deleteSpkNomorSurat"></strong> akan dihapus.
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Batalkan</button>
+                                            <form id="deleteSpkForm">
+                                                <button type="submit" class="btn btn-danger">Hapus Surat</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                                document.getElementById('deleteSpkModal').addEventListener('show.bs.modal', function(event) {
+                                    const trigger = event.relatedTarget;
+                                    this.querySelector('#deleteSpkForm').action = trigger.getAttribute('data-delete-url');
+                                    this.querySelector('#deleteSpkNomorSurat').textContent = trigger.getAttribute('data-nomor-surat');
+                                });
+                            </script>
                         </div>
                     </div>
                 </div>

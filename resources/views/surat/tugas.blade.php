@@ -70,38 +70,6 @@
                                     </tfoot>
                                     <tbody>
                                         @foreach ($surats as $surat)
-                                            <!-- Modal -->
-                                            @if (Auth::user()->role == 'Admin' ||
-                                                    $surat->id_pembuat_surat == Auth::user()->id ||
-                                                    (Auth::user()->role == 'Ketua Tim' && $surat->tim == Auth::user()->tim))
-                                                <div class="modal fade" id="{{ 'exampleModal' . $surat->id }}"
-                                                    tabindex="-1" aria-labelledby="{{ 'exampleModalLabel' . $surat->id }}"
-                                                    aria-hidden="true">
-                                                    <div class="modal-dialog">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h1 class="modal-title fs-5"
-                                                                    id="{{ 'exampleModalLabel' . $surat->id }}">Yakin
-                                                                    Menghapus Nomor Surat?</h1>
-                                                                <button type="button" class="btn-close"
-                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                Nomor surat <strong>{{ $surat->nomor_surat }}</strong> akan
-                                                                dihapus.
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary"
-                                                                    data-bs-dismiss="modal">Batalkan</button>
-                                                                <form action="{{ url('surat/destroy/' . $surat->id) }}">
-                                                                    <button type="submit" class="btn btn-danger">Hapus
-                                                                        Surat</button>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endif
                                             <tr>
                                                 <td>
                                                     @if (Auth::user()->role == 'Admin' ||
@@ -119,7 +87,9 @@
 
                                                             <button type="button" title="Hapus"
                                                                 class="btn btn-link btn-danger px-2" data-bs-toggle="modal"
-                                                                data-bs-target="{{ '#exampleModal' . $surat->id }}"
+                                                                data-bs-target="#deleteSuratModal"
+                                                                data-delete-url="{{ url('surat/destroy/' . $surat->id) }}"
+                                                                data-surat-number="{{ $surat->nomor_surat }}"
                                                                 data-original-title="Hapus">
                                                                 <i class="fa fa-trash-alt"></i>
                                                             </button>
@@ -150,10 +120,39 @@
                                     </tbody>
                                 </table>
                             </div>
+                            <div class="modal fade" id="deleteSuratModal" tabindex="-1"
+                                aria-labelledby="deleteSuratModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="deleteSuratModalLabel">Yakin Menghapus Nomor Surat?</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Nomor surat <strong id="deleteSuratNumber"></strong> akan dihapus.
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Batalkan</button>
+                                            <form id="deleteSuratForm" action="">
+                                                <button type="submit" class="btn btn-danger">Hapus Surat</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('deleteSuratModal').addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            document.getElementById('deleteSuratNumber').textContent = button.dataset.suratNumber;
+            document.getElementById('deleteSuratForm').action = button.dataset.deleteUrl;
+        });
+    </script>
 @endsection

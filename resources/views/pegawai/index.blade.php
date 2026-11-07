@@ -74,37 +74,6 @@
                                     </tfoot>
                                     <tbody>
                                         @foreach ($pegawais as $pegawai)
-                                            <!-- Modal -->
-                                            @if (Auth::user()->id == $pegawai->id || Auth::user()->role == 'Admin')
-                                                <div class="modal fade" id="{{ 'exampleModal' . $pegawai->id }}"
-                                                    tabindex="-1" aria-labelledby="{{ 'exampleModalLabel' . $pegawai->id }}"
-                                                    aria-hidden="true">
-                                                    <div class="modal-dialog">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h1 class="modal-title fs-5"
-                                                                    id="{{ 'exampleModalLabel' . $pegawai->id }}">Yakin
-                                                                    Menghapus Pegawai?</h1>
-                                                                <button type="button" class="btn-close"
-                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                Pegawai <strong>{{ $pegawai->nama }}</strong> akan ditandai
-                                                                sebagai pegawai tidak aktif!
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary"
-                                                                    data-bs-dismiss="modal">Batalkan</button>
-                                                                <form action="{{ url('pegawai/destroy/' . $pegawai->id) }}">
-                                                                    <button type="submit"
-                                                                        class="btn btn-danger hapus-pegawai">Hapus
-                                                                        Pegawai</button>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endif
                                             <tr>
                                                 <td>
                                                     @if (Auth::user()->id == $pegawai->id || Auth::user()->role == 'Admin')
@@ -119,7 +88,9 @@
 
                                                             <button type="button" title="Hapus"
                                                                 class="btn btn-link btn-danger px-2" data-bs-toggle="modal"
-                                                                data-bs-target="{{ '#exampleModal' . $pegawai->id }}"
+                                                                data-bs-target="#deletePegawaiModal"
+                                                                data-delete-url="{{ url('pegawai/destroy/' . $pegawai->id) }}"
+                                                                data-pegawai-nama="{{ $pegawai->nama }}"
                                                                 data-original-title="Hapus">
                                                                 <i class="fa fa-trash-alt"></i>
                                                             </button>
@@ -143,6 +114,31 @@
                                         @endforeach
                                     </tbody>
                                 </table>
+                                <div class="modal fade" id="deletePegawaiModal" tabindex="-1"
+                                    aria-labelledby="deletePegawaiModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="deletePegawaiModalLabel">Yakin
+                                                    Menghapus Pegawai?</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Pegawai <strong id="deletePegawaiNama"></strong> akan ditandai
+                                                sebagai pegawai tidak aktif!
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Batalkan</button>
+                                                <form id="deletePegawaiForm" action="#">
+                                                    <button type="submit" class="btn btn-danger hapus-pegawai">Hapus
+                                                        Pegawai</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -150,4 +146,11 @@
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('deletePegawaiModal').addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            document.getElementById('deletePegawaiForm').action = button.getAttribute('data-delete-url');
+            document.getElementById('deletePegawaiNama').textContent = button.getAttribute('data-pegawai-nama');
+        });
+    </script>
 @endsection
